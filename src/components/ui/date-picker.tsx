@@ -28,7 +28,6 @@ export interface DatePickerProps {
   id?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean;
-  "aria-required"?: boolean;
 }
 
 function toDate(value?: string) {
@@ -69,12 +68,13 @@ export function DatePicker({
           className={cn(
             controlStyles,
             controlVariants[variant],
-            "flex items-center justify-between gap-2 text-left",
+            "flex items-center justify-between gap-2 text-left data-[invalid=true]:border-2 data-[invalid=true]:border-danger",
             !selected && "text-muted",
             className,
           )}
-          {...field}
-          {...aria}
+          id={aria.id ?? field.id}
+          aria-describedby={aria["aria-describedby"] ?? field["aria-describedby"]}
+          data-invalid={aria["aria-invalid"] ?? field["aria-invalid"]}
         >
           <span>{selected ? format(selected, "d MMM yyyy") : placeholder}</span>
           <CalendarIcon />

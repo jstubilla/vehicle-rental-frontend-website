@@ -101,10 +101,238 @@ export const content = {
     backHome: "Back to home",
   },
 
-  /** Placeholder home page copy; replaced by the real home page in Phase 2. */
+  /** Form error messages. Used by every Zod schema. */
+  validation: {
+    required: "This field is required.",
+    email: "Enter a valid email address.",
+    phone: "Enter a valid mobile number, e.g. 0917 123 4567.",
+    messageTooShort: "Please write at least 10 characters.",
+    dateInPast: "Choose today or a future date.",
+    returnBeforePickup: "Return must be after pick-up.",
+    consent: "Please tick this box to continue.",
+  },
+
+  /** The words shown for each id in /src/lib/constants.ts. */
+  enums: {
+    vehicleCategory: {
+      sedan: "Sedan",
+      hatchback: "Hatchback",
+      suv: "SUV",
+      mpv: "MPV",
+      van: "Van",
+      pickup: "Pickup",
+    },
+    transmission: { automatic: "Automatic", manual: "Manual" },
+    fuel: { gasoline: "Gasoline", diesel: "Diesel", hybrid: "Hybrid", electric: "Electric" },
+    vehicleStatus: { available: "Available", maintenance: "In maintenance", inactive: "Inactive" },
+    leadStage: { new: "New", contacted: "Contacted", qualified: "Qualified", won: "Won", lost: "Lost" },
+    leadSource: {
+      website: "Website",
+      phone: "Phone",
+      walk_in: "Walk-in",
+      facebook: "Facebook",
+      referral: "Referral",
+    },
+    activityType: { note: "Note", call: "Call", status_change: "Status change" },
+  },
+
+  quickSearch: {
+    title: "Find your car",
+    pickupLocation: "Pick-up location",
+    locationPlaceholder: "Choose a location",
+    pickupDate: "Pick-up date",
+    pickupTime: "Pick-up time",
+    returnDate: "Return date",
+    returnTime: "Return time",
+    submit: "Search vehicles",
+  },
+
   home: {
-    title: "Home",
-    description: "The home page is built in Phase 2.",
+    meta: {
+      description:
+        "Placeholder description: browse our cars, pick your dates and book online in minutes. Prices in PHP.",
+    },
+    hero: {
+      title: "Rent a car in the Philippines",
+      subtitle: "Placeholder: simple online booking with clear daily prices in PHP.",
+    },
+    featured: {
+      title: "Featured vehicles",
+      description: "A few of our most popular cars.",
+      viewAll: "View all vehicles",
+    },
+    howItWorks: {
+      title: "How it works",
+      steps: [
+        { title: "Choose dates and place", body: "Tell us when and where you need the car." },
+        { title: "Pick your vehicle", body: "Compare cars and add any extras you want." },
+        { title: "Book and pay", body: "Confirm your details and pay online or at pick-up." },
+        { title: "Pick up and go", body: "Show your booking reference and drive away." },
+      ],
+    },
+    testimonials: {
+      title: "What customers say",
+      description: "Placeholder section. Real reviews will be added here.",
+      items: [
+        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
+        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
+        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
+      ],
+    },
+    cta: {
+      title: "Ready to hit the road?",
+      description: "Pick your dates and book in a few minutes.",
+      button: "Book now",
+    },
+  },
+
+  about: {
+    meta: {
+      title: "About us",
+      description: "Placeholder description: learn about our company, our values and our team.",
+    },
+    title: "About us",
+    subtitle: "Placeholder: a short line about the company.",
+    story: {
+      title: "Our story",
+      body: [
+        "Placeholder: tell the story of the company here. Who started it, when, and why.",
+        "Placeholder: a second paragraph about the fleet, the service and what makes customers come back.",
+      ],
+    },
+    values: {
+      title: "What we stand for",
+      items: [
+        { title: "Reliable vehicles", body: "Placeholder: how the fleet is maintained and checked." },
+        { title: "Clear pricing", body: "Placeholder: daily rates in PHP with no surprises." },
+        { title: "Friendly service", body: "Placeholder: how the team looks after customers." },
+      ],
+    },
+    team: {
+      title: "Meet the team",
+      members: [
+        { name: "Team member", role: "Role" },
+        { name: "Team member", role: "Role" },
+        { name: "Team member", role: "Role" },
+      ],
+    },
+    cta: { title: "Questions before you book?", button: "Contact us" },
+  },
+
+  vehicles: {
+    meta: {
+      title: "Our vehicles",
+      description:
+        "Placeholder description: compare sedans, SUVs, vans and pickups with clear daily rates in PHP.",
+    },
+    title: "Our vehicles",
+    description: "Filter by type, price, transmission, seats and fuel. Share the page to share your search.",
+    filtersTitle: "Filters",
+    showFilters: "Show filters",
+    hideFilters: "Hide filters",
+    filters: {
+      category: "Category",
+      transmission: "Transmission",
+      fuel: "Fuel type",
+      minSeats: "Seats",
+      minPrice: "Min price per day",
+      maxPrice: "Max price per day",
+      any: "Any",
+      noMinimum: "No minimum",
+      noMaximum: "No maximum",
+      seatsOrMore: (n: number) => `${n}+ seats`,
+    },
+    sortLabel: "Sort by",
+    sorts: {
+      "price-asc": "Price: low to high",
+      "price-desc": "Price: high to low",
+      "name-asc": "Name: A to Z",
+      "seats-desc": "Seats: most first",
+    },
+    resultCount: (n: number) => `${n} ${n === 1 ? "vehicle" : "vehicles"} found`,
+    clearFilters: "Clear filters",
+    emptyTitle: "No vehicles match your filters",
+    emptyDescription: "Try removing a filter or choosing a different price range.",
+    trip: {
+      title: "Your trip",
+      pickup: "Pick-up",
+      return: "Return",
+      change: "Change search",
+      duration: "Duration",
+      days: (n: number) => `${n} ${n === 1 ? "day" : "days"}`,
+    },
+    resultsLabel: "Vehicle results",
+  },
+
+  vehicleCard: {
+    perDay: "per day",
+    totalFor: (days: number) => `Total for ${days} ${days === 1 ? "day" : "days"}`,
+    viewDetails: "View details",
+    bookNow: "Book now",
+    seats: (n: number) => `${n} seats`,
+    unavailable: "Unavailable",
+  },
+
+  vehicleDetail: {
+    back: "All vehicles",
+    perDay: "per day",
+    description: "About this vehicle",
+    specsTitle: "Specifications",
+    specs: {
+      category: "Category",
+      transmission: "Transmission",
+      fuel: "Fuel type",
+      seats: "Seats",
+      year: "Year",
+    },
+    featuresTitle: "Features",
+    availabilityTitle: "Availability",
+    availableNow: "Available to book",
+    unavailableNow: "Not available right now",
+    bookNow: "Book now",
+    askAbout: "Ask about this vehicle",
+    galleryLabel: "Vehicle photos",
+    viewPhoto: (n: number) => `View photo ${n}`,
+    metaFallbackTitle: "Vehicle",
+    metaDescription: (name: string, rate: string) =>
+      `Rent the ${name} for ${rate} per day. Book online with clear pricing.`,
+  },
+
+  contact: {
+    meta: {
+      title: "Contact us",
+      description: "Placeholder description: call, email or send us a message and we will get back to you.",
+    },
+    title: "Contact us",
+    subtitle: "Questions about a rental? Send us a message.",
+    details: {
+      title: "Get in touch",
+      phone: "Phone",
+      email: "Email",
+      address: "Address",
+      hours: "Opening hours",
+      addressValue: "Unit 000, Placeholder Building, Makati City, Metro Manila",
+      hoursValue: "Daily, 7:00 AM to 9:00 PM",
+    },
+    form: {
+      title: "Send us a message",
+      name: "Full name",
+      email: "Email",
+      phone: "Mobile number",
+      phoneHint: "For example 0917 123 4567 or +63 917 123 4567",
+      vehicle: "Vehicle you are interested in (optional)",
+      vehicleNone: "No preference",
+      vehiclesLoading: "Loading vehicles…",
+      message: "Message",
+      consent: "I agree to be contacted about my inquiry",
+      submit: "Send message",
+      sending: "Sending",
+      successTitle: "Message sent",
+      successBody: "Thank you. We will get back to you soon.",
+      sendAnother: "Send another message",
+      errorTitle: "We could not send your message",
+      errorBody: "Please check your details and try again.",
+    },
   },
 } as const;
 

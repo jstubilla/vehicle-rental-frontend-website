@@ -11,7 +11,7 @@ const variants: Record<CardVariant, string> = {
 
 export interface CardProps extends HTMLAttributes<HTMLElement> {
   variant?: CardVariant;
-  as?: "div" | "section" | "article" | "li";
+  as?: "div" | "section" | "article" | "li" | "figure";
 }
 
 export function Card({ variant = "default", as: Tag = "div", className, ...props }: CardProps) {

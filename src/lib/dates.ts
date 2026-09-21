@@ -1,0 +1,36 @@
+import { BUSINESS_TIME_ZONE, BUSINESS_UTC_OFFSET } from "./constants";
+
+/** Today's date in the business time zone (Manila), as "yyyy-MM-dd". */
+export function todayISO(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: BUSINESS_TIME_ZONE }).format(now);
+}
+
+/** Adds days to an ISO date ("yyyy-MM-dd") and returns an ISO date. */
+export function addDaysISO(iso: string, days: number): string {
+  const date = new Date(`${iso}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+/** Converts a Manila date + "HH:mm" time to a timestamp (ms). */
+export function toTimestamp(date: string, time: string): number {
+  return Date.parse(`${date}T${time}:00${BUSINESS_UTC_OFFSET}`);
+}
+
+/** e.g. "Fri, 3 Oct 2026" */
+export function formatDateLong(iso: string): string {
+  return new Intl.DateTimeFormat("en-PH", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${iso}T00:00:00Z`));
+}
+
+/** e.g. "10:00 AM" from "10:00" */
+export function formatTime12h(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const suffix = h >= 12 ? "PM" : "AM";
+  return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${suffix}`;
+}
