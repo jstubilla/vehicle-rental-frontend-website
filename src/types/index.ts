@@ -1,9 +1,13 @@
 import type { ImageAsset } from "@/assets/config";
 import type {
   ActivityType,
+  BookingStatus,
+  ExtraPricing,
   FuelType,
   LeadSource,
   LeadStage,
+  PaymentMethod,
+  PaymentStatus,
   Transmission,
   VehicleCategory,
   VehicleStatus,
@@ -66,6 +70,80 @@ export interface Activity {
   entityId: string;
   /** null = created by the system (e.g. a website form). */
   authorId: string | null;
+  createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  licenseNumber: string | null;
+  notes: string;
+  createdAt: string;
+}
+
+/** An optional add-on such as a child seat. */
+export interface Extra {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  /** per_day = price x number of days, flat = charged once. */
+  pricing: ExtraPricing;
+}
+
+/** An extra as it was priced when the booking was made. */
+export interface BookingExtraLine {
+  extraId: string;
+  name: string;
+  pricing: ExtraPricing;
+  unitPrice: number;
+  total: number;
+}
+
+/**
+ * A booking keeps its own copy of the prices it was made at (dailyRate and the
+ * extras lines). If the owner changes a vehicle's rate later, existing bookings
+ * keep their original price and only new bookings use the new rate.
+ */
+export interface Booking {
+  id: string;
+  /** Customer-facing code, e.g. "RC-K7M2QA". */
+  reference: string;
+  customerId: string;
+  vehicleId: string;
+  pickupLocationId: string;
+  returnLocationId: string;
+  pickupDate: string;
+  pickupTime: string;
+  returnDate: string;
+  returnTime: string;
+  days: number;
+  dailyRate: number;
+  vehicleTotal: number;
+  extras: BookingExtraLine[];
+  extrasTotal: number;
+  total: number;
+  status: BookingStatus;
+  paymentId: string | null;
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A payment record. It only ever holds a method, an amount and the payment
+ * provider's reference. Card numbers are never collected or stored here.
+ */
+export interface Payment {
+  id: string;
+  bookingId: string;
+  method: PaymentMethod;
+  amount: number;
+  status: PaymentStatus;
+  /** Reference from the payment provider (mock value for now). */
+  providerRef: string | null;
   createdAt: string;
 }
 

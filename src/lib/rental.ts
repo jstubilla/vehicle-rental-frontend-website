@@ -7,19 +7,23 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const time = z.string().regex(/^\d{2}:\d{2}$/);
 
+export const rentalFields = z.object({
+  pickupLocation: z.string().min(1, content.validation.required),
+  pickupDate: isoDate.refine((d) => d >= todayISO(), content.validation.dateInPast),
+  pickupTime: time,
+  returnDate: isoDate,
+  returnTime: time,
+});
+
+/** The rule every rental must follow: the return comes after the pick-up. */
+export const returnAfterPickup = {
+  check: (v: { pickupDate: string; pickupTime: string; returnDate: string; returnTime: string }) =>
+    toTimestamp(v.returnDate, v.returnTime) > toTimestamp(v.pickupDate, v.pickupTime),
+  error: { path: ["returnDate"], message: content.validation.returnBeforePickup },
+};
+
 /** Where and when: shared by the home quick search, the catalog and the booking flow. */
-export const rentalSearchSchema = z
-  .object({
-    pickupLocation: z.string().min(1, content.validation.required),
-    pickupDate: isoDate.refine((d) => d >= todayISO(), content.validation.dateInPast),
-    pickupTime: time,
-    returnDate: isoDate,
-    returnTime: time,
-  })
-  .refine(
-    (v) => toTimestamp(v.returnDate, v.returnTime) > toTimestamp(v.pickupDate, v.pickupTime),
-    { path: ["returnDate"], message: content.validation.returnBeforePickup },
-  );
+export const rentalSearchSchema = rentalFields.refine(returnAfterPickup.check, returnAfterPickup.error);
 
 export type RentalSearch = z.infer<typeof rentalSearchSchema>;
 

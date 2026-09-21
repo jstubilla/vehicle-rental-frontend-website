@@ -26,10 +26,12 @@ export function useFeaturedVehicles(initialData?: Vehicle[]) {
   });
 }
 
-export function useVehicle(slug: string, initialData?: Vehicle | null) {
+/** Pass null while no vehicle is chosen yet (the query then stays idle). */
+export function useVehicle(slug: string | null, initialData?: Vehicle | null) {
   return useQuery({
-    queryKey: vehicleKeys.detail(slug),
-    queryFn: () => getVehicleBySlug(slug),
+    queryKey: vehicleKeys.detail(slug ?? ""),
+    queryFn: () => getVehicleBySlug(slug!),
+    enabled: slug !== null,
     initialData: initialData ?? undefined,
     initialDataUpdatedAt: 0,
   });

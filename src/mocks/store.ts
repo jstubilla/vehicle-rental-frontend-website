@@ -1,4 +1,7 @@
-import type { Activity, Lead, Location, Vehicle } from "@/types";
+import type { Activity, Booking, Customer, Extra, Lead, Location, Payment, Vehicle } from "@/types";
+import { seedBookings, seedPayments } from "./bookings";
+import { seedCustomers } from "./customers";
+import { seedExtras } from "./extras";
 import { seedLocations } from "./locations";
 import { seedVehicles } from "./vehicles";
 
@@ -9,12 +12,17 @@ import { seedVehicles } from "./vehicles";
  * - On the server it is just the seed data (the server has no localStorage).
  * - Bump SEED_VERSION whenever seed data changes, so old saved data is discarded.
  */
-const SEED_VERSION = 1;
-const STORAGE_KEY = `car-rental-mock-db-v${SEED_VERSION}`;
+const SEED_VERSION = 3;
+const STORAGE_PREFIX = "car-rental-mock-db-v";
+const STORAGE_KEY = `${STORAGE_PREFIX}${SEED_VERSION}`;
 
 export interface Db {
   vehicles: Vehicle[];
   locations: Location[];
+  extras: Extra[];
+  customers: Customer[];
+  bookings: Booking[];
+  payments: Payment[];
   leads: Lead[];
   activities: Activity[];
 }
@@ -23,33 +31,55 @@ function createSeed(): Db {
   return {
     vehicles: structuredClone(seedVehicles),
     locations: structuredClone(seedLocations),
+    extras: structuredClone(seedExtras),
+    customers: structuredClone(seedCustomers),
+    bookings: structuredClone(seedBookings),
+    payments: structuredClone(seedPayments),
     // Lead and activity seed data arrives in Phase 4.
     leads: [],
     activities: [],
   };
 }
 
-let cache: Db | null = null;
+/** Server copy of the data, and the fallback when browser storage is unavailable. */
+let memory: Db | null = null;
+let cleanedOldVersions = false;
 
-function load(): Db {
-  if (cache) return cache;
-  const seed = createSeed();
-  if (typeof window !== "undefined") {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      cache = saved ? { ...seed, ...(JSON.parse(saved) as Partial<Db>) } : seed;
-    } catch {
-      cache = seed;
+/** Removes data saved by older seed versions so it does not pile up in the browser. */
+function removeOldVersions() {
+  if (cleanedOldVersions) return;
+  cleanedOldVersions = true;
+  try {
+    for (const key of Object.keys(window.localStorage)) {
+      if (key.startsWith(STORAGE_PREFIX) && key !== STORAGE_KEY) window.localStorage.removeItem(key);
     }
+  } catch {
+    // Storage blocked: nothing to clean.
   }
-  cache ??= seed;
-  return cache;
 }
 
-function persist() {
-  if (typeof window === "undefined" || !cache) return;
+/**
+ * Reads the latest data every time (not a cached copy), so a change made in one
+ * browser tab is seen by another open tab straight away.
+ */
+function load(): Db {
+  memory ??= createSeed();
+  if (typeof window === "undefined") return memory;
+  removeOldVersions();
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) return { ...createSeed(), ...(JSON.parse(saved) as Partial<Db>) };
+  } catch {
+    // Unreadable or blocked storage: fall back to the in-memory copy.
+  }
+  return memory;
+}
+
+function persist(db: Db) {
+  memory = db;
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
   } catch {
     // Storage full or blocked (private mode): the app keeps working in memory.
   }
@@ -60,14 +90,14 @@ export function readTable<K extends keyof Db>(table: K): Db[K] {
 }
 
 export function writeTable<K extends keyof Db>(table: K, rows: Db[K]): void {
-  load()[table] = structuredClone(rows);
-  persist();
+  const db = load();
+  db[table] = structuredClone(rows);
+  persist(db);
 }
 
 /** Restores the original seed data (useful before a demo). */
 export function resetMockDb(): void {
-  cache = createSeed();
-  persist();
+  persist(createSeed());
 }
 
 export function newId(prefix: string): string {

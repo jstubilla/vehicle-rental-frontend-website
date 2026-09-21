@@ -36,3 +36,17 @@ export type LeadSource = (typeof LEAD_SOURCES)[number];
 
 export const ACTIVITY_TYPES = ["note", "call", "status_change"] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+
+export const BOOKING_STATUSES = ["pending", "confirmed", "active", "completed", "cancelled"] as const;
+export type BookingStatus = (typeof BOOKING_STATUSES)[number];
+/** Bookings in these statuses keep their vehicle reserved for the booked dates. */
+export const VEHICLE_HOLDING_STATUSES: readonly BookingStatus[] = ["pending", "confirmed", "active"];
+
+export const PAYMENT_METHODS = ["card", "gcash", "maya", "pay_at_pickup"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_STATUSES = ["pending", "processing", "paid", "failed"] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+export const EXTRA_PRICING = ["per_day", "flat"] as const;
+export type ExtraPricing = (typeof EXTRA_PRICING)[number];
