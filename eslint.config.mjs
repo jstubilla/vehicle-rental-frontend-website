@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Files the test runner generates (its HTML report contains bundled code).
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

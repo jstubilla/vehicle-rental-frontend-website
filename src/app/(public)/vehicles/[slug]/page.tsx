@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getVehicleBySlug, listVehicles } from "@/api/vehicles";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Section, Skeleton } from "@/components/ui";
 import { content } from "@/content";
 import { VehicleDetail } from "@/features/vehicles/components/vehicle-detail";
 import { formatCurrency } from "@/lib/currency";
 import { buildMetadata } from "@/lib/seo";
+import { vehicleSchema } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -34,14 +36,17 @@ export default async function VehiclePage({ params }: Props) {
   if (!vehicle) notFound();
 
   return (
-    <Suspense
-      fallback={
-        <Section>
-          <Skeleton className="aspect-photo h-auto" />
-        </Section>
-      }
-    >
-      <VehicleDetail slug={slug} initialVehicle={vehicle} />
-    </Suspense>
+    <>
+      <JsonLd data={vehicleSchema(vehicle)} />
+      <Suspense
+        fallback={
+          <Section>
+            <Skeleton className="aspect-photo h-auto" />
+          </Section>
+        }
+      >
+        <VehicleDetail slug={slug} initialVehicle={vehicle} />
+      </Suspense>
+    </>
   );
 }

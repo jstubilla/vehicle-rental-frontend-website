@@ -19,7 +19,7 @@ import type {
 /**
  * Data models. These mirror what a real backend would return, so swapping the
  * mock layer for an API should not require changing them. Dates are ISO strings.
- * Money is in PHP. More models (Booking, Customer, Task, User, Payment) arrive with their phases.
+ * Money is in PHP.
  */
 
 export interface Vehicle {
@@ -33,7 +33,7 @@ export interface Vehicle {
   transmission: Transmission;
   fuel: FuelType;
   seats: number;
-  /** Flat daily rate in PHP. The owner can change it from the fleet screen. */
+  /** Flat daily rate in PHP. Staff with the pricing permission can change it from the Pricing screen; bookings keep the rate they were made at. */
   pricePerDay: number;
   description: string;
   features: string[];

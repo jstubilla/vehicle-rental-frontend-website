@@ -5,7 +5,7 @@ export function vehicleHref(slug: string, rental: RentalSearch | null): string {
   return rental ? `/vehicles/${slug}?${rentalSearchToParams(rental)}` : `/vehicles/${slug}`;
 }
 
-/** Start of the booking flow for a specific vehicle (built in Phase 3). */
+/** Start of the booking flow for a specific vehicle. */
 export function bookHref(slug: string, rental: RentalSearch | null): string {
   const params = rental ? rentalSearchToParams(rental) : new URLSearchParams();
   params.set("vehicle", slug);

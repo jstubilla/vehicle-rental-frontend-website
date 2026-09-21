@@ -75,7 +75,7 @@ export function countRentalDays(search: Pick<RentalSearch, "pickupDate" | "picku
   return Math.max(1, Math.ceil(ms / MS_PER_DAY));
 }
 
-/** Flat daily rate times number of days. Extras and price overrides arrive in Phase 3. */
+/** Flat daily rate times number of days. Extras are added on top by buildQuote in lib/pricing.ts. */
 export function calcRentalTotal(pricePerDay: number, days: number): number {
   return pricePerDay * days;
 }

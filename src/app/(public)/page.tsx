@@ -5,10 +5,12 @@ import { listFeaturedVehicles } from "@/api/vehicles";
 import { CtaBanner } from "@/components/sections/cta-banner";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { Testimonials } from "@/components/sections/testimonials";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button, Media, Section } from "@/components/ui";
 import { content } from "@/content";
 import { FeaturedVehicles } from "@/features/vehicles/components/featured-vehicles";
 import { QuickSearch } from "@/features/search/quick-search";
+import { businessSchema } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
   title: { absolute: content.seo.defaultTitle },
@@ -31,6 +33,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={businessSchema()} />
       <Section className="pb-0">
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div className="flex flex-col gap-4">

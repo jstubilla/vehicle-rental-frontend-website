@@ -17,6 +17,8 @@ interface SearchBoxProps {
 /**
  * Search field that waits for a pause in typing before searching. If the search text
  * changes from outside (a "Clear filters" button, the Back button), the box follows.
+ * Leaving the field searches straight away, so a click on a result never gets overridden
+ * by a search that was still waiting for its pause.
  */
 export function SearchBox({ value, onSearch, label, placeholder, delayMs = 300, className }: SearchBoxProps) {
   const [text, setText] = useState(value);
@@ -32,6 +34,11 @@ export function SearchBox({ value, onSearch, label, placeholder, delayMs = 300, 
     }
   }
 
+  const send = () => {
+    setSent(text);
+    onSearch(text);
+  };
+
   useEffect(() => {
     if (text === sent) return;
     const timer = setTimeout(() => {
@@ -43,7 +50,15 @@ export function SearchBox({ value, onSearch, label, placeholder, delayMs = 300, 
 
   return (
     <FormField label={label} hideLabel className={className}>
-      <Input type="search" value={text} placeholder={placeholder} onChange={(e) => setText(e.target.value)} />
+      <Input
+        type="search"
+        value={text}
+        placeholder={placeholder}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={() => {
+          if (text !== sent) send();
+        }}
+      />
     </FormField>
   );
 }

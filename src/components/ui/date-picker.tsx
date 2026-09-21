@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Popover } from "radix-ui";
 import { DayPicker, type Matcher } from "react-day-picker";
 import { format, isValid, parseISO } from "date-fns";
@@ -49,6 +49,7 @@ export function DatePicker({
   ...aria
 }: DatePickerProps) {
   const [open, setOpen] = useState(false);
+  const calendarRef = useRef<HTMLDivElement>(null);
   const field = useFieldControl();
   const selected = toDate(value);
   const minDate = toDate(min);
@@ -82,6 +83,16 @@ export function DatePicker({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
+          ref={calendarRef}
+          onOpenAutoFocus={(event) => {
+            // Start on a day (the chosen one, else today) so the arrow keys work straight away.
+            // Otherwise focus would land on the "next month" button.
+            const day = calendarRef.current?.querySelector<HTMLElement>('[role="grid"] button[tabindex="0"]');
+            if (day) {
+              event.preventDefault();
+              day.focus();
+            }
+          }}
           align="start"
           sideOffset={4}
           aria-label={content.ui.selectDate}

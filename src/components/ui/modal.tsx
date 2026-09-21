@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Dialog } from "radix-ui";
 import { cn } from "@/lib/cn";
 import { content } from "@/content";
@@ -49,12 +49,24 @@ export function Modal({
   variant = "default",
   className,
 }: ModalProps) {
+  // Whatever had keyboard focus when the dialog opened, so focus can go back there when it closes.
+  const openerRef = useRef<HTMLElement | null>(null);
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-overlay) grid place-items-center overflow-y-auto bg-overlay p-gutter">
           <Dialog.Content
+            onOpenAutoFocus={() => {
+              openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+            }}
+            onCloseAutoFocus={(event) => {
+              // With a `trigger`, Radix returns focus to it. Dialogs opened from state have no trigger, so do it here.
+              if (trigger) return;
+              event.preventDefault();
+              if (openerRef.current?.isConnected) openerRef.current.focus();
+            }}
             {...(description ? {} : { "aria-describedby": undefined })}
             className={cn(
               "relative w-full rounded-lg border bg-surface p-4 text-foreground shadow-lg md:p-6",

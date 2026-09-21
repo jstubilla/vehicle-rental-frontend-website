@@ -40,6 +40,7 @@ variable first: `$env:E2E_SKIP_BUILD=1; npm.cmd run test:e2e`.
 | `contact-form.spec.ts` | Validation messages, the error and success states, preselecting a vehicle, and the message showing up as a New lead for staff |
 | `admin-access.spec.ts` | Login (wrong password, deactivated account, safe redirects), what each role (Admin, Sales, Accountant, Operations) can see and open, and logout |
 | `admin-management.spec.ts` | Bookings (status changes, cancelling, payments, read-only Accountant), vehicle prices reaching the public site, tasks, the pipeline (real mouse drag and the Move to menu), reports (numbers match the table), users and roles (a new role and user get only what the role allows, nobody can lock everyone out) |
+| `keyboard.spec.ts` | Using only the keyboard: the skip link, contact form errors taking focus, the calendar (arrow keys, Escape), dialogs (focus stays inside, Escape closes and focus goes back to the button), the phone menu, and moving a pipeline card |
 | `accessibility.spec.ts` | An axe scan of every main page, every booking step, all admin pages, and states that change the page (error messages, open calendar, dialogs, phone menus) |
 
 ## How they stay reliable
