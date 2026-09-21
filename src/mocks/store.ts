@@ -1,8 +1,12 @@
-import type { Activity, Booking, Customer, Extra, Lead, Location, Payment, Vehicle } from "@/types";
+import type { Activity, Booking, Customer, Extra, Lead, Location, Payment, Role, User, Vehicle } from "@/types";
+import { seedActivities } from "./activities";
 import { seedBookings, seedPayments } from "./bookings";
 import { seedCustomers } from "./customers";
 import { seedExtras } from "./extras";
+import { seedLeads } from "./leads";
 import { seedLocations } from "./locations";
+import { seedRoles } from "./roles";
+import { seedUsers } from "./users";
 import { seedVehicles } from "./vehicles";
 
 /**
@@ -12,7 +16,7 @@ import { seedVehicles } from "./vehicles";
  * - On the server it is just the seed data (the server has no localStorage).
  * - Bump SEED_VERSION whenever seed data changes, so old saved data is discarded.
  */
-const SEED_VERSION = 3;
+const SEED_VERSION = 5;
 const STORAGE_PREFIX = "car-rental-mock-db-v";
 const STORAGE_KEY = `${STORAGE_PREFIX}${SEED_VERSION}`;
 
@@ -25,6 +29,8 @@ export interface Db {
   payments: Payment[];
   leads: Lead[];
   activities: Activity[];
+  users: User[];
+  roles: Role[];
 }
 
 function createSeed(): Db {
@@ -35,9 +41,10 @@ function createSeed(): Db {
     customers: structuredClone(seedCustomers),
     bookings: structuredClone(seedBookings),
     payments: structuredClone(seedPayments),
-    // Lead and activity seed data arrives in Phase 4.
-    leads: [],
-    activities: [],
+    leads: structuredClone(seedLeads),
+    activities: structuredClone(seedActivities),
+    users: structuredClone(seedUsers),
+    roles: structuredClone(seedRoles),
   };
 }
 
@@ -68,7 +75,9 @@ function load(): Db {
   removeOldVersions();
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) return { ...createSeed(), ...(JSON.parse(saved) as Partial<Db>) };
+    if (saved) return { ...memory, ...(JSON.parse(saved) as Partial<Db>) };
+    // First visit: save the starting data so it survives reloads and can be inspected.
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(memory));
   } catch {
     // Unreadable or blocked storage: fall back to the in-memory copy.
   }

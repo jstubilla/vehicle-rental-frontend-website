@@ -1,7 +1,9 @@
+export * from "./admin-shell";
 export * from "./badge";
 export * from "./button";
 export * from "./card";
 export * from "./checkbox";
+export * from "./confirm-modal";
 export * from "./date-picker";
 export * from "./dropdown-menu";
 export * from "./feedback";
@@ -19,6 +21,7 @@ export * from "./radio-group";
 export * from "./select";
 export * from "./skip-link";
 export * from "./social-links";
+export * from "./stat-card";
 export * from "./stepper";
 export * from "./table";
 export * from "./tabs";

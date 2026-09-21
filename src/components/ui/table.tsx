@@ -25,7 +25,7 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
 export function Table({ variant = "default", label, wrapperClassName, className, ...props }: TableProps) {
   return (
     <div
-      className={cn("w-full overflow-x-auto rounded-lg border border-border", wrapperClassName)}
+      className={cn("relative w-full overflow-x-auto rounded-lg border border-border", wrapperClassName)}
       {...(label ? { role: "region", "aria-label": label, tabIndex: 0 } : {})}
     >
       <table

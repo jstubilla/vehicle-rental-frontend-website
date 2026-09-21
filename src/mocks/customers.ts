@@ -25,6 +25,16 @@ const rows: [string, string, string, string, string][] = [
   ["Camille Rivera", "camille.rivera@example.com", "+63 948 012 3420", "N20-24-345620", "Tour group organizer."],
 ];
 
+/** A few customers have extra contact details, to show that feature. */
+const extraContacts: Record<number, Customer["additionalContacts"]> = {
+  0: [{ id: "cd-01", type: "phone", value: "+63 2 8123 4567", label: "Office" }],
+  4: [
+    { id: "cd-02", type: "email", value: "accounts@villanueva-logistics.example", label: "Accounts" },
+    { id: "cd-03", type: "phone", value: "+63 917 900 1234", label: "Assistant" },
+  ],
+  19: [{ id: "cd-04", type: "email", value: "camille@riveratours.example", label: "Work" }],
+};
+
 export const seedCustomers: Customer[] = rows.map(([name, email, phone, licenseNumber, notes], index) => ({
   id: `cus-${String(index + 1).padStart(2, "0")}`,
   name,
@@ -32,5 +42,6 @@ export const seedCustomers: Customer[] = rows.map(([name, email, phone, licenseN
   phone,
   licenseNumber,
   notes,
+  additionalContacts: extraContacts[index] ?? [],
   createdAt: timestampAt(-90 + index * 4),
 }));

@@ -31,7 +31,7 @@ export function CardTitle({
   as: Tag = "h3",
   className,
   ...props
-}: HTMLAttributes<HTMLHeadingElement> & { as?: "h2" | "h3" | "h4" }) {
+}: HTMLAttributes<HTMLHeadingElement> & { as?: "h1" | "h2" | "h3" | "h4" }) {
   return <Tag className={cn("text-lg font-semibold", className)} {...props} />;
 }
 

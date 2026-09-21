@@ -2,10 +2,12 @@ import type { ImageAsset } from "@/assets/config";
 import type {
   ActivityType,
   BookingStatus,
+  ContactType,
   ExtraPricing,
   FuelType,
   LeadSource,
   LeadStage,
+  Permission,
   PaymentMethod,
   PaymentStatus,
   Transmission,
@@ -46,6 +48,15 @@ export interface Location {
   city: string;
 }
 
+/** An extra phone number or email for a customer or lead (the main ones are on the record itself). */
+export interface ContactDetail {
+  id: string;
+  type: ContactType;
+  value: string;
+  /** e.g. "Office", "Assistant", "Personal". */
+  label: string;
+}
+
 export interface Lead {
   id: string;
   name: string;
@@ -56,6 +67,7 @@ export interface Lead {
   /** Vehicle id the person asked about, if any. */
   vehicleInterest: string | null;
   message: string;
+  additionalContacts: ContactDetail[];
   assigneeId: string | null;
   customerId: string | null;
   createdAt: string;
@@ -80,6 +92,7 @@ export interface Customer {
   phone: string;
   licenseNumber: string | null;
   notes: string;
+  additionalContacts: ContactDetail[];
   createdAt: string;
 }
 
@@ -154,4 +167,22 @@ export interface Paginated<T> {
   page: number;
   pageSize: number;
   pageCount: number;
+}
+
+/** A staff account. Which role it has decides what it may do. */
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  roleId: string;
+  active: boolean;
+  createdAt: string;
+}
+
+/** A named bundle of permissions, e.g. "Sales" or "Accountant". */
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  permissions: Permission[];
 }

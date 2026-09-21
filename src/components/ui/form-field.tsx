@@ -33,6 +33,8 @@ interface FieldChromeProps {
   hint?: string;
   error?: string;
   required?: boolean;
+  /** Hides the label visually but keeps it for screen readers (e.g. search boxes). */
+  hideLabel?: boolean;
   className?: string;
   children: ReactNode;
 }
@@ -47,7 +49,7 @@ function RequiredMark() {
 }
 
 /** Label + control + hint + error message, wired together for screen readers. */
-export function FormField({ label, hint, error, required, className, children }: FieldChromeProps) {
+export function FormField({ label, hint, error, required, hideLabel, className, children }: FieldChromeProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -56,7 +58,7 @@ export function FormField({ label, hint, error, required, className, children }:
   return (
     <FieldContext value={{ id, describedBy, invalid: Boolean(error), required: Boolean(required) }}>
       <div className={cn("flex flex-col gap-1.5", className)}>
-        <label htmlFor={id} className="text-sm font-medium text-foreground">
+        <label htmlFor={id} className={cn("text-sm font-medium text-foreground", hideLabel && "sr-only")}>
           {label}
           {required && <RequiredMark />}
         </label>

@@ -50,3 +50,26 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
 export const EXTRA_PRICING = ["per_day", "flat"] as const;
 export type ExtraPricing = (typeof EXTRA_PRICING)[number];
+
+/**
+ * Everything a role can be allowed to do. Roles are just bundles of these, and the
+ * whole admin area checks these ids (never role names), so custom roles work everywhere.
+ */
+export const PERMISSIONS = [
+  "dashboard.view",
+  "customers.view",
+  "customers.edit",
+  "leads.view",
+  "leads.edit",
+  "tasks.manage",
+  "bookings.view",
+  "bookings.edit",
+  "reports.view",
+  "pricing.edit",
+  "users.manage",
+  "roles.manage",
+] as const;
+export type Permission = (typeof PERMISSIONS)[number];
+
+export const CONTACT_TYPES = ["phone", "email"] as const;
+export type ContactType = (typeof CONTACT_TYPES)[number];

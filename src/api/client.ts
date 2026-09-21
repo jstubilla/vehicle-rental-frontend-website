@@ -4,7 +4,16 @@
  */
 
 /** Machine-readable reasons the UI knows how to explain to the visitor. */
-export type ApiErrorCode = "vehicle_unavailable" | "price_changed" | "not_found" | "unknown";
+export type ApiErrorCode =
+  | "vehicle_unavailable"
+  | "price_changed"
+  | "not_found"
+  | "invalid_credentials"
+  | "account_inactive"
+  | "forbidden"
+  | "has_bookings"
+  | "duplicate_email"
+  | "unknown";
 
 export class ApiError extends Error {
   constructor(

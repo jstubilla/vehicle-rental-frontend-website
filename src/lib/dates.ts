@@ -34,3 +34,35 @@ export function formatTime12h(time: string): string {
   const suffix = h >= 12 ? "PM" : "AM";
   return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${suffix}`;
 }
+
+/** e.g. "Sep 21, 2026, 3:20 PM" (Manila time) from an ISO timestamp. */
+export function formatDateTime(iso: string): string {
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: BUSINESS_TIME_ZONE,
+  }).format(new Date(iso));
+}
+
+/** e.g. "3 days ago", "yesterday", "in 2 hours" from an ISO timestamp. */
+export function formatRelativeTime(iso: string, now: Date = new Date()): string {
+  const seconds = Math.round((new Date(iso).getTime() - now.getTime()) / 1000);
+  const formatter = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ["year", 31536000],
+    ["month", 2592000],
+    ["week", 604800],
+    ["day", 86400],
+    ["hour", 3600],
+    ["minute", 60],
+  ];
+  for (const [unit, size] of units) {
+    if (Math.abs(seconds) >= size) return formatter.format(Math.round(seconds / size), unit);
+  }
+  return formatter.format(0, "second");
+}
+
+/** e.g. "Sep 21, 2026" (Manila time) from an ISO timestamp. */
+export function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: BUSINESS_TIME_ZONE }).format(new Date(iso));
+}

@@ -91,6 +91,7 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
       phone: input.customer.phone,
       licenseNumber: input.customer.licenseNumber,
       notes: "",
+      additionalContacts: [],
       createdAt: now,
     };
     writeTable("customers", [customer, ...customers]);

@@ -33,9 +33,9 @@ const rows: Row[] = [
   { customer: 7, vehicleId: "veh-10", start: -1, nights: 3, status: "active", method: "maya", pickupLocationId: "loc-clark", extraIds: ["ext-driver"] },
   { customer: 8, vehicleId: "veh-11", start: 0, nights: 5, status: "active", method: "card", pickupLocationId: "loc-makati", extraIds: ["ext-gps", "ext-wifi"], pickupTime: "09:00" },
   { customer: 9, vehicleId: "veh-07", start: 2, nights: 3, status: "confirmed", method: "gcash", pickupLocationId: "loc-cebu", extraIds: ["ext-child-seat"] },
-  { customer: 10, vehicleId: "veh-09", start: 4, nights: 4, status: "confirmed", method: "card", pickupLocationId: "loc-bgc" },
+  { customer: 1, vehicleId: "veh-09", start: 4, nights: 4, status: "confirmed", method: "card", pickupLocationId: "loc-bgc" },
   { customer: 11, vehicleId: "veh-08", start: 6, nights: 2, status: "confirmed", method: "maya", pickupLocationId: "loc-makati" },
-  { customer: 12, vehicleId: "veh-02", start: 9, nights: 5, status: "confirmed", method: "gcash", pickupLocationId: "loc-naia", extraIds: ["ext-wifi"] },
+  { customer: 0, vehicleId: "veh-02", start: 9, nights: 5, status: "confirmed", method: "gcash", pickupLocationId: "loc-naia", extraIds: ["ext-wifi"] },
   { customer: 13, vehicleId: "veh-11", start: 12, nights: 3, status: "confirmed", method: "card", pickupLocationId: "loc-clark", pickupTime: "08:00", returnTime: "18:00" },
   { customer: 14, vehicleId: "veh-04", start: 3, nights: 2, status: "pending", method: "pay_at_pickup", pickupLocationId: "loc-bgc" },
 ];

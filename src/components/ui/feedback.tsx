@@ -18,6 +18,8 @@ export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>
 }
 
 interface StateBoxProps {
+  /** Heading level. Use "h1" when the box is the main content of a page. */
+  headingAs?: "h1" | "h2" | "h3";
   title?: string;
   description?: string;
   action?: ReactNode;
@@ -26,6 +28,7 @@ interface StateBoxProps {
 
 /** Shown when a list or page has no data. */
 export function EmptyState({
+  headingAs: Heading = "h3",
   title = content.states.emptyTitle,
   description = content.states.emptyDescription,
   action,
@@ -38,7 +41,7 @@ export function EmptyState({
         className,
       )}
     >
-      <h3 className="text-lg font-semibold">{title}</h3>
+      <Heading className="text-lg font-semibold">{title}</Heading>
       <p className="max-w-form text-sm text-muted">{description}</p>
       {action && <div className="mt-2">{action}</div>}
     </div>
@@ -47,6 +50,7 @@ export function EmptyState({
 
 /** Shown when loading data failed. Pass `onRetry` to show a retry button. */
 export function ErrorState({
+  headingAs: Heading = "h3",
   title = content.states.errorTitle,
   description = content.states.errorDescription,
   onRetry,
@@ -61,7 +65,7 @@ export function ErrorState({
         className,
       )}
     >
-      <h3 className="text-lg font-semibold">{title}</h3>
+      <Heading className="text-lg font-semibold">{title}</Heading>
       <p className="max-w-form text-sm text-muted">{description}</p>
       {(onRetry || action) && (
         <div className="mt-2">
@@ -99,7 +103,7 @@ export function Alert({ variant = "info", title, className, children, ...props }
       {...props}
     >
       <p className="font-semibold">
-        <span className="sr-only">{content.ui.alert[variant]}: </span>
+        {title !== undefined && <span className="sr-only">{content.ui.alert[variant]}: </span>}
         {title ?? content.ui.alert[variant]}
       </p>
       {children && <div className="mt-1 text-sm text-muted">{children}</div>}

@@ -41,8 +41,14 @@ export function ReviewStep() {
     confirm();
   }
 
-  const errorText = error ? t.errors[error.code] : null;
-  const errorPath = error ? ERROR_ACTION_PATH[error.code] : null;
+  // Any error the page has no specific message for shows the generic one.
+  const errorKey: keyof typeof t.errors | null = error
+    ? error.code in t.errors
+      ? (error.code as keyof typeof t.errors)
+      : "unknown"
+    : null;
+  const errorText = errorKey ? t.errors[errorKey] : null;
+  const errorPath = errorKey ? ERROR_ACTION_PATH[errorKey] : null;
 
   return (
     <div className="flex max-w-narrow flex-col gap-6">

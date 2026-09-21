@@ -33,6 +33,7 @@ export async function submitInquiry(input: InquiryInput): Promise<{ leadId: stri
     stage: "new",
     vehicleInterest: input.vehicleId,
     message: input.message,
+    additionalContacts: [],
     assigneeId: null,
     customerId: null,
     createdAt: now,
