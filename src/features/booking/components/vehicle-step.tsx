@@ -43,6 +43,7 @@ export function VehicleStep() {
         {selectedUnavailable && <Alert variant="warning">{t.selectedUnavailable}</Alert>}
 
         <section aria-label={t.vehiclesLabel}>
+          <h2 className="sr-only">{t.vehiclesLabel}</h2>
           {availability.isError ? (
             <ErrorState description={t.loadError} onRetry={() => availability.refetch()} />
           ) : availability.isPending ? (

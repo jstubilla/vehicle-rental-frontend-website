@@ -84,6 +84,7 @@ export function DatePicker({
         <Popover.Content
           align="start"
           sideOffset={4}
+          aria-label={content.ui.selectDate}
           className="z-(--z-overlay) rounded-md border border-border-strong bg-surface p-3 text-foreground shadow-md"
         >
           <DayPicker

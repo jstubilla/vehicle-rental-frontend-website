@@ -31,6 +31,7 @@ export function VehicleCatalog({ initial, locations }: VehicleCatalogProps) {
   return (
     <Section className="pt-0" aria-label={t.resultsLabel}>
       <div className="flex flex-col gap-6">
+        <h2 className="sr-only">{t.resultsLabel}</h2>
         {rental && days && <TripSummary rental={rental} days={days} locations={locations} />}
 
         <div className="grid gap-6 lg:grid-cols-4">

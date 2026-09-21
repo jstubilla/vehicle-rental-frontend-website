@@ -1,0 +1,216 @@
+import { expect, test, type Locator, type Page } from "@playwright/test";
+import { content } from "../src/content";
+import { seedBookings } from "../src/mocks/bookings";
+import { dateFromToday, expectNoA11yViolations, loginAs, pageAlerts, visit } from "./helpers";
+
+/**
+ * Accessibility scans (axe: WCAG 2.0, 2.1 and 2.2 levels A and AA, plus best practices).
+ * A scan runs on every main page and on the states that change the page: error
+ * messages, an open calendar, dialogs and the phone menus.
+ */
+
+const h1 = (page: Page, name: string) => page.getByRole("heading", { level: 1, name });
+
+interface PageCase {
+  name: string;
+  path: string;
+  /** Something that is only visible once the page has finished loading its data. */
+  ready: (page: Page) => Locator;
+}
+
+const PUBLIC_PAGES: PageCase[] = [
+  { name: "Home", path: "/", ready: (p) => h1(p, content.home.hero.title) },
+  {
+    name: "Vehicle catalog",
+    path: "/vehicles",
+    ready: (p) => p.getByRole("article").first(),
+  },
+  {
+    name: "Vehicle catalog with a trip and filters",
+    path: `/vehicles?category=suv&pickupLocation=loc-makati&pickupDate=${dateFromToday(2)}&pickupTime=10%3A00&returnDate=${dateFromToday(5)}&returnTime=10%3A00`,
+    ready: (p) => p.getByRole("region", { name: content.vehicles.trip.title }),
+  },
+  { name: "Vehicle details", path: "/vehicles/toyota-vios-2024", ready: (p) => h1(p, "Toyota Vios") },
+  { name: "About", path: "/about", ready: (p) => h1(p, content.about.title) },
+  { name: "Contact", path: "/contact", ready: (p) => h1(p, content.contact.title) },
+  { name: "Booking step 1: dates", path: "/book/dates", ready: (p) => h1(p, content.booking.dates.title) },
+  { name: "Page not found", path: "/this-page-does-not-exist", ready: (p) => h1(p, content.states.notFoundTitle) },
+];
+
+for (const { name, path, ready } of PUBLIC_PAGES) {
+  test(`${name} has no accessibility problems`, async ({ page }) => {
+    await visit(page, path);
+    await expect(ready(page)).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+}
+
+/** A half-finished booking, saved in the browser the way the real flow saves it. */
+async function startWithBooking(page: Page, includePayment: boolean) {
+  await page.addInitScript(
+    ({ pickup, ret, includePayment: withPayment }) => {
+      sessionStorage.setItem(
+        "car-rental-booking-flow",
+        JSON.stringify({
+          vehicleSlug: "toyota-vios-2024",
+          rental: {
+            pickupLocation: "loc-naia",
+            returnLocation: "loc-makati",
+            pickupDate: pickup,
+            pickupTime: "10:00",
+            returnDate: ret,
+            returnTime: "10:00",
+          },
+          extraIds: ["ext-gps"],
+          customer: {
+            name: "Lorenzo Buenaventura",
+            email: "lorenzo.b@example.com",
+            phone: "0917 555 0142",
+            licenseNumber: "N21-25-778899",
+            notes: "",
+          },
+          payment: withPayment
+            ? { method: "card", amount: 6000, status: "paid", providerRef: "MOCK-TEST", failureCode: null }
+            : null,
+        }),
+      );
+    },
+    { pickup: dateFromToday(60), ret: dateFromToday(63), includePayment },
+  );
+}
+
+test.describe("booking steps in progress", () => {
+  test("step 2: vehicle and extras", async ({ page }) => {
+    await startWithBooking(page, false);
+    await visit(page, "/book/vehicle");
+    await expect(h1(page, content.booking.vehicle.title)).toBeVisible();
+    await expect(page.getByRole("article").first()).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("step 3: your details, with error messages showing", async ({ page }) => {
+    await startWithBooking(page, false);
+    await visit(page, "/book/details");
+    await expect(h1(page, content.booking.details.title)).toBeVisible();
+    await page.getByLabel(content.booking.details.name).clear();
+    await page.getByLabel(content.booking.details.email).clear();
+    await page.getByLabel(content.booking.details.phone).clear();
+    await page.getByLabel(content.booking.details.license).clear();
+    await page.getByRole("button", { name: content.booking.common.continue }).click();
+    await expect(pageAlerts(page).first()).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("step 4: payment, before and after a declined payment", async ({ page }) => {
+    await startWithBooking(page, false);
+    await visit(page, "/book/payment");
+    await expect(h1(page, content.booking.payment.title)).toBeVisible();
+    await expectNoA11yViolations(page);
+
+    await page.getByLabel(content.booking.payment.demo.decline).check();
+    await page.getByRole("button", { name: /^Pay / }).click();
+    await expect(pageAlerts(page).filter({ hasText: content.booking.payment.failedTitle })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("step 5: review and confirm", async ({ page }) => {
+    await startWithBooking(page, true);
+    await visit(page, "/book/review");
+    await expect(h1(page, content.booking.review.title)).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("step 6: confirmation", async ({ page }) => {
+    await visit(page, `/book/confirmation/${seedBookings[0].reference}`);
+    await expect(page.getByText(seedBookings[0].reference, { exact: true })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});
+
+test.describe("states that change the page", () => {
+  test("contact form with every error message showing", async ({ page }) => {
+    await visit(page, "/contact");
+    await page.getByRole("button", { name: content.contact.form.submit }).click();
+    await expect(pageAlerts(page)).toHaveCount(5);
+    await expectNoA11yViolations(page);
+  });
+
+  test("calendar popup open on the home page search", async ({ page }) => {
+    await visit(page, "/");
+    await page.getByRole("button", { name: new RegExp(content.quickSearch.pickupDate) }).click();
+    await expect(page.getByRole("grid")).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("phone menu open on the catalog", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await visit(page, "/vehicles");
+    await page.getByRole("button", { name: content.ui.openMenu }).click();
+    await expect(page.getByRole("button", { name: content.ui.closeMenu })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});
+
+test("admin login page has no accessibility problems", async ({ page }) => {
+  await visit(page, "/admin/login");
+  await expect(h1(page, content.admin.login.title)).toBeVisible();
+  await expectNoA11yViolations(page);
+
+  // With an error message showing.
+  await page.getByRole("button", { name: content.admin.login.submit }).click();
+  await expect(pageAlerts(page).first()).toBeVisible();
+  await expectNoA11yViolations(page);
+});
+
+test.describe("admin area (signed in as Sales)", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAs(page, "Sales");
+  });
+
+  const ADMIN_PAGES: PageCase[] = [
+    { name: "Dashboard", path: "/admin", ready: (p) => p.getByRole("heading", { name: content.admin.dashboard.recentActivity }) },
+    { name: "Customer list", path: "/admin/customers", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Customer profile", path: "/admin/customers/cus-05", ready: (p) => h1(p, "Mark Villanueva") },
+    { name: "Lead list", path: "/admin/leads", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Lead detail", path: "/admin/leads/lead-05", ready: (p) => h1(p, "Trisha Valdez") },
+  ];
+
+  for (const { name, path, ready } of ADMIN_PAGES) {
+    test(`${name} has no accessibility problems`, async ({ page }) => {
+      await visit(page, path);
+      await expect(ready(page)).toBeVisible();
+      await expect(page.getByRole("status", { name: content.admin.frame.loading })).toHaveCount(0);
+      await expectNoA11yViolations(page);
+    });
+  }
+
+  test("customer dialog open", async ({ page }) => {
+    await visit(page, "/admin/customers");
+    await page.getByRole("button", { name: content.admin.customers.add }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("lead dialog with error messages showing", async ({ page }) => {
+    await visit(page, "/admin/leads");
+    await page.getByRole("button", { name: content.admin.leads.add }).click();
+    await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
+    await expect(page.getByRole("dialog").getByRole("alert").first()).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("phone-sized admin menu", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await visit(page, "/admin/customers");
+    await page.getByRole("button", { name: content.admin.frame.openMenu }).click();
+    await expect(page.getByRole("button", { name: content.admin.frame.closeMenu })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});
+
+test("the 'no access' page has no accessibility problems", async ({ page }) => {
+  await loginAs(page, "Accountant");
+  await visit(page, "/admin/leads");
+  await expect(h1(page, content.admin.forbidden.title)).toBeVisible();
+  await expectNoA11yViolations(page);
+});

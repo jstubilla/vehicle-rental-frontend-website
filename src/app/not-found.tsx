@@ -11,6 +11,7 @@ export default function NotFound() {
       <main id="main-content" className="flex-1">
         <Section size="narrow">
           <EmptyState
+            headingAs="h1"
             title={content.states.notFoundTitle}
             description={content.states.notFoundDescription}
             action={
