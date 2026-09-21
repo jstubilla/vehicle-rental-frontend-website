@@ -170,8 +170,11 @@ export interface BookingDetails {
 export async function getBookingByReference(reference: string): Promise<BookingDetails | null> {
   await simulateNetwork();
   const booking = readTable("bookings").find((b) => b.reference.toLowerCase() === reference.toLowerCase());
-  if (!booking) return null;
+  return booking ? toBookingDetails(booking) : null;
+}
 
+/** Joins a booking with its vehicle, customer, payment and locations. Shared with the admin screens. */
+export function toBookingDetails(booking: Booking): BookingDetails | null {
   const vehicle = readTable("vehicles").find((v) => v.id === booking.vehicleId);
   const customer = readTable("customers").find((c) => c.id === booking.customerId);
   if (!vehicle || !customer) return null;

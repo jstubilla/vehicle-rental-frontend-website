@@ -31,3 +31,31 @@ export function requiredPermission(pathname: string): Permission | null {
 export function firstAllowedPath(permissions: readonly Permission[]): string | null {
   return ADMIN_ROUTE_PERMISSIONS.find((route) => permissions.includes(route.permission))?.path ?? null;
 }
+
+/** The permissions as shown on the Roles screen, in groups. */
+export const PERMISSION_GROUPS: readonly { id: "dashboard" | "customers" | "leads" | "tasks" | "bookings" | "money" | "admin"; permissions: readonly Permission[] }[] = [
+  { id: "dashboard", permissions: ["dashboard.view"] },
+  { id: "customers", permissions: ["customers.view", "customers.edit"] },
+  { id: "leads", permissions: ["leads.view", "leads.edit"] },
+  { id: "tasks", permissions: ["tasks.manage"] },
+  { id: "bookings", permissions: ["bookings.view", "bookings.edit"] },
+  { id: "money", permissions: ["reports.view", "pricing.edit"] },
+  { id: "admin", permissions: ["users.manage", "roles.manage"] },
+];
+
+/** Editing something needs permission to see it first. */
+export const PERMISSION_REQUIRES: Partial<Record<Permission, Permission>> = {
+  "customers.edit": "customers.view",
+  "leads.edit": "leads.view",
+  "bookings.edit": "bookings.view",
+};
+
+/** Adds the "view" permission for every "edit" permission that is present, and removes duplicates. */
+export function withRequiredPermissions(permissions: readonly Permission[]): Permission[] {
+  const result = new Set<Permission>(permissions);
+  for (const permission of permissions) {
+    const required = PERMISSION_REQUIRES[permission];
+    if (required) result.add(required);
+  }
+  return [...result];
+}

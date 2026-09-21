@@ -10,6 +10,7 @@ import type {
   Permission,
   PaymentMethod,
   PaymentStatus,
+  TaskStatus,
   Transmission,
   VehicleCategory,
   VehicleStatus,
@@ -185,4 +186,21 @@ export interface Role {
   name: string;
   description: string;
   permissions: Permission[];
+  /** Built-in role that cannot be edited or deleted (Admin), so nobody can lock everyone out. */
+  system?: boolean;
+}
+
+/** A to-do or follow-up, optionally linked to a lead or a customer. */
+export interface Task {
+  id: string;
+  title: string;
+  notes: string;
+  /** ISO date ("2026-10-03"). */
+  dueDate: string;
+  assigneeId: string | null;
+  status: TaskStatus;
+  linkedType: "lead" | "customer" | null;
+  linkedId: string | null;
+  createdAt: string;
+  completedAt: string | null;
 }

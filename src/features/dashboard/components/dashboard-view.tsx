@@ -69,17 +69,27 @@ export function DashboardView() {
                 href="/admin/customers"
               />
             )}
+            {summary.data.tasks && (
+              <StatCard
+                label={t.cards.tasks}
+                value={summary.data.tasks.open}
+                hint={t.cardHints.tasks(summary.data.tasks.overdue)}
+                href="/admin/tasks"
+              />
+            )}
             {summary.data.bookings && (
               <>
                 <StatCard
                   label={t.cards.activeBookings}
                   value={summary.data.bookings.active}
                   hint={t.cardHints.activeBookings}
+                  href="/admin/bookings?status=active"
                 />
                 <StatCard
                   label={t.cards.pendingBookings}
                   value={summary.data.bookings.pending}
                   hint={t.cardHints.pendingBookings}
+                  href="/admin/bookings?status=pending"
                 />
               </>
             )}

@@ -10,6 +10,7 @@ export interface DashboardSummary {
   leads: { open: number; new: number; byStage: Record<LeadStage, number> } | null;
   customers: { total: number; newThisMonth: number } | null;
   bookings: { active: number; pending: number } | null;
+  tasks: { open: number; overdue: number } | null;
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
@@ -41,5 +42,11 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     };
   }
 
-  return { leads, customers, bookings };
+  let tasks: DashboardSummary["tasks"] = null;
+  if (sessionCan(session, "tasks.manage")) {
+    const open = readTable("tasks").filter((t) => t.status === "open");
+    tasks = { open: open.length, overdue: open.filter((t) => t.dueDate < todayISO()).length };
+  }
+
+  return { leads, customers, bookings, tasks };
 }

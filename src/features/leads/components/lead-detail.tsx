@@ -20,6 +20,7 @@ import { content } from "@/content";
 import { ActivityLog } from "@/features/activities/components/activity-log";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ContactDetailsCard } from "@/features/contacts/components/contact-details-card";
+import { LinkedTasksCard } from "@/features/tasks/components/linked-tasks-card";
 import { LEAD_STAGES, type LeadStage } from "@/lib/constants";
 import { formatDate } from "@/lib/dates";
 import { useLeadMutations } from "../hooks/use-lead-mutations";
@@ -148,6 +149,8 @@ export function LeadDetail({ id }: { id: string }) {
           </Card>
 
           <ContactDetailsCard owner="lead" ownerId={lead.id} contacts={lead.additionalContacts} canEdit={canEdit} />
+
+          <LinkedTasksCard type="lead" id={lead.id} />
 
           <ActivityLog entityType="lead" entityId={lead.id} />
         </div>

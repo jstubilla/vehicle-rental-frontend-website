@@ -8,6 +8,7 @@ export const seedRoles: Role[] = [
     name: "Admin",
     description: "Full access, including user accounts and role permissions.",
     permissions: [...PERMISSIONS],
+    system: true,
   },
   {
     id: "role-sales",

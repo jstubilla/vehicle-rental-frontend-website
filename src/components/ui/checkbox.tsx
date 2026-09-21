@@ -6,10 +6,12 @@ import { cn } from "@/lib/cn";
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label: ReactNode;
   description?: string;
+  /** Hides the label visually (for table cells) but keeps it for screen readers. */
+  hideLabel?: boolean;
 }
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Checkbox(
-  { label, description, className, id, ...props },
+  { label, description, hideLabel, className, id, ...props },
   ref,
 ) {
   const generated = useId();
@@ -27,7 +29,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
         {...props}
       />
       <div className="flex flex-col">
-        <label htmlFor={inputId} className="text-base text-foreground">
+        <label htmlFor={inputId} className={cn("text-base text-foreground", hideLabel && "sr-only")}>
           {label}
         </label>
         {description && (

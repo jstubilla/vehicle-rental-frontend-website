@@ -32,6 +32,7 @@ import { ActivityLog } from "@/features/activities/components/activity-log";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { BOOKING_STATUS_BADGE } from "@/features/bookings/status-style";
 import { ContactDetailsCard } from "@/features/contacts/components/contact-details-card";
+import { LinkedTasksCard } from "@/features/tasks/components/linked-tasks-card";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateLong } from "@/lib/dates";
 import { useCustomerMutations } from "../hooks/use-customer-mutations";
@@ -163,6 +164,8 @@ export function CustomerProfile({ id }: { id: string }) {
             contacts={customer.additionalContacts}
             canEdit={canEdit}
           />
+
+          <LinkedTasksCard type="customer" id={customer.id} />
         </TabsContent>
 
         {can("bookings.view") && (
@@ -184,7 +187,9 @@ export function CustomerProfile({ id }: { id: string }) {
                 <TableBody>
                   {bookings.map(({ booking, vehicleName }) => (
                     <TableRow key={booking.id}>
-                      <TableCell className="font-mono">{booking.reference}</TableCell>
+                      <TableCell className="font-mono">
+                        <Link href={`/admin/bookings/${booking.id}`}>{booking.reference}</Link>
+                      </TableCell>
                       <TableCell>{vehicleName}</TableCell>
                       <TableCell className="whitespace-nowrap">
                         {formatDateLong(booking.pickupDate)} to {formatDateLong(booking.returnDate)}

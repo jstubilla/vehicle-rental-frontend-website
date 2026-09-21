@@ -2,6 +2,7 @@ export * from "./admin-shell";
 export * from "./badge";
 export * from "./button";
 export * from "./card";
+export * from "./chart";
 export * from "./checkbox";
 export * from "./confirm-modal";
 export * from "./date-picker";

@@ -44,3 +44,13 @@ export const CalendarIcon = (p: SVGProps<SVGSVGElement>) => (
 export const CheckIcon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><path d="M20 6 9 17l-5-5" /></Icon>
 );
+export const GripIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <circle cx="9" cy="6" r="1" />
+    <circle cx="15" cy="6" r="1" />
+    <circle cx="9" cy="12" r="1" />
+    <circle cx="15" cy="12" r="1" />
+    <circle cx="9" cy="18" r="1" />
+    <circle cx="15" cy="18" r="1" />
+  </Icon>
+);

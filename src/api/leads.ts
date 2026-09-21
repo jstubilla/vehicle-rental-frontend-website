@@ -6,17 +6,27 @@ import type { Activity, Customer, Lead, Paginated } from "@/types";
 import { assertCan } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
-export async function listLeads(params: LeadListParams): Promise<Paginated<LeadRow>> {
-  assertCan("leads.view");
-  await simulateNetwork();
+function toLeadRows(): LeadRow[] {
   const vehicles = readTable("vehicles");
   const users = readTable("users");
-  const rows: LeadRow[] = readTable("leads").map((lead) => ({
+  return readTable("leads").map((lead) => ({
     ...lead,
     vehicleName: vehicles.find((v) => v.id === lead.vehicleInterest)?.name ?? null,
     assigneeName: users.find((u) => u.id === lead.assigneeId)?.name ?? null,
   }));
-  return searchLeads(rows, params);
+}
+
+export async function listLeads(params: LeadListParams): Promise<Paginated<LeadRow>> {
+  assertCan("leads.view");
+  await simulateNetwork();
+  return searchLeads(toLeadRows(), params);
+}
+
+/** Every lead, newest first, for the pipeline board (which shows them all at once). */
+export async function listPipelineLeads(): Promise<LeadRow[]> {
+  assertCan("leads.view");
+  await simulateNetwork();
+  return toLeadRows().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export interface LeadDetail {

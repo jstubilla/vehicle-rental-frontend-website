@@ -13,6 +13,13 @@ export type ApiErrorCode =
   | "forbidden"
   | "has_bookings"
   | "duplicate_email"
+  | "invalid_transition"
+  | "invalid_price"
+  | "last_admin"
+  | "self_deactivate"
+  | "duplicate_name"
+  | "has_users"
+  | "system_role"
   | "unknown";
 
 export class ApiError extends Error {

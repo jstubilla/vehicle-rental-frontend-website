@@ -73,3 +73,6 @@ export type Permission = (typeof PERMISSIONS)[number];
 
 export const CONTACT_TYPES = ["phone", "email"] as const;
 export type ContactType = (typeof CONTACT_TYPES)[number];
+
+export const TASK_STATUSES = ["open", "done"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];

@@ -214,3 +214,69 @@ test("the 'no access' page has no accessibility problems", async ({ page }) => {
   await expect(h1(page, content.admin.forbidden.title)).toBeVisible();
   await expectNoA11yViolations(page);
 });
+
+test.describe("management pages (signed in as Admin)", () => {
+  test.beforeEach(async ({ page }) => {
+    await loginAs(page, "Admin");
+  });
+
+  const pendingBooking = seedBookings.find((booking) => booking.status === "pending")!;
+
+  const MANAGEMENT_PAGES: PageCase[] = [
+    { name: "Pipeline", path: "/admin/pipeline", ready: (p) => p.getByRole("region", { name: content.enums.leadStage.new, exact: true }).getByRole("listitem").first() },
+    { name: "Task list", path: "/admin/tasks", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Booking list", path: "/admin/bookings", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Booking detail", path: `/admin/bookings/${pendingBooking.id}`, ready: (p) => h1(p, pendingBooking.reference) },
+    { name: "Reports", path: "/admin/reports", ready: (p) => p.getByRole("figure").first() },
+    { name: "Vehicle prices", path: "/admin/pricing", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Users", path: "/admin/users", ready: (p) => p.getByRole("row").nth(1) },
+    { name: "Roles", path: "/admin/roles", ready: (p) => p.getByRole("row").nth(1) },
+  ];
+
+  for (const { name, path, ready } of MANAGEMENT_PAGES) {
+    test(`${name} has no accessibility problems`, async ({ page }) => {
+      await visit(page, path);
+      await expect(ready(page)).toBeVisible();
+      await expect(page.getByRole("status", { name: content.admin.frame.loading })).toHaveCount(0);
+      await expectNoA11yViolations(page);
+    });
+  }
+
+  test("reports with the table view open", async ({ page }) => {
+    await visit(page, "/admin/reports");
+    await expect(page.getByRole("figure").first()).toBeVisible();
+    for (const tab of await page.getByRole("tab", { name: content.admin.reports.tabs.table }).all()) await tab.click();
+    await expect(page.getByRole("table").first()).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("price dialog with an error message", async ({ page }) => {
+    await visit(page, "/admin/pricing");
+    await page.getByRole("row", { name: /Toyota Vios/ }).getByRole("button", { name: content.admin.pricing.change }).click();
+    await page.getByRole("dialog").getByLabel(content.admin.pricing.rateLabel).fill("abc");
+    await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
+    await expect(page.getByRole("dialog").getByRole("alert")).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("role dialog with the permission checkboxes", async ({ page }) => {
+    await visit(page, "/admin/roles");
+    await page.getByRole("button", { name: content.admin.roles.add }).click();
+    await expect(page.getByRole("dialog").getByRole("group").first()).toBeVisible();
+    await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
+    await expect(page.getByRole("dialog").getByRole("alert").first()).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("task dialog and user dialog", async ({ page }) => {
+    await visit(page, "/admin/tasks");
+    await page.getByRole("button", { name: content.admin.tasks.add }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expectNoA11yViolations(page);
+
+    await visit(page, "/admin/users");
+    await page.getByRole("button", { name: content.admin.users.add }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+});

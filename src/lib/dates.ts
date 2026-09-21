@@ -66,3 +66,15 @@ export function formatRelativeTime(iso: string, now: Date = new Date()): string 
 export function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: BUSINESS_TIME_ZONE }).format(new Date(iso));
 }
+
+/** The Manila calendar date ("yyyy-MM-dd") of an ISO timestamp. */
+export function toManilaDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: BUSINESS_TIME_ZONE }).format(new Date(iso));
+}
+
+/** "Sep 2026" from a month key like "2026-09". */
+export function formatMonth(monthKey: string): string {
+  return new Intl.DateTimeFormat("en-PH", { month: "short", year: "numeric", timeZone: "UTC" }).format(
+    new Date(`${monthKey}-01T00:00:00Z`),
+  );
+}
