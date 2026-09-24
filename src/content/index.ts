@@ -58,6 +58,7 @@ export const content = {
         ],
       },
     ],
+    phoneLabel: "Call us",
     socialsTitle: "Follow us",
     legal: "© 2026 Car Rental Co. All rights reserved.",
   },

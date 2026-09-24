@@ -18,6 +18,8 @@ const variants: Record<FooterVariant, string> = {
 export interface FooterProps {
   brand: ReactNode;
   description?: string;
+  /** Phone number shown under the description, as a tap-to-call link. */
+  phone?: { label: string; number: string };
   columns: readonly FooterColumn[];
   /** Social links block, already rendered (e.g. <SocialLinks />). */
   socials?: ReactNode;
@@ -31,6 +33,7 @@ export interface FooterProps {
 export function Footer({
   brand,
   description,
+  phone,
   columns,
   socials,
   socialsTitle,
@@ -44,6 +47,14 @@ export function Footer({
         <div className="flex flex-col gap-3">
           {brand}
           {description && <p className="max-w-sm text-sm text-muted">{description}</p>}
+          {phone && (
+            <p className="text-sm">
+              <span className="text-muted">{phone.label}: </span>
+              <a href={`tel:${phone.number.replace(/[^+d]/g, "")}`} className="font-medium">
+                {phone.number}
+              </a>
+            </p>
+          )}
         </div>
 
         {columns.map((column) => (

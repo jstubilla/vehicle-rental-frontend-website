@@ -7,6 +7,7 @@ export function SiteFooter() {
     <Footer
       brand={<Logo />}
       description={content.site.description}
+      phone={{ label: content.footer.phoneLabel, number: content.site.contactPhone }}
       columns={content.footer.columns}
       socials={<SocialLinks links={content.socials} className="flex-col items-start gap-2" />}
       socialsTitle={content.footer.socialsTitle}
