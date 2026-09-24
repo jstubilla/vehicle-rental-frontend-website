@@ -188,3 +188,19 @@ export interface Review {
 
 /** What the public website is allowed to know about a shown review. */
 export type PublicReview = Pick<Review, "id" | "name" | "rating" | "comment" | "createdAt">;
+
+/** A website customer's login (not a staff user, and separate from the CRM customer list). */
+export interface Account {
+  id: string;
+  name: string;
+  email: string;
+  /** MOCK ONLY. A real back end never stores a password, only a hash of it. */
+  password: string;
+  /** Saved from the last booking, so the next one can be filled in. Empty until then. */
+  phone: string;
+  licenseNumber: string;
+  createdAt: string;
+}
+
+/** What the browser is allowed to see of an account (never the password). */
+export type AccountProfile = Omit<Account, "password">;

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createBooking } from "@/api/bookings";
 import { ApiError } from "@/api/client";
 import type { PaymentFailureCode } from "@/api/payments";
+import { accountKey } from "@/features/account/hooks/use-account";
 import { vehicleKeys } from "@/features/vehicles/hooks/use-vehicles";
 import type { PaymentMethod } from "@/lib/constants";
 import { confirmationPath } from "../steps";
@@ -26,6 +27,8 @@ export function usePaymentStep() {
     mutationFn: createBooking,
     onSuccess: (result) => {
       if (result.status !== "confirmed") return;
+      // A signed-in customer's phone and license were just saved to their account.
+      queryClient.invalidateQueries({ queryKey: accountKey });
       router.push(confirmationPath(result.booking.reference));
     },
     onError: (error) => {

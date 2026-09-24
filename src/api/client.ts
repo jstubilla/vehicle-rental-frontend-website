@@ -17,6 +17,8 @@ export type ApiErrorCode =
   | "last_admin"
   | "self_deactivate"
   | "unknown_booking"
+  | "no_account"
+  | "invalid_code"
   | "duplicate_name"
   | "has_users"
   | "system_role"

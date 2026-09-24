@@ -118,6 +118,8 @@ Go component by component against Figma, starting with the most used: Button, In
 | About | `/about` | `src/app/(public)/about/page.tsx` | Company story and team |
 | Contact | `/contact` | `src/app/(public)/contact/page.tsx` | Contact details and message form (creates a New lead) |
 | Leave a review | `/review` | `src/app/(public)/review/page.tsx` | Name, star rating, comment and booking reference. Saved privately (linked from the footer) |
+| Log in | `/login` | `src/app/(public)/login/page.tsx` | Customer login: Google, Apple, email and password, or an email code (mock) |
+| Sign up | `/signup` | `src/app/(public)/signup/page.tsx` | Create a customer account. Saved details can fill in the booking's details step |
 | Booking, step 1 to 6 | `/book/dates`, `/book/vehicle`, `/book/details`, `/book/check`, `/book/payment`, `/book/confirmation/[reference]` | `src/app/(public)/book/**` | Dates and place, vehicle, driver details, check, payment (pays and confirms the booking), confirmation |
 | Not found and error | any unknown address, and unexpected errors | `src/app/not-found.tsx`, `src/app/error.tsx` | Friendly messages |
 | UI kit (developers only) | `/styleguide` | `src/app/(public)/styleguide/page.tsx` | Every reusable component in one place. Hidden from search engines. |

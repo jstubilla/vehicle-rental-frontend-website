@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, FormField, Input, Textarea } from "@/components/ui";
+import Link from "next/link";
+import { Button, Card, CardContent, FormField, Input, Textarea } from "@/components/ui";
 import { content } from "@/content";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { useDetailsStep } from "../hooks/use-details-step";
@@ -30,7 +31,7 @@ export function DetailsStep() {
 
 function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: FlowState }) {
   const { vehicle, quote } = useBookingQuote();
-  const { form, onSubmit } = useDetailsStep(initial);
+  const { form, onSubmit, savedDetails, answerSavedDetails } = useDetailsStep(initial, state.customer !== null);
   const { register, formState } = form;
   const { errors } = formState;
 
@@ -38,6 +39,30 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
     <div className="grid gap-8 lg:grid-cols-3">
       <form onSubmit={onSubmit} noValidate className="flex min-w-0 flex-col gap-6 lg:col-span-2">
         <StepHeading title={t.title} description={t.description} />
+
+        {savedDetails === "offer" && (
+          <Card variant="muted" as="section" aria-labelledby="saved-details-heading">
+            <CardContent className="flex flex-col gap-3 pt-4 md:pt-6">
+              <h2 id="saved-details-heading" className="text-lg">
+                {t.savedDetails.title}
+              </h2>
+              <p className="text-muted">{t.savedDetails.description}</p>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" onClick={() => answerSavedDetails(true)}>
+                  {t.savedDetails.yes}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => answerSavedDetails(false)}>
+                  {t.savedDetails.no}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {savedDetails === "login" && (
+          <p className="text-sm text-muted">
+            {t.loginPrompt.text} <Link href="/login?next=/book/details" className="underline underline-offset-4">{t.loginPrompt.link}</Link>
+          </p>
+        )}
 
         <FormField label={t.name} required error={errors.name?.message}>
           <Input {...register("name")} autoComplete="name" />

@@ -2,6 +2,7 @@ import { buildQuote } from "@/lib/pricing";
 import { countRentalDays } from "@/lib/rental";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity, Booking, Customer, Payment, Vehicle } from "@/types";
+import { saveSignedInDetails } from "./account";
 import { ApiError, simulateNetwork } from "./client";
 import { processPayment, type PaymentFailureCode, type PaymentRequest } from "./payments";
 
@@ -144,6 +145,8 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
 
   // EMAIL TRIGGER GOES HERE: when the real backend exists, send the booking
   // confirmation to the customer and a notification to the company inbox.
+
+  saveSignedInDetails(input.customer);
 
   return { status: "confirmed", booking };
 }

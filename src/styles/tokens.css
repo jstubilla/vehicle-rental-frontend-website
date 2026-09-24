@@ -239,3 +239,14 @@
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
 }
+
+/*
+ * Brand colors for the Google logo. Google's rules require these exact colors,
+ * so they do not change with the theme. Used only by GoogleIcon in the UI kit.
+ */
+:root {
+  --brand-google-blue: #4285f4;
+  --brand-google-green: #34a853;
+  --brand-google-yellow: #fbbc05;
+  --brand-google-red: #ea4335;
+}

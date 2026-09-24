@@ -50,6 +50,7 @@ Optional: copy `.env.example` to `.env.local` to change the settings in
 | `/book/dates` | The six-step booking flow |
 | `/contact` | Contact form (each message becomes a lead in the admin) |
 | `/review` | Leave a review (private; staff choose which ones show on the home page) |
+| `/login`, `/signup` | Customer accounts (mock). A signed-in customer is asked whether to fill in their saved details when booking |
 | `/admin` | Admin area (sign in first) |
 | `/styleguide` | Every reusable component in one page (for developers) |
 
