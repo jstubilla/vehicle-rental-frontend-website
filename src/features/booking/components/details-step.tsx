@@ -2,7 +2,6 @@
 
 import { Button, FormField, Input, Textarea } from "@/components/ui";
 import { content } from "@/content";
-import { useBookingLocations } from "../hooks/use-locations";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { useDetailsStep } from "../hooks/use-details-step";
 import { useStepGuard } from "../hooks/use-step-guard";
@@ -30,7 +29,6 @@ export function DetailsStep() {
 }
 
 function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: FlowState }) {
-  const locations = useBookingLocations();
   const { vehicle, quote } = useBookingQuote();
   const { form, onSubmit } = useDetailsStep(initial);
   const { register, formState } = form;
@@ -71,7 +69,7 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
 
       <aside className="min-w-0 lg:col-span-1">
         <BookingSummary
-          data={summaryFromFlow({ state, vehicle, quote, locations })}
+          data={summaryFromFlow({ state, vehicle, quote })}
           className="lg:sticky lg:top-24"
         />
       </aside>

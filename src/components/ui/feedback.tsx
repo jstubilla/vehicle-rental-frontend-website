@@ -99,7 +99,8 @@ export function Alert({ variant = "info", title, className, children, ...props }
   return (
     <div
       role={variant === "danger" ? "alert" : "status"}
-      className={cn("rounded-md border bg-surface p-4 text-foreground", alertVariants[variant], className)}
+      data-surface="card"
+      className={cn("rounded-md border bg-card p-4 text-foreground", alertVariants[variant], className)}
       {...props}
     >
       <p className="font-semibold">

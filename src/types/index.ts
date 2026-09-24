@@ -3,15 +3,12 @@ import type {
   ActivityType,
   BookingStatus,
   ContactType,
-  ExtraPricing,
-  FuelType,
   LeadSource,
   LeadStage,
   Permission,
   PaymentMethod,
   PaymentStatus,
   TaskStatus,
-  Transmission,
   VehicleCategory,
   VehicleStatus,
 } from "@/lib/constants";
@@ -22,31 +19,20 @@ import type {
  * Money is in PHP.
  */
 
+/** Kept deliberately small: what it is, how many it seats, and what it costs. */
 export interface Vehicle {
   id: string;
   slug: string;
   name: string;
-  make: string;
-  model: string;
-  year: number;
   category: VehicleCategory;
-  transmission: Transmission;
-  fuel: FuelType;
-  seats: number;
+  /** Cars and vans always have this. Motorcycles don't carry a seat count. */
+  seats?: number;
   /** Flat daily rate in PHP. Staff with the pricing permission can change it from the Pricing screen; bookings keep the rate they were made at. */
   pricePerDay: number;
-  description: string;
-  features: string[];
   plateNumber: string;
   status: VehicleStatus;
   featured: boolean;
   images: ImageAsset[];
-}
-
-export interface Location {
-  id: string;
-  name: string;
-  city: string;
 }
 
 /** An extra phone number or email for a customer or lead (the main ones are on the record itself). */
@@ -97,28 +83,9 @@ export interface Customer {
   createdAt: string;
 }
 
-/** An optional add-on such as a child seat. */
-export interface Extra {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  /** per_day = price x number of days, flat = charged once. */
-  pricing: ExtraPricing;
-}
-
-/** An extra as it was priced when the booking was made. */
-export interface BookingExtraLine {
-  extraId: string;
-  name: string;
-  pricing: ExtraPricing;
-  unitPrice: number;
-  total: number;
-}
-
 /**
- * A booking keeps its own copy of the prices it was made at (dailyRate and the
- * extras lines). If the owner changes a vehicle's rate later, existing bookings
+ * A booking keeps its own copy of the price it was made at (dailyRate and the
+ * totals). If the owner changes a vehicle's rate later, existing bookings
  * keep their original price and only new bookings use the new rate.
  */
 export interface Booking {
@@ -127,8 +94,10 @@ export interface Booking {
   reference: string;
   customerId: string;
   vehicleId: string;
-  pickupLocationId: string;
-  returnLocationId: string;
+  /** Wherever the visitor typed or pasted (an address, or a Google Maps link) — there is no preset list. */
+  pickupLocation: string;
+  /** Same idea, for the return leg. */
+  returnLocation: string;
   pickupDate: string;
   pickupTime: string;
   returnDate: string;
@@ -136,8 +105,6 @@ export interface Booking {
   days: number;
   dailyRate: number;
   vehicleTotal: number;
-  extras: BookingExtraLine[];
-  extrasTotal: number;
   total: number;
   status: BookingStatus;
   paymentId: string | null;
@@ -204,3 +171,20 @@ export interface Task {
   createdAt: string;
   completedAt: string | null;
 }
+
+/** A customer's review of the overall service (not of one car or one booking). Private until staff choose to show it. */
+export interface Review {
+  id: string;
+  name: string;
+  /** 1 to 5 stars. */
+  rating: number;
+  comment: string;
+  /** The booking reference the customer gave. Only staff can see it. */
+  bookingReference: string;
+  /** Whether staff chose to show it on the public website. */
+  published: boolean;
+  createdAt: string;
+}
+
+/** What the public website is allowed to know about a shown review. */
+export type PublicReview = Pick<Review, "id" | "name" | "rating" | "comment" | "createdAt">;

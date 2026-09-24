@@ -49,7 +49,8 @@ function LeadCard({ lead, canMove, onMove }: { lead: LeadRow; canMove: boolean; 
   return (
     <li
       ref={setNodeRef}
-      className={cn("flex flex-col gap-3 rounded-lg border border-border bg-surface p-3", isDragging && "opacity-40")}
+      data-surface="card"
+      className={cn("flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-foreground", isDragging && "opacity-40")}
     >
       <div className="flex items-start gap-2">
         {canMove && (
@@ -198,7 +199,7 @@ export function PipelineBoard() {
           </div>
           <DragOverlay>
             {dragging ? (
-              <div className="rounded-lg border border-border-strong bg-surface p-3">
+              <div data-surface="card" className="rounded-lg border border-border-strong bg-card p-3 text-foreground">
                 <LeadCardBody lead={dragging} />
               </div>
             ) : null}

@@ -4,6 +4,7 @@ import { fontClassNames } from "@/assets/fonts";
 import { content } from "@/content";
 import { SkipLink } from "@/components/ui";
 import { SITE_URL } from "@/lib/site";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -21,7 +22,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Sets the saved (or system) theme before paint, so there is no flash of the wrong one. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className={fontClassNames}>
         <SkipLink />
         <Providers>{children}</Providers>

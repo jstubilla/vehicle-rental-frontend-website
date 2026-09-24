@@ -34,14 +34,11 @@ export function VehicleCard({ vehicle, rental = null, days = null }: VehicleCard
           </CardTitle>
           <Badge variant="outline">{content.enums.vehicleCategory[vehicle.category]}</Badge>
         </div>
-        <CardDescription>
-          {content.enums.transmission[vehicle.transmission]} · {t.seats(vehicle.seats)} ·{" "}
-          {content.enums.fuel[vehicle.fuel]}
-        </CardDescription>
+        {vehicle.seats !== undefined && <CardDescription>{t.seats(vehicle.seats)}</CardDescription>}
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         <p>
-          <span className="text-2xl font-semibold">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
+          <span className="text-2xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
           <span className="text-sm text-muted">{t.perDay}</span>
         </p>
         {days && (
@@ -60,11 +57,11 @@ export function VehicleCard({ vehicle, rental = null, days = null }: VehicleCard
           <Link href={vehicleHref(vehicle.slug, rental)}>{t.viewDetails}</Link>
         </Button>
         {available ? (
-          <Button asChild size="sm">
+          <Button asChild size="sm" variant="accent">
             <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
           </Button>
         ) : (
-          <Button size="sm" disabled>
+          <Button size="sm" variant="accent" disabled>
             {t.bookNow}
           </Button>
         )}

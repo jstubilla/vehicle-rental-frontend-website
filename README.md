@@ -49,6 +49,7 @@ Optional: copy `.env.example` to `.env.local` to change the settings in
 | `/vehicles` | Catalog with filters |
 | `/book/dates` | The six-step booking flow |
 | `/contact` | Contact form (each message becomes a lead in the admin) |
+| `/review` | Leave a review (private; staff choose which ones show on the home page) |
 | `/admin` | Admin area (sign in first) |
 | `/styleguide` | Every reusable component in one page (for developers) |
 
@@ -65,9 +66,10 @@ The demo accounts and the payment "demo controls" only show while `NEXT_PUBLIC_S
 
 ## 2. What is in it
 
-**Public site:** home page with quick search, vehicle catalog and detail pages, about page, contact
-form, and a six-step booking flow (dates and place, vehicle and extras, driver details, payment, review,
-confirmation) with a **mock payment** that can succeed or be declined.
+**Public site:** home page with quick search, vehicle catalog and detail pages, a special offers page,
+about page, contact form, and a six-step booking flow (dates and place, vehicle, driver details, check,
+payment, confirmation) with a **mock payment** that can succeed or be declined. The last step pays and
+confirms the booking in one action. Booking is open — every vehicle can be booked for any dates.
 
 **Admin area:** dashboard, customers, leads, a drag-and-drop pipeline, tasks, bookings, reports,
 vehicle pricing, staff users, and roles with an editable permission checklist. The complete list of
@@ -87,7 +89,7 @@ Other folders worth knowing:
 | --- | --- |
 | `src/content/index.ts` | **All wording.** Nothing else contains text that visitors read. |
 | `src/assets/config.ts` | The logo and every image |
-| `src/mocks` | The fake data (12 vehicles, 5 locations, 20 customers, 15 bookings, 15 leads, and more) |
+| `src/mocks` | The fake data (14 vehicles, 20 customers, 15 bookings, 15 leads, and more) |
 | `src/api` | The only door to the data. Every function is `async`, like a real API. |
 | `src/proxy.ts` | Guards `/admin` (Next.js 16 calls this file a "proxy"; older versions call it "middleware") |
 | `e2e` | The automated browser tests |
@@ -101,11 +103,20 @@ Open **`src/styles/tokens.css`**. Every color, font, size, corner radius, shadow
 whole site is defined there once, with a comment. Change a value and the whole site follows:
 
 ```css
---color-primary: #1a1a1a;   /* try a blue like #1d4ed8 and every main button changes */
+--accent: #fd802b;   /* try a different orange and every call-to-action button changes */
 ```
 
-There is also a dark theme at the bottom of the file. Add `data-theme="dark"` to the `<html>` tag in
-`src/app/layout.tsx` to try it.
+Colors have two layers: plain semantic variables (`--bg-main`, `--card`, `--text-primary`, `--primary`,
+`--accent` ...) written once per theme, and Tailwind names (`bg-background`, `text-foreground` ...) that
+just point at them. Only the first layer ever holds a color.
+
+**Light and dark mode are both live.** The light values are the base block at the top of the file; the
+dark ones are in `[data-theme="dark"]` (only the values that change need to be listed). In dark mode
+cards are light with dark text: card-like components carry `data-surface="card"`, which switches the light
+values back on inside them. The comment at the top of `tokens.css` lists the measured contrast results and
+which colors were added because the brand palette did not have them. A `ThemeToggle` button (top right of every page, public and admin) switches between them; the
+choice is remembered per browser (`src/lib/theme.ts`), and a small inline script in
+`src/app/layout.tsx` applies it before the page paints, so there is no flash of the wrong theme.
 
 How things *look* (padding, borders, hover) is in `src/components/ui`. Pages never contain colors. The
 command `npm run check:tokens` enforces this. For the full design-arrival process, use
@@ -199,7 +210,9 @@ For the real thing:
 All payment logic is in **one file: `src/api/payments.ts`**, in the function `processPayment`. Right now it
 waits a moment and then returns "paid", or "declined" if the demo control asks for it. Replace its body
 with your gateway (PayMongo, Xendit, Maya, GCash or similar), and keep the same input and result shape, so
-the payment step and the booking do not change.
+the payment step and the booking do not change. `processPayment` is called from `createBooking` in
+`src/api/bookings.ts`, which first checks that the vehicle is free and the price is unchanged, and only then
+charges and saves the booking. A real server should keep that order (check, charge, save) in one step.
 
 **Important:** the site must never see card numbers. Use the gateway's hosted page (the customer is sent
 there and comes back) or the gateway's own secure embedded fields. Do not add card inputs to this
@@ -239,20 +252,36 @@ Decisions made where the brief did not say. Each is easy to change; please check
 **The business**
 
 - One company only, with no multiple branches or accounts. Prices are in **PHP**, formatted in one place
-  (`src/lib/currency.ts`). All dates and times are **Manila time** (UTC+8, no daylight saving).
+  (`src/lib/currency.ts`), which also shows the rough **USD** equivalent next to every price using a fixed
+  placeholder exchange rate (`PHP_PER_USD` in that same file). All dates and times are **Manila time** (UTC+8,
+  no daylight saving).
 - **A rental day is a 24-hour block, rounded up.** Two days and one hour is three days. The minimum is one day.
 - **Prices are a flat daily rate**, with no seasonal or weekend pricing. Staff with the pricing permission
   can change a vehicle's rate. **New bookings use the new rate; existing bookings keep the price they were made at.**
-- Extras (for example GPS) are priced per day or as a one-time fee, and added to the total.
-- A vehicle is "taken" for the dates of any booking that is **pending, confirmed or active.** Cancelled and
-  completed bookings free it. Availability is checked by date overlap, and again when the booking is confirmed.
+- There are no add-ons (no child seats, GPS and the like). A booking's price is just the vehicle's daily
+  rate times the number of days.
+- **Booking is open:** any vehicle can be booked for any dates. There is no double-booking check and no
+  "unavailable for these dates" state. The only thing that stops a vehicle being booked is its own status
+  (a vehicle marked "in maintenance" or "inactive" cannot be selected).
+- **A vehicle is kept deliberately simple:** its type (Sedan, SUV, Van, 125cc or 155cc), how many it seats,
+  and its price. **Motorcycles (125cc/155cc) don't carry a seat count** — `seats` is optional on the
+  `Vehicle` type, and every screen that shows seats just leaves that part out for them. There is no
+  transmission, fuel type, year, description or feature list. The vehicle detail
+  page shows the photos, those specs, and the price — no other text.
 - Adding, editing or removing vehicles is **not** built (only the price). This was a deliberate scope
-  decision. The 12 vehicles come from `src/mocks/vehicles.ts`.
+  decision. The 14 vehicles come from `src/mocks/vehicles.ts`.
+- **There is no preset list of pick-up/return locations.** The visitor always types or pastes where they
+  mean — an address, or a Google Maps link — in a plain text field (`src/features/booking/components/dates-step.tsx`).
+  Nothing checks that the text is a real place or a valid link; a real backend with an address-lookup
+  service would be the place to validate it, and could also price a delivery/collection fee by how far the
+  location is from a branch, something this skeleton does not attempt.
 
 **Bookings and payment**
 
-- Payment methods offered: card, GCash, Maya and Pay at pick-up. All are **mock**. "Pay at pick-up" shows as
-  pending until staff use "Mark payment received".
+- Payment methods offered: card, GCash, Maya, PayPal, Wise and Pay at pick-up. All are **mock**. "Pay at
+  pick-up" shows as pending until staff use "Mark payment received".
+- The visitor checks the booking first and pays last. **Paying and confirming are one action:** the car and
+  price are checked before anything is charged, and a failed payment books nothing.
 - Booking statuses only move **forward**: pending, confirmed, active, completed. **Cancelling** is allowed
   only while pending or confirmed, and asks first.
 - A confirmed booking **reuses the customer with the same email address**, or creates a new customer, and
@@ -287,9 +316,9 @@ Decisions made where the brief did not say. Each is easy to change; please check
 - Real colors, fonts, spacing, logo and photos, and final wording. See
   [`docs/DESIGN-HANDOFF.md`](docs/DESIGN-HANDOFF.md).
 - A social-sharing image (`openGraph.images`), and a favicon and app icons in the final brand.
-- Placeholder wording is everywhere in `src/content/index.ts` (about text, testimonials, terms, phone,
+- Placeholder wording is everywhere in `src/content/index.ts` (about text, terms, phone,
   email, address). It needs the client's real details.
-- Real terms and conditions and a privacy notice (the review step links to none yet).
+- Real terms and conditions and a privacy notice (the payment step links to none yet).
 
 **For going live (needs a backend):**
 
@@ -297,6 +326,9 @@ Decisions made where the brief did not say. Each is easy to change; please check
   payment gateway (section 6).
 - Emails (booking confirmations, contact-form receipts), and any notifications for staff.
 - Setting up hosting and the real `NEXT_PUBLIC_SITE_URL`.
+- **Pick-up/return locations are free text today** (an address or a Google Maps link), with nothing checking
+  that they are real. A backend could validate them and, if useful, price a delivery/collection fee based
+  on distance from a branch.
 
 **Not built, on purpose or by scope:** adding and editing vehicles (only prices), invoices and receipts,
 customer accounts and login for visitors, multiple languages (the wording is already in one file, so

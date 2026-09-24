@@ -82,15 +82,9 @@ export function BookingSummary({ data, className }: { data: SummaryData; classNa
               </div>
               <p className="font-medium">{formatCurrency(data.vehicleTotal)}</p>
             </div>
-            {data.extras.map((extra) => (
-              <div key={extra.name} className="flex items-start justify-between gap-4">
-                <p>{extra.name}</p>
-                <p className="font-medium">{formatCurrency(extra.total)}</p>
-              </div>
-            ))}
             <div className="flex items-center justify-between gap-4 border-t border-border pt-3 text-lg font-semibold">
               <p>{t.total}</p>
-              <p>{formatCurrency(data.total)}</p>
+              <p className="text-price">{formatCurrency(data.total)}</p>
             </div>
             <p className="text-sm text-muted">{t.pricesNote}</p>
           </div>

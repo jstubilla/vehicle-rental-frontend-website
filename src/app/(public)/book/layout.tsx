@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { listLocations } from "@/api/locations";
 import { content } from "@/content";
 import { BookingShell } from "@/features/booking/components/booking-shell";
 
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function BookLayout({ children }: { children: React.ReactNode }) {
-  const locations = await listLocations();
-  return <BookingShell locations={locations}>{children}</BookingShell>;
+export default function BookLayout({ children }: { children: React.ReactNode }) {
+  return <BookingShell>{children}</BookingShell>;
 }

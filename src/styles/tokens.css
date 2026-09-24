@@ -1,58 +1,169 @@
 /*
  * DESIGN TOKENS — the single source of every visual value in the site.
  *
- * How it works (Tailwind v4): everything inside `@theme static` becomes a CSS
- * variable AND a Tailwind utility (e.g. --color-primary -> `bg-primary`,
- * `text-primary`, `border-primary`). `static` keeps every token in the output
- * even if unused, so a designer can always reference it.
+ * TWO LAYERS
+ *  1. THEME VALUES (top of this file): plain CSS variables with semantic names
+ *     (--bg-main, --card, --text-primary, --primary, --accent ...). One set of values per
+ *     theme. This is the ONLY place colors are written down.
+ *  2. TAILWIND NAMES (`@theme static inline` below): --color-background etc. simply point
+ *     at layer 1, so utilities like `bg-background` / `text-foreground` follow the theme.
  *
- * To re-skin the site: edit values here (and component styling in
- * src/components/ui). Pages should never need to change.
+ * To re-skin: edit layer 1. Components never contain colors (npm run check:tokens enforces it).
  *
- * Current values are a GRAYSCALE WIREFRAME placeholder, not the final design.
+ * THEMES
+ *  - Light values are the base. Dark values are in [data-theme="dark"].
+ *  - src/lib/theme.ts + ThemeToggle switch data-theme on <html>; the choice is remembered and
+ *    defaults to the system preference. An inline script in src/app/layout.tsx applies it
+ *    before first paint (no flash).
+ *  - In dark mode CARDS ARE LIGHT (dark text on #dee4eb / #ffffff). Card-like components
+ *    carry data-surface="card", which switches the light values back on inside them, so
+ *    text, borders, links and inputs there stay readable without per-component colors.
+ *
+ * CONTRAST NOTES (measured, WCAG AA = 4.5:1 text, 3:1 borders/rings)
+ *  - Brand blue #006efd is used for fills and focus rings only. As TEXT it measures 4.3:1 on
+ *    light and 3.5:1 on dark surfaces, so --link is a shade of it per context.
+ *  - Brand orange #fd802b takes NAVY text (6.3:1). White on it is 2.5:1: do not use.
+ *    As text (prices) it only works on dark backgrounds (6.3-7.5:1); on light surfaces
+ *    --price is a darker orange (5.9:1).
+ *  - White on the blue button fill is 4.52:1: passes, with almost no margin.
+ *  - Not in the brand palette, added to fill gaps: status colors, hover shades, --bg-muted,
+ *    --text-secondary in dark mode, and the darker link/price/border shades above.
+ *
+ * Fonts, spacing, radius and shadows below are still wireframe placeholders.
  */
 
-@theme static {
+/* ---------- Theme values: LIGHT (base) ---------- */
+:root,
+[data-theme="dark"] [data-surface="card"] {
+  --bg-main: #f7fafd; /* page background */
+  --bg-surface: #fafcfe; /* nav bar, footer, section bands, admin chrome */
+  --bg-muted: #eef3f8; /* hover, table header, striped rows */
+  --card: #fafcfe; /* cards, popovers, modals */
+  --field: #ffffff; /* text inputs */
+  --text-primary: #0c233d; /* body text, headings */
+  --text-secondary: #445a7a; /* labels, captions, hints */
+  --border: #9aa8be; /* card and section outlines */
+  --border-strong: #6b7b94; /* form control borders (needs 3:1) */
+  --overlay: rgb(12 35 61 / 0.5); /* modal backdrop */
+
+  --link: #0057c4; /* links as text: darker than brand blue, see contrast notes */
+  --price: #a84300; /* prices as text: darker than brand orange, see contrast notes */
+  --primary: #006efd; /* buttons, active states (fills) */
+  --primary-hover: #005ed7;
+  --primary-foreground: #ffffff;
+  --accent: #fd802b; /* important CTAs, badges, highlights (fills) */
+  --accent-hover: #ff9346;
+  --accent-foreground: #0c233d; /* navy: white fails contrast on orange */
+  --secondary: #e3ebf3;
+  --secondary-hover: #d5e0ec;
+  --secondary-foreground: #0c233d;
+  --ring: #006efd; /* focus outline */
+
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #a16207;
+  --warning-foreground: #ffffff;
+  --danger: #b91c1c; /* also used as error TEXT, including on the #dee4eb dark-mode card (5.05:1) */
+  --danger-hover: #991b1b;
+  --danger-foreground: #ffffff;
+  --info: #0369a1;
+  --info-foreground: #ffffff;
+
+  --placeholder: #e3e8ee;
+  --placeholder-foreground: #445a7a;
+}
+
+/* ---------- Theme values: DARK ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-main: #011125;
+  --bg-surface: #0c233d;
+  --bg-muted: #16324f;
+  --card: #dee4eb; /* cards stay light; see data-surface="card" above */
+  --field: #0c233d;
+  --text-primary: #dee4eb;
+  --text-secondary: #9fb0c4;
+  --border: #1c3350;
+  --border-strong: #5a7aab;
+  --overlay: rgb(1 17 37 / 0.7);
+
+  --link: #4da3ff; /* lighter than brand blue: #006efd is 3.5:1 on --bg-surface */
+  --price: #fd802b;
+  --primary: #006efd;
+  --primary-hover: #005ed7;
+  --primary-foreground: #ffffff;
+  --accent: #fd802b;
+  --accent-hover: #ff9346;
+  --accent-foreground: #0c233d;
+  --secondary: #16324f;
+  --secondary-hover: #1d3f61;
+  --secondary-foreground: #dee4eb;
+  --ring: #4da3ff;
+
+  --success: #4ade80;
+  --success-foreground: #0c233d;
+  --warning: #fbbf24;
+  --warning-foreground: #0c233d;
+  --danger: #f87171;
+  --danger-hover: #fca5a5;
+  --danger-foreground: #0c233d;
+  --info: #38bdf8;
+  --info-foreground: #0c233d;
+
+  --placeholder: #16324f;
+  --placeholder-foreground: #9fb0c4;
+}
+
+/* The card fill itself stays #dee4eb in dark mode (the light values above would have reset it). */
+[data-theme="dark"] [data-surface="card"] {
+  --card: #dee4eb;
+}
+
+/* ---------- Tailwind names: point at the theme values above ---------- */
+@theme static inline {
   /* Remove Tailwind's built-in palette so only our semantic colors exist. */
   --color-*: initial;
 
-  /* ---------- Color: surfaces & text ---------- */
-  --color-background: #ffffff; /* page background */
-  --color-surface: #ffffff; /* cards, inputs, popovers */
-  --color-surface-muted: #f2f2f2; /* alternating sections, table header */
-  --color-foreground: #1a1a1a; /* main text */
-  --color-muted: #595959; /* secondary text */
-  --color-border: #cfcfcf; /* decorative dividers */
-  --color-border-strong: #767676; /* form controls (needs 3:1 contrast) */
-  --color-overlay: rgb(0 0 0 / 0.5); /* modal backdrop */
-  --color-link: #1a1a1a;
+  --color-background: var(--bg-main);
+  --color-surface: var(--bg-surface);
+  --color-surface-muted: var(--bg-muted);
+  --color-card: var(--card);
+  --color-field: var(--field);
+  --color-foreground: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-overlay: var(--overlay);
+  --color-link: var(--link);
+  --color-price: var(--price);
 
-  /* ---------- Color: brand / actions ---------- */
-  --color-primary: #1a1a1a;
-  --color-primary-hover: #333333;
-  --color-primary-foreground: #ffffff; /* text on primary */
-  --color-secondary: #e6e6e6;
-  --color-secondary-hover: #d4d4d4;
-  --color-secondary-foreground: #1a1a1a;
-  --color-accent: #4d4d4d;
-  --color-accent-foreground: #ffffff;
-  --color-ring: #1a1a1a; /* focus outline */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-ring: var(--ring);
 
-  /* ---------- Color: status ---------- */
-  --color-success: #3d3d3d;
-  --color-success-foreground: #ffffff;
-  --color-warning: #737373;
-  --color-warning-foreground: #ffffff;
-  --color-danger: #000000;
-  --color-danger-hover: #333333;
-  --color-danger-foreground: #ffffff;
-  --color-info: #666666;
-  --color-info-foreground: #ffffff;
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
 
-  /* ---------- Color: image placeholders ---------- */
-  --color-placeholder: #d9d9d9;
-  --color-placeholder-foreground: #4d4d4d;
+  --color-placeholder: var(--placeholder);
+  --color-placeholder-foreground: var(--placeholder-foreground);
+}
 
+@theme static {
   /* ---------- Typography ---------- */
   --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -127,45 +238,4 @@
   /* ---------- Focus ---------- */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
-}
-
-/*
- * DARK MODE tokens. Unused for now: add data-theme="dark" to <html> to try it.
- * Only values that change need to be listed.
- */
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  --color-background: #111111;
-  --color-surface: #1a1a1a;
-  --color-surface-muted: #262626;
-  --color-foreground: #f2f2f2;
-  --color-muted: #a6a6a6;
-  --color-border: #3d3d3d;
-  --color-border-strong: #8c8c8c;
-  --color-overlay: rgb(0 0 0 / 0.7);
-  --color-link: #f2f2f2;
-
-  --color-primary: #f2f2f2;
-  --color-primary-hover: #d9d9d9;
-  --color-primary-foreground: #111111;
-  --color-secondary: #333333;
-  --color-secondary-hover: #404040;
-  --color-secondary-foreground: #f2f2f2;
-  --color-accent: #bfbfbf;
-  --color-accent-foreground: #111111;
-  --color-ring: #f2f2f2;
-
-  --color-success: #d0d0d0;
-  --color-success-foreground: #111111;
-  --color-warning: #a0a0a0;
-  --color-warning-foreground: #111111;
-  --color-danger: #ffffff;
-  --color-danger-hover: #d9d9d9;
-  --color-danger-foreground: #111111;
-  --color-info: #b3b3b3;
-  --color-info-foreground: #111111;
-
-  --color-placeholder: #333333;
-  --color-placeholder-foreground: #bfbfbf;
 }

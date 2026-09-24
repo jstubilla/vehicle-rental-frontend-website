@@ -6,7 +6,6 @@ import { ApiError } from "@/api/client";
 import { useToast } from "@/components/ui";
 import { content } from "@/content";
 import { activityKeys } from "@/features/activities/hooks/use-activities";
-import { availabilityKey } from "@/features/booking/hooks/use-available-vehicles";
 import { bookingKeys } from "@/features/shared/query-keys";
 import type { BookingStatus } from "@/lib/constants";
 
@@ -20,7 +19,6 @@ export function useBookingMutations() {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: bookingKeys.all });
     queryClient.invalidateQueries({ queryKey: activityKeys.all });
-    queryClient.invalidateQueries({ queryKey: availabilityKey });
     queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   };
 

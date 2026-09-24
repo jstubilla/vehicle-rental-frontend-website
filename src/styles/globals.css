@@ -40,7 +40,7 @@
 
   /* Visible keyboard focus for everything interactive. */
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-ring);
+    outline: var(--focus-ring-width) solid var(--ring);
     outline-offset: var(--focus-ring-offset);
   }
 

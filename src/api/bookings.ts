@@ -1,39 +1,30 @@
-import { isVehicleAvailable, type DateRange } from "@/lib/availability";
 import { buildQuote } from "@/lib/pricing";
 import { countRentalDays } from "@/lib/rental";
 import { newId, readTable, writeTable } from "@/mocks/store";
-import type { Activity, Booking, Customer, Location, Payment, Vehicle } from "@/types";
+import type { Activity, Booking, Customer, Payment, Vehicle } from "@/types";
 import { ApiError, simulateNetwork } from "./client";
-import type { PaymentResult } from "./payments";
-
-export interface VehicleAvailability {
-  vehicle: Vehicle;
-  available: boolean;
-}
-
-/** Every public vehicle, flagged with whether it is free for the requested dates. */
-export async function listVehiclesWithAvailability(range: DateRange): Promise<VehicleAvailability[]> {
-  await simulateNetwork();
-  const bookings = readTable("bookings");
-  return readTable("vehicles")
-    .filter((vehicle) => vehicle.status !== "inactive")
-    .map((vehicle) => ({ vehicle, available: isVehicleAvailable(vehicle, bookings, range) }))
-    .sort((a, b) => a.vehicle.pricePerDay - b.vehicle.pricePerDay);
-}
+import { processPayment, type PaymentFailureCode, type PaymentRequest } from "./payments";
 
 export interface CreateBookingInput {
   vehicleId: string;
-  pickupLocationId: string;
-  returnLocationId: string;
+  /** Wherever the visitor typed or pasted (an address, or a Google Maps link). */
+  pickupLocation: string;
+  returnLocation: string;
   pickupDate: string;
   pickupTime: string;
   returnDate: string;
   returnTime: string;
-  extraIds: string[];
   customer: { name: string; email: string; phone: string; licenseNumber: string; notes: string };
-  /** The result from /src/api/payments.ts. */
-  payment: PaymentResult;
+  /** How the visitor chose to pay. The charge happens inside createBooking, see /src/api/payments.ts. */
+  payment: Pick<PaymentRequest, "method" | "mockOutcome">;
+  /** The total the visitor was shown. If the price is different now, nothing is charged. */
+  expectedTotal: number;
 }
+
+export type CreateBookingResult =
+  | { status: "confirmed"; booking: Booking }
+  /** The payment did not go through. Nothing was booked. */
+  | { status: "payment_failed"; failureCode: PaymentFailureCode };
 
 // No 0/O/1/I so references are easy to read out over the phone.
 const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -49,32 +40,37 @@ function generateReference(existing: Set<string>): string {
 }
 
 /**
- * Creates a booking. The price is worked out here from the vehicle's CURRENT rate
- * (never trusted from the browser), and stored on the booking so later rate
- * changes do not affect it.
+ * Pays and books in one action. The price is checked first, then the payment is taken, then
+ * the booking is saved, so nobody is charged for a booking that does not go through. (A real
+ * server does all three inside one database transaction.) Booking is open: any vehicle can be
+ * booked for any dates, so there is no availability check here.
+ *
+ * The price is worked out here from the vehicle's CURRENT rate (never trusted from the
+ * browser), and stored on the booking so later rate changes do not affect it.
  */
-export async function createBooking(input: CreateBookingInput): Promise<Booking> {
+export async function createBooking(input: CreateBookingInput): Promise<CreateBookingResult> {
   await simulateNetwork();
 
   const vehicles = readTable("vehicles");
-  const bookings = readTable("bookings");
   const vehicle = vehicles.find((v) => v.id === input.vehicleId);
   if (!vehicle) throw new ApiError("Vehicle not found", 404, "not_found");
 
-  if (!isVehicleAvailable(vehicle, bookings, input)) {
-    throw new ApiError("Vehicle is no longer available for these dates", 409, "vehicle_unavailable");
+  const days = countRentalDays(input);
+  const quote = buildQuote({ dailyRate: vehicle.pricePerDay, days });
+
+  // The visitor agreed to a specific total. If the rate changed since, ask them to check again, before charging anything.
+  if (input.expectedTotal !== quote.total) {
+    throw new ApiError("The price has changed", 409, "price_changed");
   }
 
-  const extras = readTable("extras").filter((e) => input.extraIds.includes(e.id));
-  const days = countRentalDays(input);
-  const quote = buildQuote({ dailyRate: vehicle.pricePerDay, days, extras });
-
-  // The customer paid (or agreed to pay) a specific amount. If the rate changed since, ask them to review again.
-  if (input.payment.amount !== quote.total) {
-    throw new ApiError("The price changed since payment", 409, "price_changed");
+  const payment = await processPayment({ ...input.payment, amount: quote.total });
+  if (payment.status === "failed") {
+    return { status: "payment_failed", failureCode: payment.failureCode ?? "declined" };
   }
 
   const now = new Date().toISOString();
+  // Read again: taking the payment takes a moment, and other bookings may have been saved meanwhile.
+  const bookings = readTable("bookings");
 
   // Reuse the customer if this email is already known; otherwise create one.
   const customers = readTable("customers");
@@ -102,10 +98,10 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
   const paymentRecord: Payment = {
     id: paymentId,
     bookingId,
-    method: input.payment.method,
+    method: payment.method,
     amount: quote.total,
-    status: input.payment.status === "paid" ? "paid" : "pending",
-    providerRef: input.payment.providerRef,
+    status: payment.status === "paid" ? "paid" : "pending",
+    providerRef: payment.providerRef,
     createdAt: now,
   };
 
@@ -114,8 +110,8 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
     reference: generateReference(new Set(bookings.map((b) => b.reference))),
     customerId: customer.id,
     vehicleId: vehicle.id,
-    pickupLocationId: input.pickupLocationId,
-    returnLocationId: input.returnLocationId,
+    pickupLocation: input.pickupLocation,
+    returnLocation: input.returnLocation,
     pickupDate: input.pickupDate,
     pickupTime: input.pickupTime,
     returnDate: input.returnDate,
@@ -123,11 +119,9 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
     days: quote.days,
     dailyRate: quote.dailyRate,
     vehicleTotal: quote.vehicleTotal,
-    extras: quote.extras,
-    extrasTotal: quote.extrasTotal,
     total: quote.total,
     // Paid online = confirmed. Pay at pick-up waits for staff to confirm.
-    status: input.payment.status === "paid" ? "confirmed" : "pending",
+    status: payment.status === "paid" ? "confirmed" : "pending",
     paymentId,
     notes: input.customer.notes,
     createdAt: now,
@@ -151,7 +145,7 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
   // EMAIL TRIGGER GOES HERE: when the real backend exists, send the booking
   // confirmation to the customer and a notification to the company inbox.
 
-  return booking;
+  return { status: "confirmed", booking };
 }
 
 export interface BookingDetails {
@@ -159,8 +153,6 @@ export interface BookingDetails {
   vehicle: Vehicle;
   customer: Customer;
   payment: Payment | null;
-  pickupLocation: Location | null;
-  returnLocation: Location | null;
 }
 
 /**
@@ -173,19 +165,16 @@ export async function getBookingByReference(reference: string): Promise<BookingD
   return booking ? toBookingDetails(booking) : null;
 }
 
-/** Joins a booking with its vehicle, customer, payment and locations. Shared with the admin screens. */
+/** Joins a booking with its vehicle, customer and payment. Shared with the admin screens. */
 export function toBookingDetails(booking: Booking): BookingDetails | null {
   const vehicle = readTable("vehicles").find((v) => v.id === booking.vehicleId);
   const customer = readTable("customers").find((c) => c.id === booking.customerId);
   if (!vehicle || !customer) return null;
 
-  const locations = readTable("locations");
   return {
     booking,
     vehicle,
     customer,
     payment: readTable("payments").find((p) => p.id === booking.paymentId) ?? null,
-    pickupLocation: locations.find((l) => l.id === booking.pickupLocationId) ?? null,
-    returnLocation: locations.find((l) => l.id === booking.returnLocationId) ?? null,
   };
 }

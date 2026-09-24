@@ -1,5 +1,3 @@
-import type { PaymentResult } from "@/api/payments";
-
 /**
  * What the visitor has filled in so far. It lives outside React so every step page
  * shares it, and it is saved in sessionStorage so a refresh or the Back button
@@ -25,12 +23,10 @@ export interface FlowCustomer {
 export interface FlowState {
   vehicleSlug: string | null;
   rental: FlowRental | null;
-  extraIds: string[];
   customer: FlowCustomer | null;
-  payment: PaymentResult | null;
 }
 
-const EMPTY: FlowState = { vehicleSlug: null, rental: null, extraIds: [], customer: null, payment: null };
+const EMPTY: FlowState = { vehicleSlug: null, rental: null, customer: null };
 const STORAGE_KEY = "car-rental-booking-flow";
 
 let state: FlowState = EMPTY;

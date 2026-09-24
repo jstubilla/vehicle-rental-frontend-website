@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Controller } from "react-hook-form";
-import { Button, Checkbox, DatePicker, FormField, Select, TimeSelect } from "@/components/ui";
+import { Button, Checkbox, DatePicker, FormField, Input, TimeSelect } from "@/components/ui";
 import { content } from "@/content";
 import { todayISO } from "@/lib/dates";
 import {
@@ -11,9 +11,7 @@ import {
   defaultRentalDates,
   parseRentalSearch,
 } from "@/lib/rental";
-import type { Location } from "@/types";
 import { useBookingFlow } from "../hooks/use-booking-flow";
-import { useBookingLocations } from "../hooks/use-locations";
 import { useDatesStep } from "../hooks/use-dates-step";
 import type { DatesFormValues } from "../schemas";
 import { StepActions, StepHeading, StepSkeleton } from "./step-parts";
@@ -31,7 +29,7 @@ function useInitialValues(): { initial: DatesFormValues; vehicleFromUrl: string 
   const defaults = defaultRentalDates();
 
   // The return location starts empty when it is the same as pick-up, so choosing
-  // "a different location" makes the visitor actually pick one.
+  // "a different location" makes the visitor actually type one.
   const initial: DatesFormValues = fromUrl
     ? { ...fromUrl, returnLocation: "", sameReturn: true }
     : saved
@@ -60,30 +58,18 @@ export function DatesStep() {
 }
 
 function DatesForm({ initial, vehicleFromUrl }: { initial: DatesFormValues; vehicleFromUrl: string | null }) {
-  const locations: Location[] = useBookingLocations();
   const { form, onSubmit, changePickupDate } = useDatesStep(initial, vehicleFromUrl);
   const { control, register, watch, formState } = form;
   const { errors } = formState;
   const pickupDate = watch("pickupDate");
   const sameReturn = watch("sameReturn");
 
-  const locationOptions = (
-    <>
-      <option value="">{t.locationPlaceholder}</option>
-      {locations.map((location) => (
-        <option key={location.id} value={location.id}>
-          {location.name}
-        </option>
-      ))}
-    </>
-  );
-
   return (
     <form onSubmit={onSubmit} noValidate className="flex max-w-narrow flex-col gap-6">
       <StepHeading title={t.title} description={t.description} />
 
-      <FormField label={t.pickupLocation} required error={errors.pickupLocation?.message}>
-        <Select {...register("pickupLocation")}>{locationOptions}</Select>
+      <FormField label={t.pickupLocation} required error={errors.pickupLocation?.message} hint={t.locationHint}>
+        <Input {...register("pickupLocation")} placeholder={t.locationPlaceholder} />
       </FormField>
 
       {/* The form stores "same location"; the checkbox asks the opposite question. */}
@@ -100,8 +86,8 @@ function DatesForm({ initial, vehicleFromUrl }: { initial: DatesFormValues; vehi
       />
 
       {!sameReturn && (
-        <FormField label={t.returnLocation} required error={errors.returnLocation?.message}>
-          <Select {...register("returnLocation")}>{locationOptions}</Select>
+        <FormField label={t.returnLocation} required error={errors.returnLocation?.message} hint={t.locationHint}>
+          <Input {...register("returnLocation")} placeholder={t.locationPlaceholder} />
         </FormField>
       )}
 

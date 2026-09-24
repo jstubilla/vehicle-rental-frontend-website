@@ -1,9 +1,8 @@
 import type { BookingDetails } from "@/api/bookings";
 import { content } from "@/content";
 import type { Quote } from "@/lib/pricing";
-import type { Location, Vehicle } from "@/types";
+import type { Vehicle } from "@/types";
 import type { FlowState } from "./flow-store";
-import { locationName } from "./hooks/use-locations";
 
 interface TripPoint {
   location: string;
@@ -19,56 +18,51 @@ export interface SummaryData {
   days: number | null;
   dailyRate: number | null;
   vehicleTotal: number | null;
-  extras: { name: string; total: number }[];
   total: number | null;
   driver: { name: string; email: string; phone: string } | null;
   payment: string | null;
 }
 
 const vehicleMeta = (vehicle: Vehicle) =>
-  `${content.enums.vehicleCategory[vehicle.category]} · ${content.enums.transmission[vehicle.transmission]} · ${content.vehicleCard.seats(vehicle.seats)}`;
+  vehicle.seats !== undefined
+    ? `${content.enums.vehicleCategory[vehicle.category]} · ${content.vehicleCard.seats(vehicle.seats)}`
+    : content.enums.vehicleCategory[vehicle.category];
 
 /** Summary of a booking that is still being filled in. */
 export function summaryFromFlow({
   state,
   vehicle,
   quote,
-  locations,
 }: {
   state: FlowState;
   vehicle: Vehicle | null;
   quote: Quote | null;
-  locations: Location[];
 }): SummaryData {
   const rental = state.rental;
   return {
     vehicle: vehicle ? { name: vehicle.name, meta: vehicleMeta(vehicle) } : null,
-    pickup: rental
-      ? { location: locationName(locations, rental.pickupLocation), date: rental.pickupDate, time: rental.pickupTime }
-      : null,
+    pickup: rental ? { location: rental.pickupLocation, date: rental.pickupDate, time: rental.pickupTime } : null,
     returnTrip: rental
-      ? { location: locationName(locations, rental.returnLocation), date: rental.returnDate, time: rental.returnTime }
+      ? { location: rental.returnLocation, date: rental.returnDate, time: rental.returnTime }
       : null,
     days: quote?.days ?? null,
     dailyRate: quote?.dailyRate ?? null,
     vehicleTotal: quote?.vehicleTotal ?? null,
-    extras: quote?.extras.map((line) => ({ name: line.name, total: line.total })) ?? [],
     total: quote?.total ?? null,
     driver: state.customer,
-    payment: state.payment ? content.enums.paymentMethod[state.payment.method] : null,
+    payment: null,
   };
 }
 
 /** Summary of a saved booking. It shows the prices the booking was made at. */
-export function summaryFromBooking({ booking, vehicle, customer, payment, pickupLocation, returnLocation }: BookingDetails): SummaryData {
+export function summaryFromBooking({ booking, vehicle, customer, payment }: BookingDetails): SummaryData {
   return {
     vehicle: { name: vehicle.name, meta: vehicleMeta(vehicle) },
-    pickup: { location: pickupLocation?.name ?? "", date: booking.pickupDate, time: booking.pickupTime },
-    returnTrip: { location: returnLocation?.name ?? "", date: booking.returnDate, time: booking.returnTime },
+    pickup: { location: booking.pickupLocation, date: booking.pickupDate, time: booking.pickupTime },
+    returnTrip: { location: booking.returnLocation, date: booking.returnDate, time: booking.returnTime },
     days: booking.days,
     dailyRate: booking.dailyRate,
     vehicleTotal: booking.vehicleTotal,
-    extras: booking.extras.map((line) => ({ name: line.name, total: line.total })),
     total: booking.total,
     driver: { name: customer.name, email: customer.email, phone: customer.phone },
     payment: payment ? content.enums.paymentMethod[payment.method] : null,

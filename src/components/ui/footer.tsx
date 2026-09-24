@@ -11,7 +11,7 @@ export interface FooterColumn {
 export type FooterVariant = "default" | "inverted";
 
 const variants: Record<FooterVariant, string> = {
-  default: "border-t border-border bg-surface-muted text-foreground",
+  default: "border-t border-border bg-surface text-foreground",
   inverted: "bg-primary text-primary-foreground",
 };
 

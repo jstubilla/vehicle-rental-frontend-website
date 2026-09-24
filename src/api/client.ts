@@ -5,7 +5,6 @@
 
 /** Machine-readable reasons the UI knows how to explain to the visitor. */
 export type ApiErrorCode =
-  | "vehicle_unavailable"
   | "price_changed"
   | "not_found"
   | "invalid_credentials"
@@ -17,6 +16,7 @@ export type ApiErrorCode =
   | "invalid_price"
   | "last_admin"
   | "self_deactivate"
+  | "unknown_booking"
   | "duplicate_name"
   | "has_users"
   | "system_role"

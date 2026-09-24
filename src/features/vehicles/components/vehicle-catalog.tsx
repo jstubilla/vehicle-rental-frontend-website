@@ -5,7 +5,6 @@ import { Button, EmptyState, ErrorState, FormField, Pagination, Section, Select 
 import { content } from "@/content";
 import { VEHICLE_SORTS } from "@/lib/constants";
 import type { VehicleFilters } from "@/lib/vehicle-filters";
-import type { Location } from "@/types";
 import { useVehicleSearch, type InitialVehicleSearch } from "../hooks/use-vehicle-search";
 import { TripSummary } from "./trip-summary";
 import { VehicleFiltersPanel } from "./vehicle-filters";
@@ -14,10 +13,9 @@ import { VehicleGrid, VehicleGridSkeleton } from "./vehicle-grid";
 interface VehicleCatalogProps {
   /** What the server already rendered for this URL. */
   initial?: InitialVehicleSearch;
-  locations: Location[];
 }
 
-export function VehicleCatalog({ initial, locations }: VehicleCatalogProps) {
+export function VehicleCatalog({ initial }: VehicleCatalogProps) {
   const t = content.vehicles;
   const search = useVehicleSearch(initial);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -32,7 +30,7 @@ export function VehicleCatalog({ initial, locations }: VehicleCatalogProps) {
     <Section className="pt-0" aria-label={t.resultsLabel}>
       <div className="flex flex-col gap-6">
         <h2 className="sr-only">{t.resultsLabel}</h2>
-        {rental && days && <TripSummary rental={rental} days={days} locations={locations} />}
+        {rental && days && <TripSummary rental={rental} days={days} />}
 
         <div className="grid gap-6 lg:grid-cols-4">
           <div className="lg:col-span-1">

@@ -54,3 +54,17 @@ export const GripIcon = (p: SVGProps<SVGSVGElement>) => (
     <circle cx="15" cy="18" r="1" />
   </Icon>
 );
+export const SunIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+  </Icon>
+);
+export const MoonIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" /></Icon>
+);
+export const StarIcon = ({ filled, ...p }: SVGProps<SVGSVGElement> & { filled?: boolean }) => (
+  <Icon fill={filled ? "currentColor" : "none"} {...p}>
+    <path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8L12 3Z" />
+  </Icon>
+);

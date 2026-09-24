@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { href: "/admin/bookings", label: content.admin.nav.bookings },
   { href: "/admin/reports", label: content.admin.nav.reports },
   { href: "/admin/pricing", label: content.admin.nav.pricing },
+  { href: "/admin/reviews", label: content.admin.nav.reviews },
   { href: "/admin/users", label: content.admin.nav.users },
   { href: "/admin/roles", label: content.admin.nav.roles },
 ] as const;

@@ -59,8 +59,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             onOpenChange={(open) => {
               if (!open) remove(item.id);
             }}
+            data-surface="card"
             className={cn(
-              "flex items-start gap-3 rounded-lg border bg-surface p-4 text-foreground shadow-lg",
+              "flex items-start gap-3 rounded-lg border bg-card p-4 text-foreground shadow-lg",
               variants[item.variant ?? "default"],
             )}
           >

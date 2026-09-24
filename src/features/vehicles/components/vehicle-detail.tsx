@@ -35,11 +35,8 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
   const available = vehicle.status === "available";
   const specs = [
     [t.specs.category, content.enums.vehicleCategory[vehicle.category]],
-    [t.specs.transmission, content.enums.transmission[vehicle.transmission]],
-    [t.specs.fuel, content.enums.fuel[vehicle.fuel]],
-    [t.specs.seats, String(vehicle.seats)],
-    [t.specs.year, String(vehicle.year)],
-  ] as const;
+    ...(vehicle.seats !== undefined ? [[t.specs.seats, String(vehicle.seats)] as const] : []),
+  ];
 
   return (
     <Section>
@@ -52,11 +49,6 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
           <div className="flex flex-col gap-8 lg:col-span-2">
             <VehicleGallery images={vehicle.images} />
 
-            <section aria-labelledby="about-heading" className="flex flex-col gap-2">
-              <h2 id="about-heading">{t.description}</h2>
-              <p className="text-muted">{vehicle.description}</p>
-            </section>
-
             <section aria-labelledby="specs-heading" className="flex flex-col gap-2">
               <h2 id="specs-heading">{t.specsTitle}</h2>
               <dl className="grid gap-x-6 sm:grid-cols-2">
@@ -68,15 +60,6 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
                 ))}
               </dl>
             </section>
-
-            <section aria-labelledby="features-heading" className="flex flex-col gap-2">
-              <h2 id="features-heading">{t.featuresTitle}</h2>
-              <ul className="grid list-disc gap-1 pl-5 sm:grid-cols-2">
-                {vehicle.features.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
-              </ul>
-            </section>
           </div>
 
           <aside aria-label={vehicle.name} className="lg:col-span-1">
@@ -84,7 +67,7 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
               <CardHeader>
                 <h1 className="text-2xl md:text-3xl">{vehicle.name}</h1>
                 <p>
-                  <span className="text-3xl font-semibold">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
+                  <span className="text-3xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
                   <span className="text-muted">{t.perDay}</span>
                 </p>
               </CardHeader>
@@ -100,11 +83,11 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
                   </p>
                 </div>
                 {available ? (
-                  <Button asChild size="lg">
+                  <Button asChild size="lg" variant="accent">
                     <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
                   </Button>
                 ) : (
-                  <Button size="lg" disabled>
+                  <Button size="lg" variant="accent" disabled>
                     {t.bookNow}
                   </Button>
                 )}

@@ -18,7 +18,7 @@ export function CtaBanner({
       <Card variant="muted" className="items-center gap-4 p-8 text-center md:p-12">
         <h2 id="cta-heading">{title}</h2>
         {description && <p className="max-w-narrow text-muted">{description}</p>}
-        <Button asChild size="lg">
+        <Button asChild size="lg" variant="accent">
           <Link href={href}>{buttonLabel}</Link>
         </Button>
       </Card>

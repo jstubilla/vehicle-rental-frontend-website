@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listLocations } from "@/api/locations";
 import { listFeaturedVehicles } from "@/api/vehicles";
 import { CtaBanner } from "@/components/sections/cta-banner";
 import { HowItWorks } from "@/components/sections/how-it-works";
-import { Testimonials } from "@/components/sections/testimonials";
 import { JsonLd } from "@/components/seo/json-ld";
 import { Button, Media, Section } from "@/components/ui";
 import { content } from "@/content";
+import { PublicReviews } from "@/features/reviews/components/public-reviews";
 import { FeaturedVehicles } from "@/features/vehicles/components/featured-vehicles";
 import { QuickSearch } from "@/features/search/quick-search";
 import { businessSchema } from "@/lib/structured-data";
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const t = content.home;
   // Loaded on the server so the page arrives complete for search engines.
-  const [locations, featured] = await Promise.all([listLocations(), listFeaturedVehicles()]);
+  const featured = await listFeaturedVehicles();
 
   return (
     <>
@@ -45,7 +44,7 @@ export default async function HomePage() {
       </Section>
 
       <Section id="search" className="scroll-mt-24">
-        <QuickSearch locations={locations} />
+        <QuickSearch />
       </Section>
 
       <Section variant="muted" aria-labelledby="featured-heading">
@@ -62,11 +61,7 @@ export default async function HomePage() {
       </Section>
 
       <HowItWorks title={t.howItWorks.title} steps={t.howItWorks.steps} />
-      <Testimonials
-        title={t.testimonials.title}
-        description={t.testimonials.description}
-        items={t.testimonials.items}
-      />
+      <PublicReviews />
       <CtaBanner
         title={t.cta.title}
         description={t.cta.description}

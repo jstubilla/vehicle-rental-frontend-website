@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { Button } from "./button";
 import { CloseIcon, MenuIcon } from "./icons";
+import { ThemeToggle } from "./theme-toggle";
 
 export interface AdminNavItem {
   label: string;
@@ -77,9 +78,12 @@ export function AdminShell({
         <span className="block font-semibold">{user.name}</span>
         <span className="block text-muted">{user.role}</span>
       </p>
-      <Button asChild variant="link" size="sm" className="self-start">
-        <Link href={siteHref}>{labels.viewSite}</Link>
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button asChild variant="link" size="sm">
+          <Link href={siteHref}>{labels.viewSite}</Link>
+        </Button>
+        <ThemeToggle className="ms-auto" />
+      </div>
       <Button variant="outline" size="sm" onClick={onLogout} loading={logoutBusy} className="self-start">
         {labels.logout}
       </Button>
@@ -87,7 +91,7 @@ export function AdminShell({
   );
 
   return (
-    <div className={cn("min-h-screen bg-surface-muted lg:flex", className)}>
+    <div className={cn("min-h-screen bg-background lg:flex", className)}>
       {/* Desktop sidebar */}
       <aside className="hidden w-sidebar shrink-0 flex-col justify-between gap-6 border-r border-border bg-surface p-4 lg:sticky lg:top-0 lg:flex lg:h-screen lg:overflow-y-auto">
         <div className="flex flex-col gap-6">

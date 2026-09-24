@@ -15,6 +15,7 @@ export const ADMIN_ROUTE_PERMISSIONS: readonly { path: string; exact?: boolean; 
   { path: "/admin/bookings", permission: "bookings.view" },
   { path: "/admin/reports", permission: "reports.view" },
   { path: "/admin/pricing", permission: "pricing.edit" },
+  { path: "/admin/reviews", permission: "reviews.manage" },
   { path: "/admin/users", permission: "users.manage" },
   { path: "/admin/roles", permission: "roles.manage" },
 ];
@@ -33,13 +34,14 @@ export function firstAllowedPath(permissions: readonly Permission[]): string | n
 }
 
 /** The permissions as shown on the Roles screen, in groups. */
-export const PERMISSION_GROUPS: readonly { id: "dashboard" | "customers" | "leads" | "tasks" | "bookings" | "money" | "admin"; permissions: readonly Permission[] }[] = [
+export const PERMISSION_GROUPS: readonly { id: "dashboard" | "customers" | "leads" | "tasks" | "bookings" | "money" | "reviews" | "admin"; permissions: readonly Permission[] }[] = [
   { id: "dashboard", permissions: ["dashboard.view"] },
   { id: "customers", permissions: ["customers.view", "customers.edit"] },
   { id: "leads", permissions: ["leads.view", "leads.edit"] },
   { id: "tasks", permissions: ["tasks.manage"] },
   { id: "bookings", permissions: ["bookings.view", "bookings.edit"] },
   { id: "money", permissions: ["reports.view", "pricing.edit"] },
+  { id: "reviews", permissions: ["reviews.manage"] },
   { id: "admin", permissions: ["users.manage", "roles.manage"] },
 ];
 

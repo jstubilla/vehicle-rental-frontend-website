@@ -2,7 +2,7 @@ import { forwardRef, type ButtonHTMLAttributes } from "react";
 import { Slot } from "radix-ui";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger" | "link";
+export type ButtonVariant = "primary" | "accent" | "secondary" | "outline" | "ghost" | "danger" | "link";
 export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const base =
@@ -10,6 +10,7 @@ const base =
 
 const variants: Record<ButtonVariant, string> = {
   primary: "border-primary bg-primary text-primary-foreground hover:bg-primary-hover",
+  accent: "border-accent bg-accent text-accent-foreground hover:bg-accent-hover",
   secondary: "border-secondary bg-secondary text-secondary-foreground hover:bg-secondary-hover",
   outline: "border-border-strong bg-transparent text-foreground hover:bg-surface-muted",
   ghost: "border-transparent bg-transparent text-foreground hover:bg-surface-muted",

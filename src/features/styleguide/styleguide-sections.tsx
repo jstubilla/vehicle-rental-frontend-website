@@ -32,6 +32,9 @@ import {
   Skeleton,
   Spinner,
   Stepper,
+  StarRating,
+  StarRatingInput,
+  Switch,
   Table,
   TableBody,
   TableCaption,
@@ -57,6 +60,8 @@ const colorSwatches = [
   ["background", "bg-background text-foreground"],
   ["surface", "bg-surface text-foreground"],
   ["surface-muted", "bg-surface-muted text-foreground"],
+  ["card", "bg-card text-foreground"],
+  ["field", "bg-field text-foreground"],
   ["foreground", "bg-foreground text-background"],
   ["muted", "bg-muted text-background"],
   ["border", "bg-border text-foreground"],
@@ -64,6 +69,8 @@ const colorSwatches = [
   ["primary", "bg-primary text-primary-foreground"],
   ["secondary", "bg-secondary text-secondary-foreground"],
   ["accent", "bg-accent text-accent-foreground"],
+  ["price", "bg-price text-background"],
+  ["link", "bg-link text-background"],
   ["success", "bg-success text-success-foreground"],
   ["warning", "bg-warning text-warning-foreground"],
   ["danger", "bg-danger text-danger-foreground"],
@@ -71,14 +78,14 @@ const colorSwatches = [
   ["placeholder", "bg-placeholder text-placeholder-foreground"],
 ] as const;
 
-const buttonVariants: ButtonVariant[] = ["primary", "secondary", "outline", "ghost", "danger", "link"];
+const buttonVariants: ButtonVariant[] = ["primary", "accent", "secondary", "outline", "ghost", "danger", "link"];
 const buttonSizes: ButtonSize[] = ["sm", "md", "lg"];
 const badgeVariants: BadgeVariant[] = ["neutral", "outline", "solid", "success", "warning", "danger", "info"];
 
 const rows = [
   { name: "Toyota Vios", category: "Sedan", rate: 1800 },
-  { name: "Toyota Innova", category: "MPV", rate: 2800 },
-  { name: "Ford Ranger", category: "Pickup", rate: 3500 },
+  { name: "Toyota Fortuner", category: "SUV", rate: 4200 },
+  { name: "Toyota HiAce", category: "Van", rate: 4800 },
 ];
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -97,6 +104,8 @@ export function StyleguideSections() {
   const [time, setTime] = useState("");
   const [payment, setPayment] = useState("gcash");
   const [page, setPage] = useState(2);
+  const [stars, setStars] = useState(4);
+  const [switchOn, setSwitchOn] = useState(true);
   const [sort, setSort] = useState<SortDirection>("none");
 
   const sorted =
@@ -177,6 +186,16 @@ export function StyleguideSections() {
               ]}
             />
           </FieldGroup>
+          <FieldGroup label="Star rating (input)">
+            <StarRatingInput value={stars} onChange={setStars} />
+          </FieldGroup>
+          <div className="flex flex-col gap-2">
+            <StarRating value={4} />
+            <div className="flex items-center gap-2">
+              <Switch aria-label="Example switch" checked={switchOn} onCheckedChange={setSwitchOn} />
+              <span className="text-sm">{switchOn ? "On" : "Off"}</span>
+            </div>
+          </div>
         </div>
       </Block>
 
@@ -286,7 +305,7 @@ export function StyleguideSections() {
             { id: "vehicle", label: "Vehicle" },
             { id: "details", label: "Details" },
             { id: "payment", label: "Payment" },
-            { id: "review", label: "Review" },
+            { id: "check", label: "Check" },
           ]}
         />
         <div className="grid gap-4 md:grid-cols-2">

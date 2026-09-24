@@ -1,14 +1,13 @@
 "use client";
 
 import { Controller } from "react-hook-form";
-import { Button, Card, CardContent, DatePicker, FormField, Select, TimeSelect } from "@/components/ui";
+import { Button, Card, CardContent, DatePicker, FormField, Input, TimeSelect } from "@/components/ui";
 import { content } from "@/content";
 import { todayISO } from "@/lib/dates";
-import type { Location } from "@/types";
 import { useQuickSearch } from "./use-quick-search";
 
 /** Pick-up place, pick-up and return date/time. Used in the home page hero. */
-export function QuickSearch({ locations }: { locations: Location[] }) {
+export function QuickSearch() {
   const t = content.quickSearch;
   const { form, onSubmit, changePickupDate, isSubmitting } = useQuickSearch();
   const { control, register, watch, formState } = form;
@@ -22,15 +21,8 @@ export function QuickSearch({ locations }: { locations: Location[] }) {
           {t.title}
         </h2>
         <form onSubmit={onSubmit} noValidate className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <FormField label={t.pickupLocation} required error={errors.pickupLocation?.message}>
-            <Select {...register("pickupLocation")}>
-              <option value="">{t.locationPlaceholder}</option>
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </Select>
+          <FormField label={t.pickupLocation} required error={errors.pickupLocation?.message} hint={t.locationHint}>
+            <Input {...register("pickupLocation")} placeholder={t.locationPlaceholder} />
           </FormField>
 
           <div className="grid grid-cols-2 gap-2">

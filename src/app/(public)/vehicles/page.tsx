@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { listLocations } from "@/api/locations";
 import { searchVehicles } from "@/api/vehicles";
 import { PageHeader, Section } from "@/components/ui";
 import { content } from "@/content";
@@ -22,7 +21,7 @@ export default async function VehiclesPage({
   // the client takes over for filtering, sorting and paging.
   const params = await searchParams;
   const filters = parseVehicleFilters(params);
-  const [result, locations] = await Promise.all([searchVehicles(filters), listLocations()]);
+  const result = await searchVehicles(filters);
 
   return (
     <>
@@ -36,7 +35,7 @@ export default async function VehiclesPage({
           </Section>
         }
       >
-        <VehicleCatalog initial={{ filters, result }} locations={locations} />
+        <VehicleCatalog initial={{ filters, result }} />
       </Suspense>
     </>
   );

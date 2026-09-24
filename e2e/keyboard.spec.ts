@@ -116,3 +116,18 @@ test("a pipeline card can be moved to the next stage using only the keyboard", a
   await expect(stage("contacted").getByRole("link", { name })).toBeVisible();
   await expect(stage("new").getByRole("link", { name })).toHaveCount(0);
 });
+
+test("the theme toggle works from the keyboard and its choice survives a reload", async ({ page }) => {
+  await visit(page, "/");
+  const toDark = page.getByRole("button", { name: content.ui.theme.toggleToDark });
+  await toDark.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  const toLight = page.getByRole("button", { name: content.ui.theme.toggleToLight });
+  await expect(toLight).toBeFocused();
+
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: content.ui.theme.toggleToLight })).toBeVisible();
+});

@@ -36,8 +36,9 @@ export function DropdownMenu({ trigger, items, align = "end", className }: Dropd
         <MenuPrimitive.Content
           align={align}
           sideOffset={4}
+          data-surface="card"
           className={cn(
-            "z-(--z-overlay) min-w-48 rounded-md border border-border-strong bg-surface p-1 shadow-md",
+            "z-(--z-overlay) min-w-48 rounded-md border border-border-strong bg-card p-1 text-foreground shadow-md",
             className,
           )}
         >

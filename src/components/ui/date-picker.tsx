@@ -96,7 +96,8 @@ export function DatePicker({
           align="start"
           sideOffset={4}
           aria-label={content.ui.selectDate}
-          className="z-(--z-overlay) rounded-md border border-border-strong bg-surface p-3 text-foreground shadow-md"
+          data-surface="card"
+          className="z-(--z-overlay) rounded-md border border-border-strong bg-card p-3 text-foreground shadow-md"
         >
           <DayPicker
             mode="single"

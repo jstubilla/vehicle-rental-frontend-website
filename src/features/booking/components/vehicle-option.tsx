@@ -31,11 +31,11 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
         <div className="flex flex-col gap-1">
           <h3 className="text-lg font-semibold">{vehicle.name}</h3>
           <p className="text-sm text-muted">
-            {content.enums.vehicleCategory[vehicle.category]} · {content.enums.transmission[vehicle.transmission]} ·{" "}
-            {content.vehicleCard.seats(vehicle.seats)} · {content.enums.fuel[vehicle.fuel]}
+            {content.enums.vehicleCategory[vehicle.category]}
+            {vehicle.seats !== undefined && ` · ${content.vehicleCard.seats(vehicle.seats)}`}
           </p>
           <p>
-            <span className="text-xl font-semibold">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
+            <span className="text-xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
             <span className="text-sm text-muted">{content.vehicleCard.perDay}</span>
           </p>
           <p className="text-sm text-muted">
@@ -52,7 +52,7 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
             {selected ? t.selected : t.select}
             <span className="sr-only"> {vehicle.name}</span>
           </Button>
-          {!available && <Badge variant="warning">{t.unavailable}</Badge>}
+          {!available && <Badge variant="warning">{t.notAvailable}</Badge>}
         </div>
       </div>
     </Card>

@@ -18,6 +18,12 @@ export const bookingKeys = {
   detail: (id: string) => [...bookingKeys.all, "detail", id] as const,
 };
 
+export const reviewKeys = {
+  all: ["reviews"] as const,
+  admin: () => [...reviewKeys.all, "admin"] as const,
+  public: () => [...reviewKeys.all, "public"] as const,
+};
+
 export const taskKeys = {
   all: ["tasks"] as const,
   list: (params: unknown) => [...taskKeys.all, "list", params] as const,

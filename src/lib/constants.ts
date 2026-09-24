@@ -7,14 +7,8 @@ export const BUSINESS_TIME_ZONE = "Asia/Manila";
 /** Manila is UTC+8 all year (no daylight saving). */
 export const BUSINESS_UTC_OFFSET = "+08:00";
 
-export const VEHICLE_CATEGORIES = ["sedan", "hatchback", "suv", "mpv", "van", "pickup"] as const;
+export const VEHICLE_CATEGORIES = ["sedan", "suv", "van", "125cc", "155cc"] as const;
 export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
-
-export const TRANSMISSIONS = ["automatic", "manual"] as const;
-export type Transmission = (typeof TRANSMISSIONS)[number];
-
-export const FUEL_TYPES = ["gasoline", "diesel", "hybrid", "electric"] as const;
-export type FuelType = (typeof FUEL_TYPES)[number];
 
 export const VEHICLE_STATUSES = ["available", "maintenance", "inactive"] as const;
 export type VehicleStatus = (typeof VEHICLE_STATUSES)[number];
@@ -39,17 +33,12 @@ export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
 export const BOOKING_STATUSES = ["pending", "confirmed", "active", "completed", "cancelled"] as const;
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
-/** Bookings in these statuses keep their vehicle reserved for the booked dates. */
-export const VEHICLE_HOLDING_STATUSES: readonly BookingStatus[] = ["pending", "confirmed", "active"];
 
-export const PAYMENT_METHODS = ["card", "gcash", "maya", "pay_at_pickup"] as const;
+export const PAYMENT_METHODS = ["card", "gcash", "maya", "paypal", "wise", "pay_at_pickup"] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const PAYMENT_STATUSES = ["pending", "processing", "paid", "failed"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
-
-export const EXTRA_PRICING = ["per_day", "flat"] as const;
-export type ExtraPricing = (typeof EXTRA_PRICING)[number];
 
 /**
  * Everything a role can be allowed to do. Roles are just bundles of these, and the
@@ -66,6 +55,7 @@ export const PERMISSIONS = [
   "bookings.edit",
   "reports.view",
   "pricing.edit",
+  "reviews.manage",
   "users.manage",
   "roles.manage",
 ] as const;

@@ -8,6 +8,7 @@ import { content } from "@/content";
 import { Button } from "./button";
 import { CloseIcon, MenuIcon } from "./icons";
 import { Container } from "./layout";
+import { ThemeToggle } from "./theme-toggle";
 
 export interface NavbarLink {
   label: string;
@@ -78,6 +79,7 @@ export function Navbar({ brand, links, actions, utility, variant = "default", cl
 
         <div className="flex items-center gap-2">
           {actions && <div className="hidden md:block">{actions}</div>}
+          <ThemeToggle />
           <Button
             variant="outline"
             size="icon"

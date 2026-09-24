@@ -15,7 +15,7 @@ export function SiteHeader() {
         </>
       }
       actions={
-        <Button asChild>
+        <Button asChild variant="accent">
           <Link href={content.nav.bookCta.href}>{content.nav.bookCta.label}</Link>
         </Button>
       }

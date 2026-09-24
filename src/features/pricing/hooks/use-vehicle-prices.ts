@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { listVehiclePrices, updateVehiclePrice } from "@/api/pricing";
 import { useToast } from "@/components/ui";
 import { content } from "@/content";
-import { availabilityKey } from "@/features/booking/hooks/use-available-vehicles";
 import { vehicleKeys } from "@/features/vehicles/hooks/use-vehicles";
 
 const pricesKey = ["vehicle-prices"] as const;
@@ -23,7 +22,6 @@ export function useUpdateVehiclePrice() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: pricesKey });
       queryClient.invalidateQueries({ queryKey: vehicleKeys.all });
-      queryClient.invalidateQueries({ queryKey: availabilityKey });
       toast({ title: content.admin.pricing.saved, variant: "success" });
     },
   });

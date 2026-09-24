@@ -1,11 +1,5 @@
 import { z } from "zod";
-import {
-  CATALOG_PAGE_SIZE,
-  FUEL_TYPES,
-  TRANSMISSIONS,
-  VEHICLE_CATEGORIES,
-  VEHICLE_SORTS,
-} from "./constants";
+import { CATALOG_PAGE_SIZE, VEHICLE_CATEGORIES, VEHICLE_SORTS } from "./constants";
 import type { Paginated, Vehicle } from "@/types";
 
 /**
@@ -14,8 +8,6 @@ import type { Paginated, Vehicle } from "@/types";
  */
 export const vehicleFiltersSchema = z.object({
   category: z.enum(VEHICLE_CATEGORIES).optional().catch(undefined),
-  transmission: z.enum(TRANSMISSIONS).optional().catch(undefined),
-  fuel: z.enum(FUEL_TYPES).optional().catch(undefined),
   minSeats: z.coerce.number().int().min(1).max(30).optional().catch(undefined),
   minPrice: z.coerce.number().int().min(0).optional().catch(undefined),
   maxPrice: z.coerce.number().int().min(0).optional().catch(undefined),
@@ -25,16 +17,7 @@ export const vehicleFiltersSchema = z.object({
 
 export type VehicleFilters = z.infer<typeof vehicleFiltersSchema>;
 
-export const FILTER_QUERY_KEYS = [
-  "category",
-  "transmission",
-  "fuel",
-  "minSeats",
-  "minPrice",
-  "maxPrice",
-  "sort",
-  "page",
-] as const;
+export const FILTER_QUERY_KEYS = ["category", "minSeats", "minPrice", "maxPrice", "sort", "page"] as const;
 
 const DEFAULT_FILTERS: VehicleFilters = { sort: "price-asc", page: 1 };
 
@@ -63,7 +46,7 @@ export function applyFiltersToParams(base: URLSearchParams, filters: VehicleFilt
 }
 
 export function countActiveFilters(filters: VehicleFilters): number {
-  const keys = ["category", "transmission", "fuel", "minSeats", "minPrice", "maxPrice"] as const;
+  const keys = ["category", "minSeats", "minPrice", "maxPrice"] as const;
   return keys.filter((key) => filters[key] !== undefined).length;
 }
 
@@ -71,7 +54,7 @@ const sorters: Record<VehicleFilters["sort"], (a: Vehicle, b: Vehicle) => number
   "price-asc": (a, b) => a.pricePerDay - b.pricePerDay || a.name.localeCompare(b.name),
   "price-desc": (a, b) => b.pricePerDay - a.pricePerDay || a.name.localeCompare(b.name),
   "name-asc": (a, b) => a.name.localeCompare(b.name),
-  "seats-desc": (a, b) => b.seats - a.seats || a.pricePerDay - b.pricePerDay,
+  "seats-desc": (a, b) => (b.seats ?? 0) - (a.seats ?? 0) || a.pricePerDay - b.pricePerDay,
 };
 
 /**
@@ -82,9 +65,7 @@ export function searchVehicleList(vehicles: Vehicle[], filters: VehicleFilters):
   const matches = vehicles
     .filter((v) => v.status !== "inactive")
     .filter((v) => !filters.category || v.category === filters.category)
-    .filter((v) => !filters.transmission || v.transmission === filters.transmission)
-    .filter((v) => !filters.fuel || v.fuel === filters.fuel)
-    .filter((v) => !filters.minSeats || v.seats >= filters.minSeats)
+    .filter((v) => !filters.minSeats || (v.seats ?? 0) >= filters.minSeats)
     .filter((v) => filters.minPrice === undefined || v.pricePerDay >= filters.minPrice)
     .filter((v) => filters.maxPrice === undefined || v.pricePerDay <= filters.maxPrice)
     .sort(sorters[filters.sort]);

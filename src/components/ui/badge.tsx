@@ -6,7 +6,7 @@ export type BadgeVariant = "neutral" | "outline" | "solid" | "success" | "warnin
 const variants: Record<BadgeVariant, string> = {
   neutral: "border-border bg-secondary text-secondary-foreground",
   outline: "border-border-strong bg-transparent text-foreground",
-  solid: "border-primary bg-primary text-primary-foreground",
+  solid: "border-accent bg-accent text-accent-foreground",
   success: "border-success bg-success text-success-foreground",
   warning: "border-warning bg-warning text-warning-foreground",
   danger: "border-danger bg-danger text-danger-foreground",

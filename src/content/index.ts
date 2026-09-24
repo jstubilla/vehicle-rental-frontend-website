@@ -23,6 +23,7 @@ export const content = {
     public: [
       { label: "Home", href: "/" },
       { label: "Vehicles", href: "/vehicles" },
+      { label: "Special Offers", href: "/special-offers" },
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
     ],
@@ -43,6 +44,7 @@ export const content = {
         title: "Explore",
         links: [
           { label: "Vehicles", href: "/vehicles" },
+          { label: "Special offers", href: "/special-offers" },
           { label: "Book now", href: "/book/dates" },
           { label: "About us", href: "/about" },
         ],
@@ -51,6 +53,7 @@ export const content = {
         title: "Support",
         links: [
           { label: "Contact us", href: "/contact" },
+          { label: "Leave a review", href: "/review" },
           { label: "Staff login", href: "/admin/login" },
         ],
       },
@@ -80,7 +83,9 @@ export const content = {
       page: "Page",
     },
     stepper: { label: "Progress", step: "Step", of: "of", complete: "completed" },
+    theme: { toggleToLight: "Switch to light mode", toggleToDark: "Switch to dark mode" },
     sort: { ascending: "sorted ascending", descending: "sorted descending" },
+    rating: { stars: (n: number) => `${n} out of 5 stars`, option: (n: number) => `${n} ${n === 1 ? "star" : "stars"}` },
     alert: {
       info: "Note",
       success: "Success",
@@ -110,6 +115,7 @@ export const content = {
     dateInPast: "Choose today or a future date.",
     returnBeforePickup: "Return must be after pick-up.",
     consent: "Please tick this box to continue.",
+    rating: "Choose a star rating from 1 to 5.",
     license: "Enter your driver's license number.",
   },
 
@@ -117,14 +123,11 @@ export const content = {
   enums: {
     vehicleCategory: {
       sedan: "Sedan",
-      hatchback: "Hatchback",
       suv: "SUV",
-      mpv: "MPV",
       van: "Van",
-      pickup: "Pickup",
+      "125cc": "125cc",
+      "155cc": "155cc",
     },
-    transmission: { automatic: "Automatic", manual: "Manual" },
-    fuel: { gasoline: "Gasoline", diesel: "Diesel", hybrid: "Hybrid", electric: "Electric" },
     vehicleStatus: { available: "Available", maintenance: "In maintenance", inactive: "Inactive" },
     leadStage: { new: "New", contacted: "Contacted", qualified: "Qualified", won: "Won", lost: "Lost" },
     leadSource: {
@@ -146,6 +149,8 @@ export const content = {
       card: "Credit or debit card",
       gcash: "GCash",
       maya: "Maya",
+      paypal: "PayPal",
+      wise: "Wise",
       pay_at_pickup: "Pay at pick-up",
     },
     paymentStatus: { pending: "Pending", processing: "Processing", paid: "Paid", failed: "Failed" },
@@ -154,7 +159,8 @@ export const content = {
   quickSearch: {
     title: "Find your car",
     pickupLocation: "Pick-up location",
-    locationPlaceholder: "Choose a location",
+    locationPlaceholder: "Paste a Google Maps link, or type an address",
+    locationHint: "For example a hotel, airport terminal or barangay.",
     pickupDate: "Pick-up date",
     pickupTime: "Pick-up time",
     returnDate: "Return date",
@@ -180,24 +186,49 @@ export const content = {
       title: "How it works",
       steps: [
         { title: "Choose dates and place", body: "Tell us when and where you need the car." },
-        { title: "Pick your vehicle", body: "Compare cars and add any extras you want." },
+        { title: "Pick your vehicle", body: "Compare the cars available for your dates." },
         { title: "Book and pay", body: "Confirm your details and pay online or at pick-up." },
         { title: "Pick up and go", body: "Show your booking reference and drive away." },
       ],
     },
-    testimonials: {
+    reviews: {
       title: "What customers say",
-      description: "Placeholder section. Real reviews will be added here.",
-      items: [
-        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
-        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
-        { quote: "Placeholder testimonial. A real customer review goes here.", name: "Customer name", detail: "Trip type" },
-      ],
+      description: "Reviews from people who have rented with us.",
+      emptyTitle: "No reviews to show yet",
+      emptyDescription: "Be the first to tell us how we did.",
+      errorTitle: "We could not load the reviews",
     },
     cta: {
       title: "Ready to hit the road?",
       description: "Pick your dates and book in a few minutes.",
       button: "Book now",
+    },
+  },
+
+  reviews: {
+    meta: {
+      title: "Leave a review",
+      description: "Tell us how we did. Your review goes to our team first.",
+    },
+    title: "Leave a review",
+    subtitle: "Tell us about your experience with our service overall.",
+    form: {
+      title: "Your review",
+      name: "Your name",
+      rating: "Your rating",
+      comment: "Your comments",
+      commentHint: "A few sentences is plenty.",
+      reference: "Booking reference",
+      referenceHint: "The code from your booking confirmation, like RC-K7M2QA.",
+      unknownReference: "We could not find a booking with that reference. Check it and try again.",
+      privacyNote: "Reviews are private. Our team reads each one and chooses which to show on the website.",
+      submit: "Send review",
+      sending: "Sending",
+      successTitle: "Thank you for your review",
+      successBody: "We received it. Our team will read it and may show it on the website.",
+      another: "Write another review",
+      errorTitle: "We could not send your review",
+      errorBody: "Something went wrong on our side. Please try again.",
     },
   },
 
@@ -234,21 +265,47 @@ export const content = {
     cta: { title: "Questions before you book?", button: "Contact us" },
   },
 
+  specialOffers: {
+    meta: {
+      title: "Special offers",
+      description: "Placeholder description: weekly and monthly rates, a driver, tours and point-to-point trips.",
+    },
+    title: "Special offers",
+    subtitle: "Placeholder: ways to save, or to get more out of your rental.",
+    offers: [
+      {
+        title: "Weekly and monthly rates",
+        body: "Placeholder: book by the week or the month for a lower daily rate than a short rental.",
+      },
+      {
+        title: "With a driver",
+        body: "Placeholder: add a licensed driver to your booking for an extra charge, and let us do the driving.",
+      },
+      {
+        title: "Tours package",
+        body: "Placeholder: a vehicle, a driver and a planned route for day trips and sightseeing.",
+      },
+      {
+        title: "Point-to-point pick-up and drop-off",
+        body: "Placeholder: start in one city or province and end in another, instead of returning to where you started.",
+      },
+    ],
+    cta: { title: "Ask about any of these", button: "Contact us" },
+  },
+
   vehicles: {
     meta: {
       title: "Our vehicles",
       description:
-        "Placeholder description: compare sedans, SUVs, vans and pickups with clear daily rates in PHP.",
+        "Placeholder description: compare sedans, SUVs, vans and motorcycles with clear daily rates in PHP.",
     },
     title: "Our vehicles",
-    description: "Filter by type, price, transmission, seats and fuel. Share the page to share your search.",
+    description: "Filter by type, price and seats. Share the page to share your search.",
     filtersTitle: "Filters",
     showFilters: "Show filters",
     hideFilters: "Hide filters",
     filters: {
       category: "Category",
-      transmission: "Transmission",
-      fuel: "Fuel type",
       minSeats: "Seats",
       minPrice: "Min price per day",
       maxPrice: "Max price per day",
@@ -291,16 +348,11 @@ export const content = {
   vehicleDetail: {
     back: "All vehicles",
     perDay: "per day",
-    description: "About this vehicle",
     specsTitle: "Specifications",
     specs: {
       category: "Category",
-      transmission: "Transmission",
-      fuel: "Fuel type",
       seats: "Seats",
-      year: "Year",
     },
-    featuresTitle: "Features",
     availabilityTitle: "Availability",
     availableNow: "Available to book",
     unavailableNow: "Not available right now",
@@ -320,10 +372,10 @@ export const content = {
     },
     steps: {
       dates: "Dates and location",
-      vehicle: "Vehicle and extras",
+      vehicle: "Vehicle",
       details: "Your details",
       payment: "Payment",
-      review: "Review",
+      check: "Check",
       confirmation: "Confirmation",
     },
     common: {
@@ -337,7 +389,8 @@ export const content = {
       title: "Choose your dates and location",
       description: "Tell us where and when you need the car.",
       pickupLocation: "Pick-up location",
-      locationPlaceholder: "Choose a location",
+      locationPlaceholder: "Paste a Google Maps link, or type an address",
+      locationHint: "For example a hotel, airport terminal or barangay.",
       differentReturn: "Return to a different location",
       returnLocation: "Return location",
       pickupDate: "Pick-up date",
@@ -347,19 +400,14 @@ export const content = {
     },
     vehicle: {
       title: "Choose your vehicle",
-      description: "Vehicles shown are for your dates. Prices are per day.",
+      description: "Booking is open: choose any vehicle. Prices shown are per day for your dates.",
       select: "Select",
       selected: "Selected",
-      unavailable: "Unavailable for these dates",
-      extrasTitle: "Optional extras",
-      extrasDescription: "Add anything you need. You can change this later.",
-      extraPerDay: "per day",
-      extraFlat: "one time",
+      notAvailable: "Not available right now",
       selectPrompt: "Select a vehicle to continue.",
-      selectedUnavailable: "Your selected vehicle is not available for these dates. Please choose another one.",
+      selectedUnavailable: "Your selected vehicle is not available right now. Please choose another one.",
       loadError: "We could not load the vehicles.",
       vehiclesLabel: "Available vehicles",
-      extrasLabel: "Extras",
     },
     details: {
       title: "Your details",
@@ -380,6 +428,8 @@ export const content = {
         card: { label: "Credit or debit card", description: "Pay with your card." },
         gcash: { label: "GCash", description: "Pay with your GCash wallet." },
         maya: { label: "Maya", description: "Pay with your Maya wallet." },
+        paypal: { label: "PayPal", description: "Pay with your PayPal account." },
+        wise: { label: "Wise", description: "Pay with your Wise account." },
         pay_at_pickup: {
           label: "Pay at pick-up",
           description: "Placeholder: pay when you collect the vehicle.",
@@ -391,46 +441,22 @@ export const content = {
         `You would be sent to ${method} to approve the payment. In this demo, this step is simulated.`,
       pickupNotice:
         "You pay when you collect the vehicle. Your booking stays pending until our team confirms it.",
-      pay: (amount: string) => `Pay ${amount}`,
-      choosePickup: "Choose pay at pick-up",
+      pay: (amount: string) => `Pay ${amount} and confirm booking`,
+      confirmPickup: "Confirm booking",
+      terms: "I agree to the rental terms and conditions",
+      termsError: "Please accept the terms to continue.",
       processing: "Processing your payment. Please do not close this page.",
-      successTitle: "Payment successful",
-      successBody: (amount: string) => `We received ${amount}.`,
-      pickupTitle: "Pay at pick-up selected",
-      pickupBody: "Nothing to pay right now.",
       failedTitle: "Payment failed",
       failureReasons: {
         declined: "The payment was declined.",
         cancelled: "The payment was cancelled.",
         insufficient_funds: "There were not enough funds.",
       },
-      tryAgain: "Try again",
-      changeMethod: "Change payment method",
-      continueToReview: "Continue to review",
-      demo: {
-        title: "Demo controls",
-        description: "Only shown in this demo. Choose what the mock payment does.",
-        success: "The payment succeeds",
-        decline: "The payment is declined",
-      },
-    },
-    review: {
-      title: "Review and confirm",
-      description: "Check everything below, then confirm your booking.",
-      terms: "I agree to the rental terms and conditions",
-      termsError: "Please accept the terms to confirm your booking.",
-      confirm: "Confirm booking",
-      confirming: "Confirming",
       errors: {
-        vehicle_unavailable: {
-          title: "This vehicle was just booked",
-          body: "Someone else booked it for these dates while you were checking out. Please choose another vehicle.",
-          action: "Choose another vehicle",
-        },
         price_changed: {
           title: "The price has changed",
-          body: "The daily rate changed since you paid. Please review the new total and pay again.",
-          action: "Go to payment",
+          body: "The daily rate changed while you were checking out. You have not been charged. Please check the new total.",
+          action: "Check your booking",
         },
         not_found: {
           title: "We could not find that vehicle",
@@ -443,6 +469,18 @@ export const content = {
           action: "",
         },
       },
+      tryAgain: "Try again",
+      demo: {
+        title: "Demo controls",
+        description: "Only shown in this demo. Choose what the mock payment does.",
+        success: "The payment succeeds",
+        decline: "The payment is declined",
+      },
+    },
+    check: {
+      title: "Check your booking",
+      description: "Check everything below. You will pay and confirm on the next step.",
+      toPayment: "Continue to payment",
     },
     summary: {
       title: "Booking summary",
@@ -454,7 +492,6 @@ export const content = {
       days: (n: number) => `${n} ${n === 1 ? "day" : "days"}`,
       rate: (rate: string, days: number) => `${rate} × ${days} ${days === 1 ? "day" : "days"}`,
       vehicleLine: "Vehicle rental",
-      extras: "Extras",
       total: "Total",
       driver: "Driver",
       payment: "Payment",
@@ -529,6 +566,7 @@ export const content = {
       bookings: "Bookings",
       reports: "Reports",
       pricing: "Pricing",
+      reviews: "Reviews",
       users: "Users",
       roles: "Roles",
       viewSite: "View website",
@@ -805,6 +843,18 @@ export const content = {
       saved: "Price updated",
       empty: "No vehicles found.",
     },
+    reviews: {
+      title: "Reviews",
+      description: "What customers wrote about our service. Only the reviews switched on here appear on the website.",
+      columns: { customer: "Customer", rating: "Rating", comment: "Comment", reference: "Booking", date: "Date", show: "On website" },
+      showSwitch: (name: string) => `Show ${name}'s review on the website`,
+      shown: "Shown",
+      hidden: "Hidden",
+      shownToast: "Review is now shown on the website",
+      hiddenToast: "Review is now hidden from the website",
+      emptyTitle: "No reviews yet",
+      emptyDescription: "Reviews from customers will appear here.",
+    },
     permissions: {
       groups: {
         dashboard: "Dashboard",
@@ -813,6 +863,7 @@ export const content = {
         tasks: "Tasks",
         bookings: "Bookings",
         money: "Reports and prices",
+        reviews: "Reviews",
         admin: "Administration",
       },
       items: {
@@ -826,6 +877,7 @@ export const content = {
         "bookings.edit": { label: "Change booking status", description: "Confirm, start, complete or cancel bookings and record payments." },
         "reports.view": { label: "View reports", description: "See leads, customers, bookings and revenue reports." },
         "pricing.edit": { label: "Change vehicle prices", description: "Set the daily rate for new bookings." },
+        "reviews.manage": { label: "Manage reviews", description: "Read customer reviews and choose which ones show on the website." },
         "users.manage": { label: "Manage users", description: "Add and edit staff accounts and turn them on or off." },
         "roles.manage": { label: "Manage roles", description: "Create roles and choose what each role can do." },
       },

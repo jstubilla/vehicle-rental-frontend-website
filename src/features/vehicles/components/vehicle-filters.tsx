@@ -2,13 +2,7 @@
 
 import { Button, FormField, Select } from "@/components/ui";
 import { content } from "@/content";
-import {
-  FUEL_TYPES,
-  PRICE_FILTER_STEPS,
-  SEAT_FILTER_OPTIONS,
-  TRANSMISSIONS,
-  VEHICLE_CATEGORIES,
-} from "@/lib/constants";
+import { PRICE_FILTER_STEPS, SEAT_FILTER_OPTIONS, VEHICLE_CATEGORIES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/currency";
 import type { VehicleFilters } from "@/lib/vehicle-filters";
 
@@ -43,22 +37,6 @@ export function VehicleFiltersPanel({ filters, onChange, onReset, activeCount }:
         </Select>
       </FormField>
 
-      <FormField label={t.transmission}>
-        <Select
-          value={filters.transmission ?? ""}
-          onChange={(e) =>
-            onChange({ transmission: (e.target.value || undefined) as VehicleFilters["transmission"] })
-          }
-        >
-          <option value="">{t.any}</option>
-          {TRANSMISSIONS.map((v) => (
-            <option key={v} value={v}>
-              {content.enums.transmission[v]}
-            </option>
-          ))}
-        </Select>
-      </FormField>
-
       <FormField label={t.minSeats}>
         <Select
           value={filters.minSeats ?? ""}
@@ -68,20 +46,6 @@ export function VehicleFiltersPanel({ filters, onChange, onReset, activeCount }:
           {SEAT_FILTER_OPTIONS.map((n) => (
             <option key={n} value={n}>
               {t.seatsOrMore(n)}
-            </option>
-          ))}
-        </Select>
-      </FormField>
-
-      <FormField label={t.fuel}>
-        <Select
-          value={filters.fuel ?? ""}
-          onChange={(e) => onChange({ fuel: (e.target.value || undefined) as VehicleFilters["fuel"] })}
-        >
-          <option value="">{t.any}</option>
-          {FUEL_TYPES.map((v) => (
-            <option key={v} value={v}>
-              {content.enums.fuel[v]}
             </option>
           ))}
         </Select>

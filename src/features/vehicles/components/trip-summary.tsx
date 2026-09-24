@@ -3,20 +3,10 @@ import { Button, Card, CardContent } from "@/components/ui";
 import { content } from "@/content";
 import { formatDateLong, formatTime12h } from "@/lib/dates";
 import type { RentalSearch } from "@/lib/rental";
-import type { Location } from "@/types";
 
 /** Reminds the visitor which dates and place they searched for. */
-export function TripSummary({
-  rental,
-  days,
-  locations,
-}: {
-  rental: RentalSearch;
-  days: number;
-  locations: Location[];
-}) {
+export function TripSummary({ rental, days }: { rental: RentalSearch; days: number }) {
   const t = content.vehicles.trip;
-  const place = locations.find((l) => l.id === rental.pickupLocation);
 
   return (
     <Card variant="muted" as="section" aria-label={t.title}>
@@ -25,7 +15,7 @@ export function TripSummary({
           <div>
             <dt className="text-sm text-muted">{t.pickup}</dt>
             <dd className="font-medium">
-              {place?.name ?? rental.pickupLocation}
+              {rental.pickupLocation}
               <br />
               {formatDateLong(rental.pickupDate)}, {formatTime12h(rental.pickupTime)}
             </dd>

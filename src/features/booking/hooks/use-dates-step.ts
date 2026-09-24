@@ -28,9 +28,8 @@ export function useDatesStep(initial: DatesFormValues, vehicleFromUrl: string | 
         returnDate: values.returnDate,
         returnTime: values.returnTime,
       },
-      // A vehicle chosen on the catalog (?vehicle=slug) is kept; new dates need a new payment.
+      // A vehicle chosen on the catalog (?vehicle=slug) is kept.
       vehicleSlug: vehicleFromUrl ?? state.vehicleSlug,
-      payment: null,
     });
     router.push(nextStepPath("dates"));
   });

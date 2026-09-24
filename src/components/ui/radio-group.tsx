@@ -39,10 +39,11 @@ export function RadioGroup({
           <label
             key={option.value}
             htmlFor={inputId}
+            data-surface={variant === "cards" ? "card" : undefined}
             className={cn(
               "flex items-start gap-3",
               variant === "cards" &&
-                "cursor-pointer rounded-md border border-border-strong bg-surface p-4 has-checked:border-2 has-checked:border-primary has-disabled:cursor-not-allowed has-disabled:bg-surface-muted",
+                "cursor-pointer rounded-md border border-border-strong bg-card p-4 has-checked:border-2 has-checked:border-primary has-disabled:cursor-not-allowed has-disabled:bg-surface-muted",
             )}
           >
             <input

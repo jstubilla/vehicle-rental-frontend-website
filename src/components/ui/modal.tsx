@@ -58,6 +58,7 @@ export function Modal({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-overlay) grid place-items-center overflow-y-auto bg-overlay p-gutter">
           <Dialog.Content
+            data-surface="card"
             onOpenAutoFocus={() => {
               openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
             }}
@@ -69,7 +70,7 @@ export function Modal({
             }}
             {...(description ? {} : { "aria-describedby": undefined })}
             className={cn(
-              "relative w-full rounded-lg border bg-surface p-4 text-foreground shadow-lg md:p-6",
+              "relative w-full rounded-lg border bg-card p-4 text-foreground shadow-lg md:p-6",
               sizes[size],
               variants[variant],
               className,

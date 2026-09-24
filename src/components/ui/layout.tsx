@@ -36,7 +36,7 @@ export function Section({
 }) {
   return (
     <section
-      className={cn("py-section", variant === "muted" && "bg-surface-muted", className)}
+      className={cn("py-section", variant === "muted" && "bg-surface", className)}
       {...props}
     >
       <Container size={size} className={containerClassName}>

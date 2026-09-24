@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
+import { PERMISSIONS } from "../src/lib/constants";
 import { formatCurrency } from "../src/lib/currency";
 import { seedBookings } from "../src/mocks/bookings";
 import { loginAs, pageAlerts, visit } from "./helpers";
@@ -211,7 +212,7 @@ test.describe("reports", () => {
 
     const revenueCard = page.getByRole("article").filter({ hasText: t.reports.summary.revenue });
     const revenue = (await revenueCard.locator("p").first().textContent())!;
-    expect(revenue).toMatch(/^₱[\d,]+\.\d{2}$/);
+    expect(revenue).toMatch(/^₱[\d,]+\.\d{2} \(~\$[\d,]+\)$/);
 
     await page.getByRole("tab", { name: t.reports.tabs.table }).nth(2).click();
     await expect(page.getByRole("row", { name: new RegExp(`^${t.reports.revenue.total}`) })).toContainText(revenue);
@@ -250,7 +251,7 @@ test.describe("users and roles", () => {
     await dialog.getByLabel(t.permissions.items["bookings.view"].label).check();
     await dialog.getByLabel(t.permissions.items["customers.view"].label).check();
     await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(page.getByRole("row", { name: /Front desk/ })).toContainText(t.roles.permissionCount(2, 12));
+    await expect(page.getByRole("row", { name: /Front desk/ })).toContainText(t.roles.permissionCount(2, PERMISSIONS.length));
 
     // A duplicate name is refused.
     await page.getByRole("button", { name: t.roles.add }).click();
