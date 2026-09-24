@@ -22,10 +22,16 @@ export const logo = {
   /** Plain-text wordmark used until a real logo file is provided. */
   wordmark: content.site.name,
   /** Set to an image path (e.g. "/images/logo.svg") to replace the wordmark. */
-  src: null as string | null,
-  alt: content.site.name,
-  width: 160,
-  height: 40,
+  src: "/images/logo.png" as string | null,
+  /** Optional second file used only in dark mode. Leave null to use `src` in both themes. */
+  srcDark: "/images/logo-dark.png" as string | null,
+  alt: "Ela's Car Rental",
+  /** The light file's own size (sets the shape). The logo is shown at a fixed height, see Logo. */
+  width: 480,
+  height: 165,
+  /** The dark file's own size. */
+  darkWidth: 480,
+  darkHeight: 169,
 };
 
 export const images = {

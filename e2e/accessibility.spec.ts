@@ -401,3 +401,20 @@ test.describe("dark mode", () => {
     });
   });
 });
+
+test.describe("logo follows the theme", () => {
+  for (const [theme, file] of [
+    ["light", "logo.png"],
+    ["dark", "logo-dark.png"],
+  ] as const) {
+    test(`${theme} mode shows one logo, using ${file}`, async ({ page }) => {
+      await page.addInitScript((chosen) => {
+        if (!localStorage.getItem("car-rental-theme")) localStorage.setItem("car-rental-theme", chosen);
+      }, theme);
+      await visit(page, "/");
+      const logos = page.getByRole("banner").getByRole("img", { name: "Ela's Car Rental" });
+      await expect(logos).toHaveCount(1);
+      expect(decodeURIComponent((await logos.getAttribute("src")) ?? "")).toContain(`/images/${file}`);
+    });
+  }
+});

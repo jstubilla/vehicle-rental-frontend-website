@@ -207,6 +207,7 @@ export const content = {
       emptyTitle: "No reviews to show yet",
       emptyDescription: "Be the first to tell us how we did.",
       errorTitle: "We could not load the reviews",
+      write: "Write a review",
     },
     cta: {
       title: "Ready to hit the road?",

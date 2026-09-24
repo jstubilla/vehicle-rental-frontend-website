@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, EmptyState, ErrorState, Section, Skeleton, StarRating } from "@/components/ui";
+import Link from "next/link";
+import { Button, Card, CardContent, EmptyState, ErrorState, Section, Skeleton, StarRating } from "@/components/ui";
 import { content } from "@/content";
 import { formatDate } from "@/lib/dates";
 import { usePublishedReviews } from "../hooks/use-reviews";
@@ -13,9 +14,14 @@ export function PublicReviews() {
 
   return (
     <Section aria-labelledby="reviews-heading">
-      <div className="mb-6 flex flex-col gap-2">
-        <h2 id="reviews-heading">{t.title}</h2>
-        <p className="text-muted">{t.description}</p>
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-2">
+          <h2 id="reviews-heading">{t.title}</h2>
+          <p className="text-muted">{t.description}</p>
+        </div>
+        <Button asChild variant="outline">
+          <Link href="/review">{t.write}</Link>
+        </Button>
       </div>
 
       {isError && !data ? (

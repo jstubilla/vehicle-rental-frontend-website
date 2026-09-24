@@ -111,7 +111,7 @@ Go component by component against Figma, starting with the most used: Button, In
 
 | Page | Route | File | What it does |
 | --- | --- | --- | --- |
-| Home | `/` | `src/app/(public)/page.tsx` | Hero, quick search (location + dates), featured vehicles, how it works, customer reviews (only the ones staff switched on), call to action |
+| Home | `/` | `src/app/(public)/page.tsx` | Hero, quick search (location + dates), featured vehicles, how it works, customer reviews (only the ones staff switched on, with a "Write a review" button), call to action |
 | Vehicles | `/vehicles` | `src/app/(public)/vehicles/page.tsx` | Catalog with filters (category, price, seats), sorting, pagination, and a trip summary when dates are given |
 | Vehicle detail | `/vehicles/[slug]` | `src/app/(public)/vehicles/[slug]/page.tsx` | Gallery, type, seats, price and Book now — deliberately no other text |
 | Special offers | `/special-offers` | `src/app/(public)/special-offers/page.tsx` | Static marketing copy: weekly/monthly rates, with-driver, tours, point-to-point |

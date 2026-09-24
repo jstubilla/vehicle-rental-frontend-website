@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AdminShell, Skeleton } from "@/components/ui";
+import { AdminShell, Logo, Skeleton } from "@/components/ui";
 import { content } from "@/content";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useLogout } from "@/features/auth/hooks/use-logout";
@@ -36,7 +36,12 @@ export function AdminFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminShell
-      brand={<span className="text-xl font-bold tracking-tight">{content.site.name}<span className="sr-only"> {t.frame.brand}</span></span>}
+      brand={
+        <>
+          <Logo href="/admin" />
+          <span className="sr-only">{t.frame.brand}</span>
+        </>
+      }
       nav={nav}
       labels={{
         navigation: t.nav.label,

@@ -69,6 +69,18 @@ test.describe("the review form", () => {
 });
 
 test.describe("what the public sees", () => {
+  test("the home page reviews section has a button that opens the review form", async ({ page }) => {
+    // Shown right away, before the reviews have loaded, and it works from the keyboard.
+    await page.goto("/");
+    const button = homeReviews(page).getByRole("link", { name: home.write });
+    await expect(button).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await button.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/review$/);
+    await expect(h1(page, content.reviews.title)).toBeVisible();
+  });
+
   test("only the reviews staff chose to show", async ({ page }) => {
     await visit(page, "/");
     const section = homeReviews(page);

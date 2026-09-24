@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+/* "dark:" utilities follow the theme toggle (data-theme), not only the system setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Base element styles. Every value comes from tokens.css. */
 @layer base {
   :root {
