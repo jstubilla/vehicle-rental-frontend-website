@@ -30,7 +30,7 @@ const PUBLIC_PAGES: PageCase[] = [
     path: `/vehicles?category=suv&pickupLocation=Makati+CBD&pickupDate=${dateFromToday(2)}&pickupTime=10%3A00&returnDate=${dateFromToday(5)}&returnTime=10%3A00`,
     ready: (p) => p.getByRole("region", { name: content.vehicles.trip.title }),
   },
-  { name: "Vehicle details", path: "/vehicles/toyota-vios-2024", ready: (p) => h1(p, "Toyota Vios") },
+  { name: "Vehicle details", path: "/vehicles/sedan", ready: (p) => h1(p, "Sedan") },
   { name: "Special offers", path: "/special-offers", ready: (p) => h1(p, content.specialOffers.title) },
   { name: "About", path: "/about", ready: (p) => h1(p, content.about.title) },
   { name: "Contact", path: "/contact", ready: (p) => h1(p, content.contact.title) },
@@ -53,7 +53,7 @@ async function startWithBooking(page: Page) {
       sessionStorage.setItem(
         "car-rental-booking-flow",
         JSON.stringify({
-          vehicleSlug: "toyota-vios-2024",
+          vehicleSlug: "sedan",
           rental: {
             pickupLocation: "NAIA Terminal 3, Pasay",
             returnLocation: "Makati CBD",
@@ -164,9 +164,9 @@ test("admin login page has no accessibility problems", async ({ page }) => {
   await expectNoA11yViolations(page);
 });
 
-test.describe("admin area (signed in as Sales)", () => {
+test.describe("admin area (signed in)", () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
   });
 
   const ADMIN_PAGES: PageCase[] = [
@@ -210,16 +210,9 @@ test.describe("admin area (signed in as Sales)", () => {
   });
 });
 
-test("the 'no access' page has no accessibility problems", async ({ page }) => {
-  await loginAs(page, "Accountant");
-  await visit(page, "/admin/leads");
-  await expect(h1(page, content.admin.forbidden.title)).toBeVisible();
-  await expectNoA11yViolations(page);
-});
-
-test.describe("management pages (signed in as Admin)", () => {
+test.describe("management pages (signed in)", () => {
   test.beforeEach(async ({ page }) => {
-    await loginAs(page, "Admin");
+    await loginAs(page);
   });
 
   const pendingBooking = seedBookings.find((booking) => booking.status === "pending")!;
@@ -232,7 +225,6 @@ test.describe("management pages (signed in as Admin)", () => {
     { name: "Reports", path: "/admin/reports", ready: (p) => p.getByRole("figure").first() },
     { name: "Vehicle prices", path: "/admin/pricing", ready: (p) => p.getByRole("row").nth(1) },
     { name: "Users", path: "/admin/users", ready: (p) => p.getByRole("row").nth(1) },
-    { name: "Roles", path: "/admin/roles", ready: (p) => p.getByRole("row").nth(1) },
   ];
 
   for (const { name, path, ready } of MANAGEMENT_PAGES) {
@@ -254,19 +246,10 @@ test.describe("management pages (signed in as Admin)", () => {
 
   test("price dialog with an error message", async ({ page }) => {
     await visit(page, "/admin/pricing");
-    await page.getByRole("row", { name: /Toyota Vios/ }).getByRole("button", { name: content.admin.pricing.change }).click();
+    await page.getByRole("row", { name: /Sedan/ }).getByRole("button", { name: content.admin.pricing.change }).click();
     await page.getByRole("dialog").getByLabel(content.admin.pricing.rateLabel).fill("abc");
     await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
     await expect(page.getByRole("dialog").getByRole("alert")).toBeVisible();
-    await expectNoA11yViolations(page);
-  });
-
-  test("role dialog with the permission checkboxes", async ({ page }) => {
-    await visit(page, "/admin/roles");
-    await page.getByRole("button", { name: content.admin.roles.add }).click();
-    await expect(page.getByRole("dialog").getByRole("group").first()).toBeVisible();
-    await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
-    await expect(page.getByRole("dialog").getByRole("alert").first()).toBeVisible();
     await expectNoA11yViolations(page);
   });
 
@@ -322,7 +305,7 @@ test.describe("dark mode", () => {
   const PUBLIC: PageCase[] = [
     { name: "Home", path: "/", ready: (p) => h1(p, content.home.hero.title) },
     { name: "Vehicle catalog", path: "/vehicles", ready: (p) => p.getByRole("article").first() },
-    { name: "Vehicle details", path: "/vehicles/toyota-vios-2024", ready: (p) => h1(p, "Toyota Vios") },
+    { name: "Vehicle details", path: "/vehicles/sedan", ready: (p) => h1(p, "Sedan") },
     { name: "Special offers", path: "/special-offers", ready: (p) => h1(p, content.specialOffers.title) },
     { name: "Contact", path: "/contact", ready: (p) => h1(p, content.contact.title) },
     { name: "Booking step 1", path: "/book/dates", ready: (p) => h1(p, content.booking.dates.title) },
@@ -362,7 +345,7 @@ test.describe("dark mode", () => {
 
   test.describe("admin", () => {
     test.beforeEach(async ({ page }) => {
-      await loginAs(page, "Admin");
+      await loginAs(page);
     });
 
     test("dashboard, tables, pipeline and reports", async ({ page }) => {
@@ -387,11 +370,6 @@ test.describe("dark mode", () => {
       await page.getByRole("button", { name: content.admin.customers.add }).click();
       await page.getByRole("dialog").getByRole("button", { name: content.admin.common.save }).click();
       await expect(page.getByRole("dialog").getByRole("alert").first()).toBeVisible();
-      await expectNoA11yViolations(page);
-
-      await visit(page, "/admin/roles");
-      await page.getByRole("button", { name: content.admin.roles.add }).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
       await expectNoA11yViolations(page);
 
       const pending = seedBookings.find((booking) => booking.status === "pending")!;

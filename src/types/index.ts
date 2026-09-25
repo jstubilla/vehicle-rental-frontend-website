@@ -5,7 +5,6 @@ import type {
   ContactType,
   LeadSource,
   LeadStage,
-  Permission,
   PaymentMethod,
   PaymentStatus,
   TaskStatus,
@@ -19,17 +18,22 @@ import type {
  * Money is in PHP.
  */
 
-/** Kept deliberately small: what it is, how many it seats, and what it costs. */
+/**
+ * A type of vehicle (not one particular car): what it is, an example of it, how many it seats at most,
+ * and what it costs. Bookings are for a type, and staff hand over a matching vehicle.
+ */
 export interface Vehicle {
   id: string;
   slug: string;
+  /** The type's display name, e.g. "Sedan". */
   name: string;
   category: VehicleCategory;
-  /** Cars and vans always have this. Motorcycles don't carry a seat count. */
+  /** What a customer can expect, e.g. "Toyota Vios or similar". */
+  examples: string;
+  /** The most people it seats. Cars and vans always have this; motorcycles don't carry a seat count. */
   seats?: number;
   /** Flat daily rate in PHP. Staff with the pricing permission can change it from the Pricing screen; bookings keep the rate they were made at. */
   pricePerDay: number;
-  plateNumber: string;
   status: VehicleStatus;
   featured: boolean;
   images: ImageAsset[];
@@ -137,24 +141,13 @@ export interface Paginated<T> {
   pageCount: number;
 }
 
-/** A staff account. Which role it has decides what it may do. */
+/** A staff account. Every staff account is an admin and may do everything. */
 export interface User {
   id: string;
   name: string;
   email: string;
-  roleId: string;
   active: boolean;
   createdAt: string;
-}
-
-/** A named bundle of permissions, e.g. "Sales" or "Accountant". */
-export interface Role {
-  id: string;
-  name: string;
-  description: string;
-  permissions: Permission[];
-  /** Built-in role that cannot be edited or deleted (Admin), so nobody can lock everyone out. */
-  system?: boolean;
 }
 
 /** A to-do or follow-up, optionally linked to a lead or a customer. */

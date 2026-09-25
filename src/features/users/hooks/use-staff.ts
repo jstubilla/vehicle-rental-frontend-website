@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/api/client";
-import { createUser, listRoles, listStaff, setUserActive, updateUser, type UserInput } from "@/api/users";
+import { createUser, listStaff, setUserActive, updateUser, type UserInput } from "@/api/users";
 import { useToast } from "@/components/ui";
 import { content } from "@/content";
 import { userKeys } from "./use-users";
@@ -11,14 +11,9 @@ const t = content.admin.users;
 
 export const staffKey = [...userKeys.all, "staff"] as const;
 
-/** Staff accounts with their role names (Users screen). */
+/** Staff accounts (Users screen). */
 export function useStaff() {
   return useQuery({ queryKey: staffKey, queryFn: listStaff });
-}
-
-/** Roles for the "role" picker. */
-export function useRoleOptions() {
-  return useQuery({ queryKey: ["roles", "options"], queryFn: listRoles });
 }
 
 /** The message for a failed staff change, in plain words. */
@@ -34,7 +29,6 @@ export function useUserMutations() {
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: userKeys.all });
-    queryClient.invalidateQueries({ queryKey: ["roles"] });
   };
 
   return {

@@ -106,7 +106,7 @@ test.describe("staff", () => {
     await expect(homeReviews(page).getByRole("listitem")).toHaveCount(shownSeed.length);
     await expect(page.getByText(comment)).toHaveCount(0);
 
-    await loginAs(page, "Admin");
+    await loginAs(page);
     await visit(page, "/admin/reviews");
     await expect(h1(page, admin.title)).toBeVisible();
     const row = page.getByRole("row", { name: new RegExp(comment) });
@@ -129,7 +129,7 @@ test.describe("staff", () => {
   });
 
   test("the switch works with the keyboard", async ({ page }) => {
-    await loginAs(page, "Admin");
+    await loginAs(page);
     await visit(page, "/admin/reviews");
     const first = shownSeed[0];
     const toggle = page.getByRole("switch", { name: admin.showSwitch(first.name) });
@@ -140,17 +140,12 @@ test.describe("staff", () => {
   });
 
   test("the admin list shows every review, shown or not", async ({ page }) => {
-    await loginAs(page, "Admin");
+    await loginAs(page);
     await visit(page, "/admin/reviews");
     await expect(page.getByRole("row")).toHaveCount(seedReviews.length + 1);
     await expect(page.getByRole("switch", { checked: true })).toHaveCount(shownSeed.length);
   });
 
-  test("Sales cannot open the reviews page", async ({ page }) => {
-    await loginAs(page, "Sales");
-    await visit(page, "/admin/reviews");
-    await expect(page).toHaveURL(/\/admin\/forbidden$/);
-  });
 });
 
 /** The same pages, once in each theme. */
@@ -187,7 +182,7 @@ for (const theme of ["light", "dark"] as const) {
     });
 
     test("admin review list", async ({ page }) => {
-      await loginAs(page, "Admin");
+      await loginAs(page);
       await visit(page, "/admin/reviews");
       await expect(page.getByRole("row")).toHaveCount(seedReviews.length + 1);
       await expectNoA11yViolations(page);

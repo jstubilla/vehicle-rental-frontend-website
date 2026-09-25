@@ -14,9 +14,8 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import { Alert, ErrorState, FormField, GripIcon, Select, Skeleton } from "@/components/ui";
+import { ErrorState, FormField, GripIcon, Select, Skeleton } from "@/components/ui";
 import { content } from "@/content";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { LeadStageBadge } from "@/features/leads/stage-style";
 import { useUsers } from "@/features/users/hooks/use-users";
 import { cn } from "@/lib/cn";
@@ -43,8 +42,8 @@ function LeadCardBody({ lead }: { lead: LeadRow }) {
   );
 }
 
-function LeadCard({ lead, canMove, onMove }: { lead: LeadRow; canMove: boolean; onMove: (stage: LeadStage) => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id, disabled: !canMove });
+function LeadCard({ lead, onMove }: { lead: LeadRow; onMove: (stage: LeadStage) => void }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
 
   return (
     <li
@@ -53,30 +52,26 @@ function LeadCard({ lead, canMove, onMove }: { lead: LeadRow; canMove: boolean; 
       className={cn("flex flex-col gap-3 rounded-lg border border-border bg-card p-3 text-foreground", isDragging && "opacity-40")}
     >
       <div className="flex items-start gap-2">
-        {canMove && (
-          <button
-            type="button"
-            aria-label={t.dragHandle(lead.name)}
-            className="mt-0.5 inline-flex size-control-sm shrink-0 cursor-grab items-center justify-center rounded-md text-muted hover:bg-surface-muted"
-            {...attributes}
-            {...listeners}
-          >
-            <GripIcon />
-          </button>
-        )}
+        <button
+          type="button"
+          aria-label={t.dragHandle(lead.name)}
+          className="mt-0.5 inline-flex size-control-sm shrink-0 cursor-grab items-center justify-center rounded-md text-muted hover:bg-surface-muted"
+          {...attributes}
+          {...listeners}
+        >
+          <GripIcon />
+        </button>
         <LeadCardBody lead={lead} />
       </div>
-      {canMove && (
-        <FormField label={`${t.moveTo}: ${lead.name}`} hideLabel>
-          <Select value={lead.stage} onChange={(e) => onMove(e.target.value as LeadStage)}>
-            {LEAD_STAGES.map((stage) => (
-              <option key={stage} value={stage}>
-                {t.moveTo}: {content.enums.leadStage[stage]}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-      )}
+      <FormField label={`${t.moveTo}: ${lead.name}`} hideLabel>
+        <Select value={lead.stage} onChange={(e) => onMove(e.target.value as LeadStage)}>
+          {LEAD_STAGES.map((stage) => (
+            <option key={stage} value={stage}>
+              {t.moveTo}: {content.enums.leadStage[stage]}
+            </option>
+          ))}
+        </Select>
+      </FormField>
     </li>
   );
 }
@@ -84,12 +79,10 @@ function LeadCard({ lead, canMove, onMove }: { lead: LeadRow; canMove: boolean; 
 function StageColumn({
   stage,
   leads,
-  canMove,
   onMove,
 }: {
   stage: LeadStage;
   leads: LeadRow[];
-  canMove: boolean;
   onMove: (lead: LeadRow, stage: LeadStage) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
@@ -116,7 +109,7 @@ function StageColumn({
       ) : (
         <ul className="flex flex-col gap-3">
           {leads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} canMove={canMove} onMove={(next) => onMove(lead, next)} />
+            <LeadCard key={lead.id} lead={lead} onMove={(next) => onMove(lead, next)} />
           ))}
         </ul>
       )}
@@ -125,12 +118,10 @@ function StageColumn({
 }
 
 export function PipelineBoard() {
-  const { can } = useAuth();
   const { leads, isError, refetch, move } = usePipeline();
   const users = useUsers();
   const [assignee, setAssignee] = useState("");
   const [dragging, setDragging] = useState<LeadRow | null>(null);
-  const canMove = can("leads.edit");
 
   // The pointer needs to travel a little before a drag starts, so clicks on cards still work.
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }), useSensor(KeyboardSensor));
@@ -162,8 +153,6 @@ export function PipelineBoard() {
         <p className="max-w-narrow text-lg text-muted">{t.description}</p>
       </div>
 
-      {!canMove && <Alert variant="info">{t.readOnly}</Alert>}
-
       <FormField label={t.assigneeFilter} className="sm:max-w-xs">
         <Select value={assignee} onChange={(e) => setAssignee(e.target.value)}>
           <option value="">{content.admin.common.any}</option>
@@ -192,7 +181,6 @@ export function PipelineBoard() {
                 key={stage}
                 stage={stage}
                 leads={visible.filter((lead) => lead.stage === stage)}
-                canMove={canMove}
                 onMove={moveLead}
               />
             ))}

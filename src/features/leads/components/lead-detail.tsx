@@ -18,7 +18,6 @@ import {
 } from "@/components/ui";
 import { content } from "@/content";
 import { ActivityLog } from "@/features/activities/components/activity-log";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { ContactDetailsCard } from "@/features/contacts/components/contact-details-card";
 import { LinkedTasksCard } from "@/features/tasks/components/linked-tasks-card";
 import { LEAD_STAGES, type LeadStage } from "@/lib/constants";
@@ -32,7 +31,6 @@ const t = content.admin.leads;
 
 export function LeadDetail({ id }: { id: string }) {
   const router = useRouter();
-  const { can } = useAuth();
   const query = useLead(id);
   const { changeStage, convert, remove } = useLeadMutations();
   const [editing, setEditing] = useState(false);
@@ -64,8 +62,7 @@ export function LeadDetail({ id }: { id: string }) {
   }
 
   const { lead, vehicle, assigneeName, customer } = query.data;
-  const canEdit = can("leads.edit");
-  const canConvert = canEdit && can("customers.edit") && !lead.customerId;
+  const canConvert = !lead.customerId;
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,19 +78,17 @@ export function LeadDetail({ id }: { id: string }) {
             {t.detail.created} {formatDate(lead.createdAt)}
           </p>
         </div>
-        {canEdit && (
-          <div className="flex flex-wrap gap-2">
-            {canConvert && (
-              <Button onClick={() => setConfirmingConvert(true)}>{t.detail.convert}</Button>
-            )}
-            <Button variant="outline" onClick={() => setEditing(true)}>
-              {content.admin.common.edit}
-            </Button>
-            <Button variant="outline" onClick={() => setConfirmingDelete(true)}>
-              {content.admin.common.delete}
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {canConvert && (
+            <Button onClick={() => setConfirmingConvert(true)}>{t.detail.convert}</Button>
+          )}
+          <Button variant="outline" onClick={() => setEditing(true)}>
+            {content.admin.common.edit}
+          </Button>
+          <Button variant="outline" onClick={() => setConfirmingDelete(true)}>
+            {content.admin.common.delete}
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -148,7 +143,7 @@ export function LeadDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          <ContactDetailsCard owner="lead" ownerId={lead.id} contacts={lead.additionalContacts} canEdit={canEdit} />
+          <ContactDetailsCard owner="lead" ownerId={lead.id} contacts={lead.additionalContacts} />
 
           <LinkedTasksCard type="lead" id={lead.id} />
 
@@ -163,23 +158,19 @@ export function LeadDetail({ id }: { id: string }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              {canEdit ? (
-                <FormField label={t.detail.changeStage}>
-                  <Select
-                    value={lead.stage}
-                    disabled={changeStage.isPending}
-                    onChange={(e) => changeStage.mutate({ id: lead.id, stage: e.target.value as LeadStage })}
-                  >
-                    {LEAD_STAGES.map((stage) => (
-                      <option key={stage} value={stage}>
-                        {content.enums.leadStage[stage]}
-                      </option>
-                    ))}
-                  </Select>
-                </FormField>
-              ) : (
-                <LeadStageBadge stage={lead.stage} />
-              )}
+              <FormField label={t.detail.changeStage}>
+                <Select
+                  value={lead.stage}
+                  disabled={changeStage.isPending}
+                  onChange={(e) => changeStage.mutate({ id: lead.id, stage: e.target.value as LeadStage })}
+                >
+                  {LEAD_STAGES.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {content.enums.leadStage[stage]}
+                    </option>
+                  ))}
+                </Select>
+              </FormField>
               {canConvert && <p className="text-sm text-muted">{t.detail.convertHint}</p>}
             </CardContent>
           </Card>

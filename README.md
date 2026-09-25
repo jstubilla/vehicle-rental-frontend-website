@@ -56,9 +56,8 @@ Optional: copy `.env.example` to `.env.local` to change the settings in
 
 ### Signing in to the admin
 
-The login page lists four demo accounts, one for each starting role. They all use the password
-**`demo1234`**. **Admin** can do everything. **Sales**, **Accountant** and **Operations** each see only
-the pages their role allows, so signing in as each one is a good way to see roles at work.
+The login page lists the demo admin account. Every staff account is an **admin** and can do everything:
+there are no roles or permissions. All staff accounts use the password **`demo1234`**.
 
 The demo accounts and the payment "demo controls" only show while `NEXT_PUBLIC_SHOW_MOCK_CONTROLS` is not
 `false`.
@@ -73,7 +72,7 @@ payment, confirmation) with a **mock payment** that can succeed or be declined. 
 confirms the booking in one action. Booking is open — every vehicle can be booked for any dates.
 
 **Admin area:** dashboard, customers, leads, a drag-and-drop pipeline, tasks, bookings, reports,
-vehicle pricing, staff users, and roles with an editable permission checklist. The complete list of
+vehicle pricing, customer reviews and staff users. The complete list of
 pages and components is in [`docs/DESIGN-HANDOFF.md`](docs/DESIGN-HANDOFF.md).
 
 **How it stays organized.** Three layers, and a file only belongs in one of them:
@@ -90,7 +89,7 @@ Other folders worth knowing:
 | --- | --- |
 | `src/content/index.ts` | **All wording.** Nothing else contains text that visitors read. |
 | `src/assets/config.ts` | The logo and every image |
-| `src/mocks` | The fake data (14 vehicles, 20 customers, 15 bookings, 15 leads, and more) |
+| `src/mocks` | The fake data (8 vehicle types, 20 customers, 15 bookings, 15 leads, and more) |
 | `src/api` | The only door to the data. Every function is `async`, like a real API. |
 | `src/proxy.ts` | Guards `/admin` (Next.js 16 calls this file a "proxy"; older versions call it "middleware") |
 | `e2e` | The automated browser tests |
@@ -176,7 +175,7 @@ change.
    `vehicle_unavailable`, `price_changed`, `duplicate_email`, `last_admin`). The full list is in
    `src/api/client.ts`. Have the server return matching codes and throw `new ApiError(message, status, code)`.
 5. **Move the business rules to the server.** The rules in `src/lib` and `src/api` (availability by
-   date, price snapshot, the booking status flow, "last admin" protection, permission checks) run in the
+   date, price snapshot, the booking status flow, "last active account" protection, sign-in checks) run in the
    browser today so the demo works. A real server **must repeat them**, because anything in a browser can
    be bypassed. `src/lib` can stay for showing the *same* answer to the visitor early (for example the
    price quote).
@@ -186,7 +185,7 @@ change.
 8. Run `npm run test:e2e` against the real API, using a test database that resets. The tests expect the
    demo data, so seed it the same way.
 
-### Sign-in and permissions
+### Sign-in
 
 Today's login is a **fake**: one shared password, and a plain cookie that the site creates for itself
 (`src/api/auth.ts`, `src/lib/session.ts`, `src/app/api/mock-session/route.ts`). It is fine for a demo and
@@ -197,12 +196,9 @@ For the real thing:
 - Replace `login`, `getSession` and `logout` in `src/api/auth.ts` so they call your server.
 - Have the server set a real, signed, `httpOnly` cookie, and make `src/proxy.ts` check it properly.
 - Delete `DEMO_PASSWORD` and `src/app/api/mock-session/route.ts`.
-- **The server must check permissions on every request**, not just the screens. Hiding a button is a
-  convenience, not protection. The permission ids are in `src/lib/constants.ts` and the page mapping in
-  `src/lib/permissions.ts`. Sidebar, route guard and API all check the *permission*, never the role name,
-  so roles can be edited freely.
-- A role's permissions are copied into the session at sign-in, so a role change applies at the person's
-  *next* sign-in. A real server can decide to apply it sooner.
+- **The server must check that someone is signed in on every request**, not just the screens (`assertAdmin` in
+  `src/api/auth.ts` is where the mock does it). Every signed-in staff member is an admin. If you later need
+  different levels of access, add them then.
 
 ---
 
@@ -228,7 +224,7 @@ control disappears, and remove the `mockOutcome` input.
 ## 7. Tests
 
 `npm run test:e2e` opens the real site in a real browser and clicks through it: all six booking steps
-(including a declined payment), the contact form, admin login and what each role can open, every admin
+(including a declined payment), the contact form, admin login and the admin sign-in, every admin
 screen, keyboard-only use, and an **accessibility scan (axe)** of every main page. Details, and how to
 run just one file, are in [`e2e/README.md`](e2e/README.md). The first time, run
 `npm run test:e2e:install` to download the test browser.
@@ -257,20 +253,21 @@ Decisions made where the brief did not say. Each is easy to change; please check
   placeholder exchange rate (`PHP_PER_USD` in that same file). All dates and times are **Manila time** (UTC+8,
   no daylight saving).
 - **A rental day is a 24-hour block, rounded up.** Two days and one hour is three days. The minimum is one day.
-- **Prices are a flat daily rate**, with no seasonal or weekend pricing. Staff with the pricing permission
-  can change a vehicle's rate. **New bookings use the new rate; existing bookings keep the price they were made at.**
+- **Prices are a flat daily rate**, with no seasonal or weekend pricing. Staff can change a vehicle type's rate
+  on the Pricing screen. **New bookings use the new rate; existing bookings keep the price they were made at.**
 - There are no add-ons (no child seats, GPS and the like). A booking's price is just the vehicle's daily
   rate times the number of days.
 - **Booking is open:** any vehicle can be booked for any dates. There is no double-booking check and no
   "unavailable for these dates" state. The only thing that stops a vehicle being booked is its own status
   (a vehicle marked "in maintenance" or "inactive" cannot be selected).
-- **A vehicle is kept deliberately simple:** its type (Sedan, SUV, Van, 125cc or 155cc), how many it seats,
-  and its price. **Motorcycles (125cc/155cc) don't carry a seat count** — `seats` is optional on the
+- **Vehicles are types, not particular cars.** The types are SUV, Multi-purpose vehicle (MPV, 7-8
+  seaters), Sedan, Hatchback, Van, Pick-up truck, 125cc and 155cc. Each has an example shown as "Toyota
+  Vios or similar", the most it seats, and a daily price. There are no plate numbers or model years. **Motorcycles (125cc/155cc) don't carry a seat count** — `seats` is optional on the
   `Vehicle` type, and every screen that shows seats just leaves that part out for them. There is no
   transmission, fuel type, year, description or feature list. The vehicle detail
   page shows the photos, those specs, and the price — no other text.
 - Adding, editing or removing vehicles is **not** built (only the price). This was a deliberate scope
-  decision. The 14 vehicles come from `src/mocks/vehicles.ts`.
+  decision. The 8 vehicle types come from `src/mocks/vehicles.ts`.
 - **There is no preset list of pick-up/return locations.** The visitor always types or pastes where they
   mean — an address, or a Google Maps link — in a plain text field (`src/features/booking/components/dates-step.tsx`).
   Nothing checks that the text is a real place or a valid link; a real backend with an address-lookup
@@ -297,10 +294,8 @@ Decisions made where the brief did not say. Each is easy to change; please check
   emails that can be added, edited and removed.
 - A contact-form message creates a lead with the stage **New**. Leads move through New, Contacted,
   Qualified, Won and Lost. Converting a lead creates a customer.
-- **Roles:** four starting roles (Admin, Sales, Accountant, Operations) with an editable permission
-  checklist. Choosing an "edit" permission also selects the matching "view" permission. The **Admin role is
-  built in**: it cannot be edited or deleted, and the system will not let the last active administrator be
-  deactivated or moved to another role.
+- **There are no roles.** Every staff account is an admin. The system will not let the last active account be
+  deactivated, and nobody can deactivate themselves.
 - Staff sessions last 8 hours.
 
 **Storage**

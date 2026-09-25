@@ -3,7 +3,7 @@ import { todayISO } from "@/lib/dates";
 import { searchTasks, type TaskListParams, type TaskRow } from "@/lib/task-search";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Paginated, Task } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 function toRows(tasks: Task[]): TaskRow[] {
@@ -26,14 +26,14 @@ function toRows(tasks: Task[]): TaskRow[] {
 }
 
 export async function listTasks(params: TaskListParams): Promise<Paginated<TaskRow>> {
-  const session = assertCan("tasks.manage");
+  const session = assertAdmin();
   await simulateNetwork();
   return searchTasks(toRows(readTable("tasks")), params, session.userId);
 }
 
 /** The tasks linked to one lead or customer, open ones first (for their detail pages). */
 export async function listTasksFor(linkedType: "lead" | "customer", linkedId: string): Promise<TaskRow[]> {
-  assertCan("tasks.manage");
+  assertAdmin();
   await simulateNetwork();
   return toRows(readTable("tasks").filter((t) => t.linkedType === linkedType && t.linkedId === linkedId)).sort(
     (a, b) => Number(a.status === "done") - Number(b.status === "done") || a.dueDate.localeCompare(b.dueDate),
@@ -42,7 +42,7 @@ export async function listTasksFor(linkedType: "lead" | "customer", linkedId: st
 
 /** Names for the "linked to" picker in the task form. */
 export async function listLinkOptions(type: "lead" | "customer"): Promise<{ id: string; name: string }[]> {
-  assertCan("tasks.manage");
+  assertAdmin();
   await simulateNetwork();
   const rows = type === "lead" ? readTable("leads") : readTable("customers");
   return rows.map((row) => ({ id: row.id, name: row.name })).sort((a, b) => a.name.localeCompare(b.name));
@@ -58,7 +58,7 @@ export interface TaskInput {
 }
 
 export async function createTask(input: TaskInput): Promise<Task> {
-  assertCan("tasks.manage");
+  assertAdmin();
   await simulateNetwork();
 
   const task: Task = {
@@ -75,7 +75,7 @@ export async function createTask(input: TaskInput): Promise<Task> {
 }
 
 export async function updateTask(id: string, input: TaskInput): Promise<Task> {
-  assertCan("tasks.manage");
+  assertAdmin();
   await simulateNetwork();
 
   const tasks = readTable("tasks");
@@ -89,7 +89,7 @@ export async function updateTask(id: string, input: TaskInput): Promise<Task> {
 
 /** Marks a task done (or open again). Finishing a task is noted on the lead or customer it belongs to. */
 export async function setTaskDone(id: string, done: boolean): Promise<Task> {
-  const session = assertCan("tasks.manage");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const tasks = readTable("tasks");
@@ -118,7 +118,7 @@ export async function setTaskDone(id: string, done: boolean): Promise<Task> {
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  assertCan("tasks.manage");
+  assertAdmin();
   await simulateNetwork();
   writeTable("tasks", readTable("tasks").filter((t) => t.id !== id));
 }

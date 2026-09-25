@@ -26,15 +26,15 @@ export function VehicleCard({ vehicle, rental = null, days = null }: VehicleCard
         className="rounded-b-none border-0 border-b"
       />
       <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle as="h3">
-            <Link href={vehicleHref(vehicle.slug, rental)} className="text-inherit no-underline hover:underline">
-              {vehicle.name}
-            </Link>
-          </CardTitle>
-          <Badge variant="outline">{content.enums.vehicleCategory[vehicle.category]}</Badge>
-        </div>
-        {vehicle.seats !== undefined && <CardDescription>{t.seats(vehicle.seats)}</CardDescription>}
+        <CardTitle as="h3">
+          <Link href={vehicleHref(vehicle.slug, rental)} className="text-inherit no-underline hover:underline">
+            {vehicle.name}
+          </Link>
+        </CardTitle>
+        <CardDescription>
+          {vehicle.examples}
+          {vehicle.seats !== undefined && ` · ${t.seats(vehicle.seats)}`}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         <p>

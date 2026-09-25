@@ -8,7 +8,6 @@ import { z } from "zod";
 import { login } from "@/api/auth";
 import { ApiError } from "@/api/client";
 import { content } from "@/content";
-import { firstAllowedPath } from "@/lib/permissions";
 import { sessionKey } from "./use-auth";
 
 const loginSchema = z.object({
@@ -38,7 +37,7 @@ export function useLogin() {
     mutationFn: (values: LoginValues) => login(values.email, values.password),
     onSuccess: (session) => {
       queryClient.setQueryData(sessionKey, session);
-      router.replace(next ?? firstAllowedPath(session.permissions) ?? "/admin/forbidden");
+      router.replace(next ?? "/admin");
     },
   });
 

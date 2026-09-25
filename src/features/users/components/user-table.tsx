@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { StaffRow } from "@/api/users";
+import type { User } from "@/types";
 import {
   Badge,
   Button,
@@ -28,8 +28,8 @@ export function UserTable() {
   const staff = useStaff();
   const { setActive } = useUserMutations();
   const [adding, setAdding] = useState(false);
-  const [editing, setEditing] = useState<StaffRow | null>(null);
-  const [deactivating, setDeactivating] = useState<StaffRow | null>(null);
+  const [editing, setEditing] = useState<User | null>(null);
+  const [deactivating, setDeactivating] = useState<User | null>(null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,7 +57,6 @@ export function UserTable() {
             <TableRow>
               <TableHead>{t.columns.name}</TableHead>
               <TableHead>{t.columns.email}</TableHead>
-              <TableHead>{t.columns.role}</TableHead>
               <TableHead>{t.columns.status}</TableHead>
               <TableHead>{t.columns.actions}</TableHead>
             </TableRow>
@@ -71,7 +70,6 @@ export function UserTable() {
                     {user.name} {isYou && <span className="font-normal text-muted">{t.you}</span>}
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.roleName}</TableCell>
                   <TableCell>
                     <Badge variant={user.active ? "success" : "neutral"}>
                       {user.active ? t.statuses.active : t.statuses.inactive}

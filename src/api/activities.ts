@@ -1,8 +1,7 @@
 import type { ActivityType } from "@/lib/constants";
-import { sessionCan } from "@/lib/session";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { simulateNetwork } from "./client";
 
 /** An activity plus the names needed to display it. */
@@ -28,7 +27,7 @@ const newestFirst = (a: Activity, b: Activity) => b.createdAt.localeCompare(a.cr
 
 /** The activity log of one lead or customer. */
 export async function listActivities(entityType: Activity["entityType"], entityId: string): Promise<ActivityView[]> {
-  assertCan(entityType === "lead" ? "leads.view" : "customers.view");
+  assertAdmin();
   await simulateNetwork();
   return withNames(
     readTable("activities")
@@ -37,13 +36,12 @@ export async function listActivities(entityType: Activity["entityType"], entityI
   );
 }
 
-/** The latest activity across the CRM, limited to what the signed-in role may see. */
+/** The latest activity across the CRM. */
 export async function listRecentActivities(limit = 8): Promise<ActivityView[]> {
-  const session = assertCan("dashboard.view");
+  assertAdmin();
   await simulateNetwork();
   return withNames(
     readTable("activities")
-      .filter((a) => sessionCan(session, a.entityType === "lead" ? "leads.view" : "customers.view"))
       .sort(newestFirst)
       .slice(0, limit),
   );
@@ -57,7 +55,7 @@ export interface ActivityInput {
 }
 
 export async function createActivity(input: ActivityInput): Promise<Activity> {
-  const session = assertCan(input.entityType === "lead" ? "leads.edit" : "customers.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const activity: Activity = {

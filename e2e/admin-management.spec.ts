@@ -1,7 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
-import { PERMISSIONS } from "../src/lib/constants";
 import { formatCurrency } from "../src/lib/currency";
 import { seedBookings } from "../src/mocks/bookings";
 import { loginAs, pageAlerts, visit } from "./helpers";
@@ -14,8 +13,8 @@ const region = (page: Page, name: string) => page.getByRole("region", { name, ex
 test.describe("bookings", () => {
   const pending = seedBookings.find((booking) => booking.status === "pending")!;
 
-  test("Operations moves a booking through its whole life and records the payment", async ({ page }) => {
-    await loginAs(page, "Operations");
+  test("staff move a booking through its whole life and record the payment", async ({ page }) => {
+    await loginAs(page);
     await visit(page, `/admin/bookings/${pending.id}`);
     await expect(page.getByRole("heading", { level: 1, name: pending.reference })).toBeVisible();
 
@@ -39,8 +38,8 @@ test.describe("bookings", () => {
     await expect(status.getByText(t.bookings.detail.finalStatus)).toBeVisible();
   });
 
-  test("cancelling asks first, and Accountant can only look", async ({ page }) => {
-    await loginAs(page, "Operations");
+  test("cancelling asks first", async ({ page }) => {
+    await loginAs(page);
     await visit(page, `/admin/bookings/${pending.id}`);
     await page.getByRole("button", { name: t.bookings.detail.actions.cancelled }).click();
 
@@ -54,18 +53,8 @@ test.describe("bookings", () => {
     await expect(region(page, t.bookings.detail.status).getByText(content.enums.bookingStatus.cancelled, { exact: true })).toBeVisible();
   });
 
-  test("Accountant sees bookings but has no buttons to change them", async ({ page }) => {
-    await loginAs(page, "Accountant");
-    await visit(page, `/admin/bookings/${pending.id}`);
-    await expect(page.getByRole("heading", { level: 1, name: pending.reference })).toBeVisible();
-    for (const action of Object.values(t.bookings.detail.actions)) {
-      await expect(page.getByRole("button", { name: action })).toHaveCount(0);
-    }
-    await expect(page.getByRole("button", { name: t.bookings.detail.markPaid })).toHaveCount(0);
-  });
-
   test("the booking list can be filtered and searched", async ({ page }) => {
-    await loginAs(page, "Accountant");
+    await loginAs(page);
     await visit(page, "/admin/bookings");
     await expect(page.getByRole("status").filter({ hasText: /of 15/ })).toBeVisible();
 
@@ -82,9 +71,9 @@ test.describe("bookings", () => {
 
 test.describe("pricing", () => {
   test("a new daily rate shows on the public site right away", async ({ page }) => {
-    await loginAs(page, "Operations");
+    await loginAs(page);
     await visit(page, "/admin/pricing");
-    const row = page.getByRole("row", { name: /Toyota Vios/ });
+    const row = page.getByRole("row", { name: /Sedan/ });
     await expect(row).toContainText(formatCurrency(1800));
 
     await row.getByRole("button", { name: t.pricing.change }).click();
@@ -105,20 +94,14 @@ test.describe("pricing", () => {
     await expect(row).toContainText(formatCurrency(1900));
 
     // Same browser, so the public website sees the change.
-    await visit(page, "/vehicles/toyota-vios-2024");
-    await expect(page.getByRole("complementary", { name: "Toyota Vios" })).toContainText(formatCurrency(1900));
-  });
-
-  test("only roles with the price permission can open the screen", async ({ page }) => {
-    await loginAs(page, "Sales");
-    await visit(page, "/admin/pricing");
-    await expect(page).toHaveURL(/\/admin\/forbidden$/);
+    await visit(page, "/vehicles/sedan");
+    await expect(page.getByRole("complementary", { name: "Sedan" })).toContainText(formatCurrency(1900));
   });
 });
 
 test.describe("tasks", () => {
   test("a task added on a lead's page appears everywhere and can be finished", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await visit(page, "/admin/leads/lead-03");
 
     const card = region(page, t.tasks.linkedCard.title);
@@ -147,7 +130,7 @@ test.describe("tasks", () => {
   });
 
   test("overdue tasks are flagged and the form checks its fields", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await visit(page, "/admin/tasks");
     await expect(page.getByRole("row", { name: /Follow up Gerald Uy/ })).toContainText(t.tasks.overdue);
 
@@ -165,7 +148,7 @@ test.describe("pipeline", () => {
     region(page, content.enums.leadStage[stage]);
 
   test("a card can be dragged to another stage with the mouse", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await visit(page, "/admin/pipeline");
     await expect(column(page, "new").getByRole("listitem")).toHaveCount(4);
     await expect(column(page, "qualified").getByRole("listitem")).toHaveCount(3);
@@ -184,7 +167,7 @@ test.describe("pipeline", () => {
   });
 
   test("the Move to menu works without dragging, and the move is logged on the lead", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await visit(page, "/admin/pipeline");
 
     const card = column(page, "new").getByRole("listitem").first();
@@ -196,17 +179,11 @@ test.describe("pipeline", () => {
     await column(page, "contacted").getByRole("link", { name }).click();
     await expect(page.getByText(t.leads.stageChangeNote(content.enums.leadStage.new, content.enums.leadStage.contacted))).toBeVisible();
   });
-
-  test("Accountant has no access to the pipeline", async ({ page }) => {
-    await loginAs(page, "Accountant");
-    await visit(page, "/admin/pipeline");
-    await expect(page).toHaveURL(/\/admin\/forbidden$/);
-  });
 });
 
 test.describe("reports", () => {
   test("the numbers on the cards match the table underneath, and the date range can change", async ({ page }) => {
-    await loginAs(page, "Accountant");
+    await loginAs(page);
     await visit(page, "/admin/reports");
     await expect(page.getByRole("heading", { level: 1, name: t.reports.title })).toBeVisible();
 
@@ -224,55 +201,27 @@ test.describe("reports", () => {
   });
 
   test("an end date before the start date is refused", async ({ page }) => {
-    await loginAs(page, "Accountant");
+    await loginAs(page);
     await visit(page, "/admin/reports?from=2026-09-30&to=2026-09-01");
     await expect(pageAlerts(page).filter({ hasText: t.reports.range.invalid })).toBeVisible();
     await expect(page.getByRole("figure")).toHaveCount(0);
   });
 });
 
-test.describe("users and roles", () => {
-  test("a new role and a new user really get only what the role allows", async ({ page }) => {
-    await loginAs(page, "Admin");
-
-    // 1. Create a role with two permissions.
-    await visit(page, "/admin/roles");
-    await page.getByRole("button", { name: t.roles.add }).click();
-    let dialog = page.getByRole("dialog");
-    await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(dialog.getByRole("alert").filter({ hasText: t.roles.form.permissionsRequired })).toBeVisible();
-
-    await dialog.getByLabel(t.roles.form.name).fill("Front desk");
-    // Choosing an edit permission also turns its view permission on, and removing the view removes the edit.
-    await dialog.getByLabel(t.permissions.items["bookings.edit"].label).check();
-    await expect(dialog.getByLabel(t.permissions.items["bookings.view"].label)).toBeChecked();
-    await dialog.getByLabel(t.permissions.items["bookings.view"].label).uncheck();
-    await expect(dialog.getByLabel(t.permissions.items["bookings.edit"].label)).not.toBeChecked();
-    await dialog.getByLabel(t.permissions.items["bookings.view"].label).check();
-    await dialog.getByLabel(t.permissions.items["customers.view"].label).check();
-    await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(page.getByRole("row", { name: /Front desk/ })).toContainText(t.roles.permissionCount(2, PERMISSIONS.length));
-
-    // A duplicate name is refused.
-    await page.getByRole("button", { name: t.roles.add }).click();
-    dialog = page.getByRole("dialog");
-    await dialog.getByLabel(t.roles.form.name).fill("front DESK");
-    await dialog.getByLabel(t.permissions.items["customers.view"].label).check();
-    await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(dialog.getByRole("alert").filter({ hasText: t.roles.errors.duplicate_name })).toBeVisible();
-    await dialog.getByRole("button", { name: t.common.cancel }).click();
-
-    // 2. Create a user with that role.
+test.describe("users", () => {
+  test("a new staff member is an admin from their first sign-in", async ({ page }) => {
+    await loginAs(page);
     await visit(page, "/admin/users");
+    await expect(page.getByRole("columnheader", { name: /^Role/ })).toHaveCount(0);
+
     await page.getByRole("button", { name: t.users.add }).click();
-    dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByLabel(/^Role/)).toHaveCount(0);
     await dialog.getByLabel(t.users.form.name).fill("Carmela Ortega");
     await dialog.getByLabel(t.users.form.email).fill("carmela.ortega@carrental.example");
-    await dialog.getByLabel(/^Role/).selectOption({ label: "Front desk" });
     await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(page.getByRole("row", { name: /Carmela Ortega/ })).toContainText("Front desk");
+    await expect(page.getByRole("row", { name: /Carmela Ortega/ })).toBeVisible();
 
-    // 3. Sign in as that user: only what the role allows.
     await page.getByRole("button", { name: t.frame.logout }).click();
     await page.waitForURL(/\/admin\/login/);
     await page.waitForLoadState("networkidle");
@@ -280,39 +229,16 @@ test.describe("users and roles", () => {
     await page.getByLabel(t.login.password).fill(DEMO_PASSWORD);
     await page.getByRole("button", { name: t.login.submit }).click();
 
-    await expect(page).toHaveURL(/\/admin\/customers$/); // no dashboard permission, so the first allowed page
-    await expect(page.getByRole("navigation", { name: t.nav.label }).getByRole("link")).toHaveText([t.nav.customers, t.nav.bookings]);
-    for (const path of ["/admin", "/admin/roles", "/admin/users", "/admin/leads"]) {
-      await page.goto(path);
-      await expect(page).toHaveURL(path === "/admin" ? /\/admin\/customers$/ : /\/admin\/forbidden$/);
-    }
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole("navigation", { name: t.nav.label }).getByRole("link")).toHaveCount(10);
+    await visit(page, "/admin/users");
+    await expect(page.getByRole("heading", { level: 1, name: t.users.title })).toBeVisible();
   });
 
   test("nobody can lock everyone out", async ({ page }) => {
-    await loginAs(page, "Admin");
+    await loginAs(page);
     await visit(page, "/admin/users");
-
     const me = page.getByRole("row", { name: /Ramon Villareal/ });
     await expect(me.getByRole("button", { name: new RegExp(`^${t.users.deactivate}`) })).toBeDisabled();
-
-    // Moving the only Admin to another role is refused.
-    await me.getByRole("button", { name: new RegExp(`^${t.common.edit}`) }).click();
-    const dialog = page.getByRole("dialog");
-    await dialog.getByLabel(/^Role/).selectOption({ label: "Sales" });
-    await dialog.getByRole("button", { name: t.common.save }).click();
-    await expect(dialog.getByRole("alert")).toContainText(t.users.errors.last_admin);
-  });
-
-  test("the built-in Admin role is read-only and can't be deleted", async ({ page }) => {
-    await loginAs(page, "Admin");
-    await visit(page, "/admin/roles");
-    const admin = page.getByRole("row", { name: /^Admin/ });
-    await expect(admin.getByRole("button", { name: new RegExp(`^${t.common.delete}`) })).toHaveCount(0);
-
-    await admin.getByRole("button", { name: new RegExp(`^${t.common.edit}`) }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toContainText(t.roles.form.lockedNote);
-    await expect(dialog.getByLabel(t.roles.form.name)).toBeDisabled();
-    await expect(dialog.getByRole("button", { name: t.common.save })).toHaveCount(0);
   });
 });

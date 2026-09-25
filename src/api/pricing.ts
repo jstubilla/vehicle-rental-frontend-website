@@ -1,6 +1,6 @@
 import { readTable, writeTable } from "@/mocks/store";
 import type { Vehicle } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 export const MIN_DAILY_RATE = 100;
@@ -8,7 +8,7 @@ export const MAX_DAILY_RATE = 100_000;
 
 /** Every vehicle (including ones taken off the public site), for the Pricing screen. */
 export async function listVehiclePrices(): Promise<Vehicle[]> {
-  assertCan("pricing.edit");
+  assertAdmin();
   await simulateNetwork();
   return readTable("vehicles").sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -18,7 +18,7 @@ export async function listVehiclePrices(): Promise<Vehicle[]> {
  * keep the rate they were made at (see the Booking model).
  */
 export async function updateVehiclePrice(vehicleId: string, pricePerDay: number): Promise<Vehicle> {
-  assertCan("pricing.edit");
+  assertAdmin();
   await simulateNetwork();
 
   if (!Number.isInteger(pricePerDay) || pricePerDay < MIN_DAILY_RATE || pricePerDay > MAX_DAILY_RATE) {

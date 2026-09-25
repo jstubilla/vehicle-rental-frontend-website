@@ -112,8 +112,8 @@ Go component by component against Figma, starting with the most used: Button, In
 | Page | Route | File | What it does |
 | --- | --- | --- | --- |
 | Home | `/` | `src/app/(public)/page.tsx` | Hero, quick search (location + dates), featured vehicles, how it works, customer reviews (only the ones staff switched on, with a "Write a review" button), call to action |
-| Vehicles | `/vehicles` | `src/app/(public)/vehicles/page.tsx` | Catalog with filters (category, price, seats), sorting, pagination, and a trip summary when dates are given |
-| Vehicle detail | `/vehicles/[slug]` | `src/app/(public)/vehicles/[slug]/page.tsx` | Gallery, type, seats, price and Book now — deliberately no other text |
+| Vehicles | `/vehicles` | `src/app/(public)/vehicles/page.tsx` | Catalog of vehicle types with filters (type, price, seats), sorting, pagination, and a trip summary when dates are given |
+| Vehicle detail | `/vehicles/[slug]` | `src/app/(public)/vehicles/[slug]/page.tsx` | Gallery, example ("Toyota Vios or similar"), type, seats, price and Book now — deliberately no other text |
 | Special offers | `/special-offers` | `src/app/(public)/special-offers/page.tsx` | Static marketing copy: weekly/monthly rates, with-driver, tours, point-to-point |
 | About | `/about` | `src/app/(public)/about/page.tsx` | Company story and team |
 | Contact | `/contact` | `src/app/(public)/contact/page.tsx` | Contact details and message form (creates a New lead) |
@@ -126,23 +126,21 @@ Go component by component against Figma, starting with the most used: Button, In
 
 ### Admin area (`/admin`, signed-in staff only)
 
-Each page needs a permission (set on the Roles screen). The sidebar only shows what the signed-in role can open.
+Everyone who signs in is an admin, so the sidebar shows every page and there are no per-page permissions.
 
-| Page | Route | Permission | What it does |
-| --- | --- | --- | --- |
-| Login | `/admin/login` | none | Sign in (demo accounts are listed in the demo) |
-| No access | `/admin/forbidden` | signed in | Shown when a role opens a page it lacks |
-| Dashboard | `/admin` | `dashboard.view` | Key numbers (leads, bookings, open tasks), leads by stage, recent activity. Cards a role cannot use are left out. |
-| Customers | `/admin/customers`, `/admin/customers/[id]` | `customers.view` (`customers.edit` to change) | List with search, profile with extra phones and emails, bookings, notes and tasks |
-| Leads | `/admin/leads`, `/admin/leads/[id]` | `leads.view` (`leads.edit` to change) | List with filters, detail with activity log, convert to customer |
-| Pipeline | `/admin/pipeline` | `leads.view` | Board of lead stages, drag or use "Move to" |
-| Tasks | `/admin/tasks` | `tasks.manage` | To-dos linked to a lead or customer, overdue flags |
-| Bookings | `/admin/bookings`, `/admin/bookings/[id]` | `bookings.view` (`bookings.edit` to change) | List with filters, detail with status changes and payment |
-| Reports | `/admin/reports` | `reports.view` | Charts and tables by date range |
-| Pricing | `/admin/pricing` | `pricing.edit` | Change a vehicle's daily rate |
-| Reviews | `/admin/reviews` | `reviews.manage` | Read every customer review and switch each one on or off for the website |
-| Users | `/admin/users` | `users.manage` | Staff accounts: add, edit, deactivate |
-| Roles | `/admin/roles` | `roles.manage` | Roles and their permission checkboxes |
+| Page | Route | What it does |
+| --- | --- | --- |
+| Login | `/admin/login` | Sign in (demo accounts are listed in the demo) |
+| Dashboard | `/admin` | Key numbers (leads, bookings, open tasks), leads by stage, recent activity. |
+| Customers | `/admin/customers`, `/admin/customers/[id]` | List with search, profile with extra phones and emails, bookings, notes and tasks |
+| Leads | `/admin/leads`, `/admin/leads/[id]` | List with filters, detail with activity log, convert to customer |
+| Pipeline | `/admin/pipeline` | Board of lead stages, drag or use "Move to" |
+| Tasks | `/admin/tasks` | To-dos linked to a lead or customer, overdue flags |
+| Bookings | `/admin/bookings`, `/admin/bookings/[id]` | List with filters, detail with status changes and payment |
+| Reports | `/admin/reports` | Charts and tables by date range |
+| Pricing | `/admin/pricing` | Change a vehicle's daily rate |
+| Reviews | `/admin/reviews` | Read every customer review and switch each one on or off for the website |
+| Users | `/admin/users` | Staff accounts: add, edit, deactivate |
 
 Other files that are not pages but affect what visitors get: `src/app/sitemap.ts`, `src/app/robots.ts`,
 `src/proxy.ts` (guards `/admin`), `src/app/api/mock-session/route.ts` (the fake login cookie, mock only).
@@ -177,7 +175,7 @@ Other files that are not pages but affect what visitors get: `src/app/sitemap.ts
 | Search | `QuickSearch` |
 | Booking | `BookingShell`, `DatesStep`, `VehicleStep`, `VehicleOption`, `DetailsStep`, `PaymentStep`, `CheckStep`, `Confirmation`, `BookingSummary`, plus small parts in `step-parts.tsx` |
 | Contact | `ContactForm` |
-| Auth | `LoginForm`, `ForbiddenNotice`, `Can` (hides a control from roles that lack the permission) |
+| Auth | `LoginForm` |
 | Dashboard | `DashboardView` |
 | Customers | `CustomerList`, `CustomerProfile`, `CustomerFormModal`, `ContactDetailsCard` (extra phones and emails) |
 | Leads | `LeadList`, `LeadDetail`, `LeadFormModal` |
@@ -187,7 +185,7 @@ Other files that are not pages but affect what visitors get: `src/app/sitemap.ts
 | Bookings | `BookingList`, `BookingDetail`, `BookingStatusBadge` |
 | Reports | `ReportsView` |
 | Pricing | `PricingTable` |
-| Users and roles | `UserTable`, `UserFormModal`, `RoleTable`, `RoleFormModal`, `PermissionMatrix` |
+| Users | `UserTable`, `UserFormModal` |
 | Shared | `SearchBox` (waits for you to stop typing), `use-url-params` (keeps filters in the address bar) |
 
 Status colors for lead stages and booking statuses come from `src/features/leads/stage-style.tsx` and

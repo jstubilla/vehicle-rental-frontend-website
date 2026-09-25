@@ -1,6 +1,6 @@
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { PublicReview, Review } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 export interface ReviewInput {
@@ -51,14 +51,14 @@ export async function listPublishedReviews(): Promise<PublicReview[]> {
 
 /** Staff only: every review, shown or not. */
 export async function listReviews(): Promise<Review[]> {
-  assertCan("reviews.manage");
+  assertAdmin();
   await simulateNetwork();
   return readTable("reviews").sort(byNewest);
 }
 
 /** Staff only: show or hide one review on the public website. */
 export async function setReviewPublished(id: string, published: boolean): Promise<Review> {
-  assertCan("reviews.manage");
+  assertAdmin();
   await simulateNetwork();
   const reviews = readTable("reviews");
   const review = reviews.find((r) => r.id === id);

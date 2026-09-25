@@ -58,15 +58,15 @@ test("a failed send keeps what was typed and can be retried", async ({ page }) =
 });
 
 test("'Ask about this vehicle' preselects that vehicle", async ({ page }) => {
-  await visit(page, "/vehicles/toyota-vios-2024");
+  await visit(page, "/vehicles/sedan");
   await page.getByRole("link", { name: content.vehicleDetail.askAbout }).click();
-  await expect(page).toHaveURL(/\/contact\?vehicle=toyota-vios-2024/);
+  await expect(page).toHaveURL(/\/contact\?vehicle=sedan/);
   await expect(page.getByLabel(t.vehicle)).toHaveValue("veh-03");
-  await expect(page.getByLabel(t.vehicle).locator("option:checked")).toHaveText("Toyota Vios");
+  await expect(page.getByLabel(t.vehicle).locator("option:checked")).toHaveText("Sedan");
 });
 
 test("a sent message becomes a New lead that staff can see", async ({ page }) => {
-  await visit(page, "/contact?vehicle=toyota-vios-2024");
+  await visit(page, "/contact?vehicle=sedan");
   await fillValidForm(page, "I would like a sedan for a family trip next month.");
   await page.getByRole("button", { name: t.submit }).click();
 
@@ -76,14 +76,14 @@ test("a sent message becomes a New lead that staff can see", async ({ page }) =>
   await expect(page.getByLabel(t.name)).toHaveValue("");
 
   // Same browser, so the fake database is shared: a Sales user finds the new lead.
-  await loginAs(page, "Sales");
+  await loginAs(page);
   await visit(page, "/admin/leads");
   await page.getByRole("searchbox", { name: content.admin.leads.searchLabel }).fill("Rosalinda");
   const row = page.getByRole("row", { name: /Rosalinda Fuentes/ });
   await expect(row).toBeVisible();
   await expect(row).toContainText(content.enums.leadStage.new);
   await expect(row).toContainText(content.enums.leadSource.website);
-  await expect(row).toContainText("Toyota Vios");
+  await expect(row).toContainText("Sedan");
 
   await row.getByRole("link", { name: "Rosalinda Fuentes" }).click();
   await expect(page.getByText(/I would like a sedan for a family trip next month\./).first()).toBeVisible();

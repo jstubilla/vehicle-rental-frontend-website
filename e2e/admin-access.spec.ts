@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
-import { demoAccount, loginAs, pageAlerts, visit, type DemoRole } from "./helpers";
+import { demoAccount, loginAs, pageAlerts, visit } from "./helpers";
 
 const t = content.admin;
 const sidebar = (page: Page) => page.getByRole("navigation", { name: t.nav.label });
@@ -18,7 +18,7 @@ test.describe("signed out", () => {
   test("after signing in the visitor lands on the page they asked for", async ({ page }) => {
     await page.goto("/admin/leads?stage=new");
     await page.waitForLoadState("networkidle");
-    await page.getByLabel(t.login.email).fill(demoAccount("Sales").email);
+    await page.getByLabel(t.login.email).fill(demoAccount().email);
     await page.getByLabel(t.login.password).fill(DEMO_PASSWORD);
     await page.getByRole("button", { name: t.login.submit }).click();
 
@@ -29,7 +29,7 @@ test.describe("signed out", () => {
 
   test("a login link cannot send people to another website", async ({ page }) => {
     await visit(page, "/admin/login?next=https://evil.example/phish");
-    await page.getByLabel(t.login.email).fill(demoAccount("Admin").email);
+    await page.getByLabel(t.login.email).fill(demoAccount().email);
     await page.getByLabel(t.login.password).fill(DEMO_PASSWORD);
     await page.getByRole("button", { name: t.login.submit }).click();
     await expect(page).toHaveURL(/localhost:3100\/admin$/);
@@ -40,7 +40,7 @@ test.describe("signed out", () => {
     await page.getByRole("button", { name: t.login.submit }).click();
     await expect(pageAlerts(page)).toHaveCount(2);
 
-    await page.getByLabel(t.login.email).fill(demoAccount("Admin").email);
+    await page.getByLabel(t.login.email).fill(demoAccount().email);
     await page.getByLabel(t.login.password).fill("not-the-password");
     await page.getByRole("button", { name: t.login.submit }).click();
     await expect(pageAlerts(page).filter({ hasText: t.login.errors.invalid_credentials })).toBeVisible();
@@ -53,12 +53,12 @@ test.describe("signed out", () => {
   });
 });
 
-/** What each starting role can open. Pages a role lacks send it to the "no access" page. */
-const ROLES: { role: DemoRole; person: string; menu: string[]; blocked: string[]; canEditCustomers: boolean }[] = [
-  {
-    role: "Admin",
-    person: "Ramon Villareal",
-    menu: [
+test.describe("staff", () => {
+  test("everyone who signs in is an admin and sees every menu item", async ({ page }) => {
+    await loginAs(page);
+    await expect(page).toHaveURL(/localhost:3100\/admin$/);
+    await expect(page.getByText(t.dashboard.welcome("Ramon Villareal"))).toBeVisible();
+    await expect(sidebar(page).getByRole("link")).toHaveText([
       t.nav.dashboard,
       t.nav.customers,
       t.nav.leads,
@@ -69,100 +69,45 @@ const ROLES: { role: DemoRole; person: string; menu: string[]; blocked: string[]
       t.nav.pricing,
       t.nav.reviews,
       t.nav.users,
-      t.nav.roles,
-    ],
-    blocked: [],
-    canEditCustomers: true,
-  },
-  {
-    role: "Sales",
-    person: "Liza Manalo",
-    menu: [t.nav.dashboard, t.nav.customers, t.nav.leads, t.nav.pipeline, t.nav.tasks, t.nav.bookings],
-    blocked: ["/admin/reports", "/admin/pricing", "/admin/reviews", "/admin/users", "/admin/roles"],
-    canEditCustomers: true,
-  },
-  {
-    role: "Accountant",
-    person: "Beatriz Aquino",
-    menu: [t.nav.dashboard, t.nav.customers, t.nav.bookings, t.nav.reports],
-    blocked: ["/admin/leads", "/admin/leads/lead-01", "/admin/pipeline", "/admin/tasks", "/admin/pricing", "/admin/reviews", "/admin/users", "/admin/roles"],
-    canEditCustomers: false,
-  },
-  {
-    role: "Operations",
-    person: "Dennis Ocampo",
-    menu: [t.nav.dashboard, t.nav.customers, t.nav.tasks, t.nav.bookings, t.nav.pricing],
-    blocked: ["/admin/leads", "/admin/pipeline", "/admin/reports", "/admin/reviews", "/admin/users", "/admin/roles"],
-    canEditCustomers: false,
-  },
-];
-
-for (const { role, person, menu, blocked, canEditCustomers } of ROLES) {
-  test.describe(`${role} role`, () => {
-    test("sees only the menu items it is allowed to use", async ({ page }) => {
-      await loginAs(page, role);
-      await expect(page).toHaveURL(/localhost:3100\/admin$/);
-      await expect(page.getByText(t.dashboard.welcome(person))).toBeVisible();
-      await expect(sidebar(page).getByRole("link")).toHaveText(menu);
-      await expect(page.getByText(role, { exact: true }).first()).toBeVisible();
-    });
-
-    test("is turned away from pages its role does not include", async ({ page }) => {
-      await loginAs(page, role);
-      for (const path of blocked) {
-        await visit(page, path);
-        await expect(page).toHaveURL(/\/admin\/forbidden$/);
-        await expect(page.getByRole("heading", { level: 1, name: t.forbidden.title })).toBeVisible();
-      }
-      // Pages it may open still work.
-      await visit(page, "/admin/customers");
-      await expect(page.getByRole("heading", { level: 1, name: t.customers.title })).toBeVisible();
-    });
-
-    test(`${canEditCustomers ? "can" : "cannot"} add or edit customers`, async ({ page }) => {
-      await loginAs(page, role);
-
-      await visit(page, "/admin/customers/cus-01");
-      await expect(page.getByRole("heading", { level: 1, name: "Juan Dela Cruz" })).toBeVisible();
-      const editButton = page.getByRole("button", { name: t.common.edit, exact: true });
-      const deleteButton = page.getByRole("button", { name: t.common.delete, exact: true });
-
-      await visit(page, "/admin/customers");
-      await expect(page.getByRole("heading", { level: 1, name: t.customers.title })).toBeVisible();
-      const addButton = page.getByRole("button", { name: t.customers.add });
-
-      if (canEditCustomers) {
-        await expect(addButton).toBeVisible();
-        await visit(page, "/admin/customers/cus-01");
-        await expect(editButton).toBeVisible();
-        await expect(deleteButton).toBeVisible();
-      } else {
-        await expect(addButton).toHaveCount(0);
-        await visit(page, "/admin/customers/cus-01");
-        await expect(page.getByRole("heading", { level: 1, name: "Juan Dela Cruz" })).toBeVisible();
-        await expect(editButton).toHaveCount(0);
-        await expect(deleteButton).toHaveCount(0);
-      }
-    });
+    ]);
+    await expect(page.getByText(t.frame.brand, { exact: true }).first()).toBeVisible();
   });
-}
+
+  test("there are no roles: the roles page and the no-access page do not exist", async ({ page }) => {
+    await loginAs(page);
+    for (const path of ["/admin/roles", "/admin/forbidden"]) {
+      const response = await page.goto(path);
+      expect(response?.status()).toBe(404);
+    }
+  });
+
+  test("can add, edit and delete customers", async ({ page }) => {
+    await loginAs(page);
+    await visit(page, "/admin/customers");
+    await expect(page.getByRole("button", { name: t.customers.add })).toBeVisible();
+    await visit(page, "/admin/customers/cus-01");
+    await expect(page.getByRole("heading", { level: 1, name: "Juan Dela Cruz" })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.common.edit, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: t.common.delete, exact: true })).toBeVisible();
+  });
+});
 
 test.describe("signed in", () => {
   test("the session cookie is hidden from page scripts", async ({ page, context }) => {
-    await loginAs(page, "Admin");
+    await loginAs(page);
     const cookie = (await context.cookies()).find((c) => c.name === "car-rental-session");
     expect(cookie?.httpOnly).toBe(true);
     expect(await page.evaluate(() => document.cookie)).not.toContain("car-rental-session");
   });
 
   test("the login page sends signed-in staff to their dashboard", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await page.goto("/admin/login");
     await expect(page).toHaveURL(/localhost:3100\/admin$/);
   });
 
   test("logging out ends the session and protects the pages again", async ({ page }) => {
-    await loginAs(page, "Sales");
+    await loginAs(page);
     await page.getByRole("button", { name: t.frame.logout }).click();
     await expect(page).toHaveURL(/\/admin\/login/);
 

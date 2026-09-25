@@ -29,7 +29,6 @@ import {
 } from "@/components/ui";
 import { content } from "@/content";
 import { ActivityLog } from "@/features/activities/components/activity-log";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { BOOKING_STATUS_BADGE } from "@/features/bookings/status-style";
 import { ContactDetailsCard } from "@/features/contacts/components/contact-details-card";
 import { LinkedTasksCard } from "@/features/tasks/components/linked-tasks-card";
@@ -44,7 +43,6 @@ const t = content.admin.customers;
 export function CustomerProfile({ id }: { id: string }) {
   const router = useRouter();
   const { toast } = useToast();
-  const { can } = useAuth();
   const profile = useCustomerProfile(id);
   const { remove } = useCustomerMutations();
   const [editing, setEditing] = useState(false);
@@ -75,7 +73,6 @@ export function CustomerProfile({ id }: { id: string }) {
   }
 
   const { customer, bookings } = profile.data;
-  const canEdit = can("customers.edit");
   const hasBookings = bookings.length > 0;
 
   function confirmDelete() {
@@ -105,23 +102,21 @@ export function CustomerProfile({ id }: { id: string }) {
             {t.profile.customerSince} {formatDate(customer.createdAt)}
           </p>
         </div>
-        {canEdit && (
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => setEditing(true)}>
-              {content.admin.common.edit}
-            </Button>
-            <Button variant="outline" onClick={() => setConfirmingDelete(true)} disabled={hasBookings}>
-              {content.admin.common.delete}
-            </Button>
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setEditing(true)}>
+            {content.admin.common.edit}
+          </Button>
+          <Button variant="outline" onClick={() => setConfirmingDelete(true)} disabled={hasBookings}>
+            {content.admin.common.delete}
+          </Button>
+        </div>
       </div>
-      {canEdit && hasBookings && <p className="text-sm text-muted">{t.deleteBlocked}</p>}
+      {hasBookings && <p className="text-sm text-muted">{t.deleteBlocked}</p>}
 
       <Tabs defaultValue="details">
         <TabsList aria-label={customer.name}>
           <TabsTrigger value="details">{t.profile.tabs.details}</TabsTrigger>
-          {can("bookings.view") && <TabsTrigger value="bookings">{t.profile.tabs.bookings}</TabsTrigger>}
+          <TabsTrigger value="bookings">{t.profile.tabs.bookings}</TabsTrigger>
           <TabsTrigger value="activity">{t.profile.tabs.activity}</TabsTrigger>
         </TabsList>
 
@@ -162,51 +157,48 @@ export function CustomerProfile({ id }: { id: string }) {
             owner="customer"
             ownerId={customer.id}
             contacts={customer.additionalContacts}
-            canEdit={canEdit}
           />
 
           <LinkedTasksCard type="customer" id={customer.id} />
         </TabsContent>
 
-        {can("bookings.view") && (
-          <TabsContent value="bookings">
-            <h2 className="mb-4">{t.profile.bookings}</h2>
-            {bookings.length === 0 ? (
-              <p className="text-muted">{t.profile.noBookings}</p>
-            ) : (
-              <Table label={t.profile.bookings}>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.profile.bookingColumns.reference}</TableHead>
-                    <TableHead>{t.profile.bookingColumns.vehicle}</TableHead>
-                    <TableHead>{t.profile.bookingColumns.dates}</TableHead>
-                    <TableHead>{t.profile.bookingColumns.total}</TableHead>
-                    <TableHead>{t.profile.bookingColumns.status}</TableHead>
+        <TabsContent value="bookings">
+          <h2 className="mb-4">{t.profile.bookings}</h2>
+          {bookings.length === 0 ? (
+            <p className="text-muted">{t.profile.noBookings}</p>
+          ) : (
+            <Table label={t.profile.bookings}>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t.profile.bookingColumns.reference}</TableHead>
+                  <TableHead>{t.profile.bookingColumns.vehicle}</TableHead>
+                  <TableHead>{t.profile.bookingColumns.dates}</TableHead>
+                  <TableHead>{t.profile.bookingColumns.total}</TableHead>
+                  <TableHead>{t.profile.bookingColumns.status}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bookings.map(({ booking, vehicleName }) => (
+                  <TableRow key={booking.id}>
+                    <TableCell className="font-mono">
+                      <Link href={`/admin/bookings/${booking.id}`}>{booking.reference}</Link>
+                    </TableCell>
+                    <TableCell>{vehicleName}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {formatDateLong(booking.pickupDate)} to {formatDateLong(booking.returnDate)}
+                    </TableCell>
+                    <TableCell>{formatCurrency(booking.total)}</TableCell>
+                    <TableCell>
+                      <Badge variant={BOOKING_STATUS_BADGE[booking.status]}>
+                        {content.enums.bookingStatus[booking.status]}
+                      </Badge>
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bookings.map(({ booking, vehicleName }) => (
-                    <TableRow key={booking.id}>
-                      <TableCell className="font-mono">
-                        <Link href={`/admin/bookings/${booking.id}`}>{booking.reference}</Link>
-                      </TableCell>
-                      <TableCell>{vehicleName}</TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {formatDateLong(booking.pickupDate)} to {formatDateLong(booking.returnDate)}
-                      </TableCell>
-                      <TableCell>{formatCurrency(booking.total)}</TableCell>
-                      <TableCell>
-                        <Badge variant={BOOKING_STATUS_BADGE[booking.status]}>
-                          {content.enums.bookingStatus[booking.status]}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </TabsContent>
-        )}
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </TabsContent>
 
         <TabsContent value="activity">
           <ActivityLog entityType="customer" entityId={customer.id} />

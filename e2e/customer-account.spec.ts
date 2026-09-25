@@ -28,7 +28,7 @@ async function goToDetails(page: Page) {
     pickupTime: "10:00",
     returnDate: dateFromToday(22),
     returnTime: "10:00",
-    vehicle: "toyota-vios-2024",
+    vehicle: "sedan",
   });
   await visit(page, `/book/dates?${query}`);
   await page.getByRole("button", { name: content.booking.common.continue }).click();

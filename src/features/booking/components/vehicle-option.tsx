@@ -31,7 +31,7 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
         <div className="flex flex-col gap-1">
           <h3 className="text-lg font-semibold">{vehicle.name}</h3>
           <p className="text-sm text-muted">
-            {content.enums.vehicleCategory[vehicle.category]}
+            {vehicle.examples}
             {vehicle.seats !== undefined && ` · ${content.vehicleCard.seats(vehicle.seats)}`}
           </p>
           <p>

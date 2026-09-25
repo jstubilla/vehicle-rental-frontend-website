@@ -14,7 +14,6 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { content } from "@/content";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { BookingSummary } from "@/features/booking/components/booking-summary";
 import { summaryFromBooking } from "@/features/booking/summary";
 import { BOOKING_TRANSITIONS } from "@/lib/booking-status";
@@ -28,7 +27,6 @@ import { BookingStatusBadge, PaymentStatusBadge } from "./booking-status-badge";
 const t = content.admin.bookings.detail;
 
 export function BookingDetail({ id }: { id: string }) {
-  const { can } = useAuth();
   const query = useBooking(id);
   const { changeStatus, markPaid } = useBookingMutations();
   const [confirmingCancel, setConfirmingCancel] = useState(false);
@@ -59,7 +57,6 @@ export function BookingDetail({ id }: { id: string }) {
 
   const details = query.data;
   const { booking, customer, payment } = details;
-  const canEdit = can("bookings.edit");
   const nextStatuses = BOOKING_TRANSITIONS[booking.status];
 
   function move(status: BookingStatus) {
@@ -110,21 +107,19 @@ export function BookingDetail({ id }: { id: string }) {
               {nextStatuses.length === 0 ? (
                 <p className="text-sm text-muted">{t.finalStatus}</p>
               ) : (
-                canEdit && (
-                  <div className="flex flex-col gap-2">
-                    {nextStatuses.map((status) => (
-                      <Button
-                        key={status}
-                        variant={status === "cancelled" ? "outline" : "primary"}
-                        loading={changeStatus.isPending && changeStatus.variables?.status === status}
-                        disabled={changeStatus.isPending}
-                        onClick={() => move(status)}
-                      >
-                        {t.actions[status]}
-                      </Button>
-                    ))}
-                  </div>
-                )
+                <div className="flex flex-col gap-2">
+                  {nextStatuses.map((status) => (
+                    <Button
+                      key={status}
+                      variant={status === "cancelled" ? "outline" : "primary"}
+                      loading={changeStatus.isPending && changeStatus.variables?.status === status}
+                      disabled={changeStatus.isPending}
+                      onClick={() => move(status)}
+                    >
+                      {t.actions[status]}
+                    </Button>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -159,7 +154,7 @@ export function BookingDetail({ id }: { id: string }) {
                     </div>
                   )}
                 </dl>
-                {canEdit && payment.status === "pending" && booking.status !== "cancelled" && (
+                {payment.status === "pending" && booking.status !== "cancelled" && (
                   <Button variant="outline" loading={markPaid.isPending} onClick={() => markPaid.mutate(booking.id)}>
                     {t.markPaid}
                   </Button>
@@ -176,11 +171,9 @@ export function BookingDetail({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               <p className="font-medium">{customer.name}</p>
-              {can("customers.view") && (
-                <Button asChild variant="link" size="sm" className="self-start">
-                  <Link href={`/admin/customers/${customer.id}`}>{t.viewCustomer}</Link>
-                </Button>
-              )}
+              <Button asChild variant="link" size="sm" className="self-start">
+                <Link href={`/admin/customers/${customer.id}`}>{t.viewCustomer}</Link>
+              </Button>
             </CardContent>
           </Card>
         </aside>

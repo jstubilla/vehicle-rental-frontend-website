@@ -32,11 +32,10 @@ interface ContactDetailsCardProps {
   ownerId: string;
   contacts: ContactDetail[];
   /** Whether the signed-in role may add, edit and delete. */
-  canEdit: boolean;
 }
 
 /** The extra phone numbers and emails of a customer or lead: list, add, edit, delete. */
-export function ContactDetailsCard({ owner, ownerId, contacts, canEdit }: ContactDetailsCardProps) {
+export function ContactDetailsCard({ owner, ownerId, contacts }: ContactDetailsCardProps) {
   const mutations = useContactDetailMutations(owner, ownerId);
   const [editing, setEditing] = useState<ContactDetail | "new" | null>(null);
   const [deleting, setDeleting] = useState<ContactDetail | null>(null);
@@ -51,11 +50,9 @@ export function ContactDetailsCard({ owner, ownerId, contacts, canEdit }: Contac
             </CardTitle>
             <CardDescription>{t.description}</CardDescription>
           </div>
-          {canEdit && (
-            <Button variant="outline" size="sm" onClick={() => setEditing("new")}>
-              {t.add}
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={() => setEditing("new")}>
+            {t.add}
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -78,18 +75,16 @@ export function ContactDetailsCard({ owner, ownerId, contacts, canEdit }: Contac
                     {contact.value}
                   </a>
                 </div>
-                {canEdit && (
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => setEditing(contact)}>
-                      {content.admin.common.edit}
-                      <span className="sr-only"> {contact.value}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => setDeleting(contact)}>
-                      {content.admin.common.delete}
-                      <span className="sr-only"> {contact.value}</span>
-                    </Button>
-                  </div>
-                )}
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => setEditing(contact)}>
+                    {content.admin.common.edit}
+                    <span className="sr-only"> {contact.value}</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setDeleting(contact)}>
+                    {content.admin.common.delete}
+                    <span className="sr-only"> {contact.value}</span>
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

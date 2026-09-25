@@ -7,7 +7,7 @@ export const BUSINESS_TIME_ZONE = "Asia/Manila";
 /** Manila is UTC+8 all year (no daylight saving). */
 export const BUSINESS_UTC_OFFSET = "+08:00";
 
-export const VEHICLE_CATEGORIES = ["sedan", "suv", "van", "125cc", "155cc"] as const;
+export const VEHICLE_CATEGORIES = ["suv", "mpv", "sedan", "hatchback", "van", "pickup", "125cc", "155cc"] as const;
 export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
 
 export const VEHICLE_STATUSES = ["available", "maintenance", "inactive"] as const;
@@ -39,27 +39,6 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const PAYMENT_STATUSES = ["pending", "processing", "paid", "failed"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
-
-/**
- * Everything a role can be allowed to do. Roles are just bundles of these, and the
- * whole admin area checks these ids (never role names), so custom roles work everywhere.
- */
-export const PERMISSIONS = [
-  "dashboard.view",
-  "customers.view",
-  "customers.edit",
-  "leads.view",
-  "leads.edit",
-  "tasks.manage",
-  "bookings.view",
-  "bookings.edit",
-  "reports.view",
-  "pricing.edit",
-  "reviews.manage",
-  "users.manage",
-  "roles.manage",
-] as const;
-export type Permission = (typeof PERMISSIONS)[number];
 
 export const CONTACT_TYPES = ["phone", "email"] as const;
 export type ContactType = (typeof CONTACT_TYPES)[number];

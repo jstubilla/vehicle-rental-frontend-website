@@ -45,8 +45,7 @@ export function DashboardView() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {summary.data.leads && (
-              <>
+            <>
                 <StatCard
                   label={t.cards.leads}
                   value={summary.data.leads.open}
@@ -59,25 +58,19 @@ export function DashboardView() {
                   hint={t.cardHints.newLeads}
                   href="/admin/leads?stage=new"
                 />
-              </>
-            )}
-            {summary.data.customers && (
-              <StatCard
+            </>
+            <StatCard
                 label={t.cards.customers}
                 value={summary.data.customers.total}
                 hint={t.cardHints.customers}
                 href="/admin/customers"
               />
-            )}
-            {summary.data.tasks && (
               <StatCard
                 label={t.cards.tasks}
                 value={summary.data.tasks.open}
                 hint={t.cardHints.tasks(summary.data.tasks.overdue)}
                 href="/admin/tasks"
               />
-            )}
-            {summary.data.bookings && (
               <>
                 <StatCard
                   label={t.cards.activeBookings}
@@ -92,7 +85,6 @@ export function DashboardView() {
                   href="/admin/bookings?status=pending"
                 />
               </>
-            )}
           </div>
         )}
       </section>
@@ -125,7 +117,7 @@ export function DashboardView() {
           </CardContent>
         </Card>
 
-        {summary.data?.leads && (
+        {summary.data && (
           <Card as="section" aria-labelledby="leads-by-stage-heading" className="min-w-0 lg:col-span-1">
             <CardHeader>
               <CardTitle as="h2" id="leads-by-stage-heading" className="text-xl">
@@ -142,7 +134,7 @@ export function DashboardView() {
                     <Link href={`/admin/leads?stage=${stage}`} className="no-underline">
                       <LeadStageBadge stage={stage} />
                     </Link>
-                    <span className="font-semibold">{summary.data.leads?.byStage[stage] ?? 0}</span>
+                    <span className="font-semibold">{summary.data.leads.byStage[stage]}</span>
                   </li>
                 ))}
               </ul>

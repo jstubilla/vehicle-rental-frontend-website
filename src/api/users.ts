@@ -1,7 +1,6 @@
-import type { Permission } from "@/lib/constants";
 import { newId, readTable, writeTable } from "@/mocks/store";
-import type { Role, User } from "@/types";
-import { assertCan } from "./auth";
+import type { User } from "@/types";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 /**
@@ -13,39 +12,24 @@ export async function listUsers(): Promise<User[]> {
   return readTable("users");
 }
 
-export async function listRoles(): Promise<Role[]> {
-  await simulateNetwork();
-  return readTable("roles");
-}
-
-/** Refuses a change that would leave nobody able to manage users and roles (everyone locked out). */
-export function assertManagersRemain(users: User[], roles: Role[]): void {
-  const someone = (permission: Permission) =>
-    users.some((user) => user.active && roles.find((role) => role.id === user.roleId)?.permissions.includes(permission));
-  if (!someone("users.manage") || !someone("roles.manage")) {
-    throw new ApiError("At least one active user must be able to manage users and roles", 409, "last_admin");
+/** Refuses a change that would leave nobody able to sign in (everyone locked out). */
+export function assertSomeoneActive(users: User[]): void {
+  if (!users.some((user) => user.active)) {
+    throw new ApiError("At least one account must stay active", 409, "last_admin");
   }
 }
 
 /* ---------- Staff accounts (Users screen) ---------- */
 
-export interface StaffRow extends User {
-  roleName: string;
-}
-
-export async function listStaff(): Promise<StaffRow[]> {
-  assertCan("users.manage");
+export async function listStaff(): Promise<User[]> {
+  assertAdmin();
   await simulateNetwork();
-  const roles = readTable("roles");
-  return readTable("users")
-    .map((user) => ({ ...user, roleName: roles.find((r) => r.id === user.roleId)?.name ?? "" }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  return readTable("users").sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export interface UserInput {
   name: string;
   email: string;
-  roleId: string;
   active: boolean;
 }
 
@@ -56,19 +40,17 @@ function assertEmailFree(users: User[], email: string, exceptId?: string) {
 }
 
 export async function createUser(input: UserInput): Promise<User> {
-  assertCan("users.manage");
+  assertAdmin();
   await simulateNetwork();
 
   const users = readTable("users");
   const email = input.email.trim().toLowerCase();
   assertEmailFree(users, email);
-  if (!readTable("roles").some((r) => r.id === input.roleId)) throw new ApiError("Role not found", 404, "not_found");
 
   const user: User = {
     id: newId("usr"),
     name: input.name.trim(),
     email,
-    roleId: input.roleId,
     active: input.active,
     createdAt: new Date().toISOString(),
   };
@@ -77,7 +59,7 @@ export async function createUser(input: UserInput): Promise<User> {
 }
 
 export async function updateUser(id: string, input: UserInput): Promise<User> {
-  const session = assertCan("users.manage");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const users = readTable("users");
@@ -87,19 +69,16 @@ export async function updateUser(id: string, input: UserInput): Promise<User> {
   assertEmailFree(users, email, id);
   if (session.userId === id && !input.active) throw new ApiError("You cannot deactivate yourself", 409, "self_deactivate");
 
-  const roles = readTable("roles");
-  if (!roles.some((r) => r.id === input.roleId)) throw new ApiError("Role not found", 404, "not_found");
-
-  const updated: User = { ...existing, name: input.name.trim(), email, roleId: input.roleId, active: input.active };
+  const updated: User = { ...existing, name: input.name.trim(), email, active: input.active };
   const next = users.map((u) => (u.id === id ? updated : u));
-  assertManagersRemain(next, roles);
+  assertSomeoneActive(next);
   writeTable("users", next);
   return updated;
 }
 
 /** Turns an account off or back on. Deactivated people cannot sign in; their records stay. */
 export async function setUserActive(id: string, active: boolean): Promise<User> {
-  const session = assertCan("users.manage");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const users = readTable("users");
@@ -109,7 +88,7 @@ export async function setUserActive(id: string, active: boolean): Promise<User> 
 
   const updated: User = { ...existing, active };
   const next = users.map((u) => (u.id === id ? updated : u));
-  assertManagersRemain(next, readTable("roles"));
+  assertSomeoneActive(next);
   writeTable("users", next);
   return updated;
 }

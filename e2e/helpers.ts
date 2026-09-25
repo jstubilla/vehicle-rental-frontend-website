@@ -13,15 +13,13 @@ export async function visit(page: Page, path: string): Promise<void> {
   await page.waitForLoadState("networkidle");
 }
 
-export type DemoRole = (typeof content.admin.login.demo.accounts)[number]["role"];
-
-export const demoAccount = (role: DemoRole) =>
-  content.admin.login.demo.accounts.find((account) => account.role === role)!;
+/** The demo staff login. Everyone who signs in is an admin, so there is only one to pick. */
+export const demoAccount = () => content.admin.login.demo.accounts[0];
 
 /** Signs in through the real login form. */
-export async function loginAs(page: Page, role: DemoRole, from = "/admin/login"): Promise<void> {
+export async function loginAs(page: Page, from = "/admin/login"): Promise<void> {
   await visit(page, from);
-  await page.getByLabel(content.admin.login.email).fill(demoAccount(role).email);
+  await page.getByLabel(content.admin.login.email).fill(demoAccount().email);
   await page.getByLabel(content.admin.login.password).fill(DEMO_PASSWORD);
   await page.getByRole("button", { name: content.admin.login.submit }).click();
   await page.waitForURL((url) => url.pathname.startsWith("/admin") && url.pathname !== "/admin/login");

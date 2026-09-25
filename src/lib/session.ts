@@ -1,10 +1,9 @@
 import { z } from "zod";
-import { PERMISSIONS, type Permission } from "./constants";
 
 /**
  * MOCK LOGIN SESSION. A real backend would issue a signed, tamper-proof session.
  * Here the session is a plain cookie the mock login sets, which is enough to demo
- * route protection and roles. Never rely on this for real security.
+ * route protection. Never rely on this for real security.
  */
 export const SESSION_COOKIE = "car-rental-session";
 export const SESSION_TTL_SECONDS = 8 * 60 * 60;
@@ -13,8 +12,6 @@ export const sessionSchema = z.object({
   userId: z.string(),
   name: z.string(),
   email: z.string(),
-  roleName: z.string(),
-  permissions: z.array(z.enum(PERMISSIONS)),
   /** Milliseconds since 1970. */
   expiresAt: z.number(),
 });
@@ -48,8 +45,4 @@ export function decodeSession(value: string | undefined): Session | null {
   } catch {
     return null;
   }
-}
-
-export function sessionCan(session: Pick<Session, "permissions"> | null | undefined, permission: Permission): boolean {
-  return session?.permissions.includes(permission) ?? false;
 }

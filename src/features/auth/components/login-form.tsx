@@ -54,12 +54,12 @@ export function LoginForm() {
               {t.demo.accounts.map((account) => (
                 <li key={account.email} className="flex flex-wrap items-center justify-between gap-2">
                   <span className="text-sm">
-                    <span className="font-medium">{account.role}</span>
+                    <span className="font-medium">{account.name}</span>
                     <span className="block text-muted">{account.email}</span>
                   </span>
                   <Button variant="outline" size="sm" onClick={() => fill(account.email, DEMO_PASSWORD)}>
                     {t.demo.use}
-                    <span className="sr-only"> ({account.role})</span>
+                    <span className="sr-only"> ({account.name})</span>
                   </Button>
                 </li>
               ))}

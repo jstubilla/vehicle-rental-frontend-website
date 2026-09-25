@@ -1,11 +1,10 @@
-import type { Account, Activity, Booking, Customer, Lead, Payment, Review, Role, Task, User, Vehicle } from "@/types";
+import type { Account, Activity, Booking, Customer, Lead, Payment, Review, Task, User, Vehicle } from "@/types";
 import { seedAccounts } from "./accounts";
 import { seedActivities } from "./activities";
 import { seedBookings, seedPayments } from "./bookings";
 import { seedCustomers } from "./customers";
 import { seedLeads } from "./leads";
 import { seedReviews } from "./reviews";
-import { seedRoles } from "./roles";
 import { seedTasks } from "./tasks";
 import { seedUsers } from "./users";
 import { seedVehicles } from "./vehicles";
@@ -17,7 +16,7 @@ import { seedVehicles } from "./vehicles";
  * - On the server it is just the seed data (the server has no localStorage).
  * - Bump SEED_VERSION whenever seed data changes, so old saved data is discarded.
  */
-const SEED_VERSION = 13;
+const SEED_VERSION = 15;
 const STORAGE_PREFIX = "car-rental-mock-db-v";
 const STORAGE_KEY = `${STORAGE_PREFIX}${SEED_VERSION}`;
 
@@ -29,7 +28,6 @@ export interface Db {
   leads: Lead[];
   activities: Activity[];
   users: User[];
-  roles: Role[];
   tasks: Task[];
   reviews: Review[];
   accounts: Account[];
@@ -44,7 +42,6 @@ function createSeed(): Db {
     leads: structuredClone(seedLeads),
     activities: structuredClone(seedActivities),
     users: structuredClone(seedUsers),
-    roles: structuredClone(seedRoles),
     tasks: structuredClone(seedTasks),
     reviews: structuredClone(seedReviews),
     accounts: structuredClone(seedAccounts),

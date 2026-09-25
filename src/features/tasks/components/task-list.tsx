@@ -20,7 +20,6 @@ import {
   TableRow,
 } from "@/components/ui";
 import { content } from "@/content";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { SearchBox } from "@/features/shared/search-box";
 import { useUsers } from "@/features/users/hooks/use-users";
 import { MINE, NOBODY, type TaskListParams, type TaskRow } from "@/lib/task-search";
@@ -32,7 +31,6 @@ import { TaskFormModal } from "./task-form-modal";
 const t = content.admin.tasks;
 
 export function TaskList() {
-  const { can } = useAuth();
   const list = useTaskList();
   const users = useUsers();
   const { setDone, remove } = useTaskMutations();
@@ -46,13 +44,10 @@ export function TaskList() {
 
   function linkedCell(task: TaskRow) {
     if (!task.linkedType || !task.linkedName) return content.admin.common.none;
-    const allowed = can(task.linkedType === "lead" ? "leads.view" : "customers.view");
-    return allowed ? (
+    return (
       <Link href={`/admin/${task.linkedType === "lead" ? "leads" : "customers"}/${task.linkedId}`}>
         {task.linkedName}
       </Link>
-    ) : (
-      task.linkedName
     );
   }
 

@@ -5,14 +5,14 @@ import type { BookingStatus } from "@/lib/constants";
 import { formatCurrency } from "@/lib/currency";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity, Booking, Paginated, Payment } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { toBookingDetails, type BookingDetails } from "./bookings";
 import { ApiError, simulateNetwork } from "./client";
 
 /** Staff-side booking management. (Visitors create bookings in api/bookings.ts.) */
 
 export async function listBookings(params: BookingListParams): Promise<Paginated<BookingRow>> {
-  assertCan("bookings.view");
+  assertAdmin();
   await simulateNetwork();
 
   const customers = readTable("customers");
@@ -28,7 +28,7 @@ export async function listBookings(params: BookingListParams): Promise<Paginated
 }
 
 export async function getBookingById(id: string): Promise<BookingDetails | null> {
-  assertCan("bookings.view");
+  assertAdmin();
   await simulateNetwork();
   const booking = readTable("bookings").find((b) => b.id === id);
   return booking ? toBookingDetails(booking) : null;
@@ -46,7 +46,7 @@ const customerNote = (customerId: string, type: Activity["type"], body: string, 
 
 /** Moves a booking to its next status, if the rules allow it, and logs it on the customer. */
 export async function changeBookingStatus(id: string, status: BookingStatus): Promise<Booking> {
-  const session = assertCan("bookings.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const bookings = readTable("bookings");
@@ -76,7 +76,7 @@ export async function changeBookingStatus(id: string, status: BookingStatus): Pr
 
 /** Records that the customer has paid (used for pay-at-pick-up bookings). */
 export async function markPaymentReceived(bookingId: string): Promise<Payment> {
-  const session = assertCan("bookings.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const booking = readTable("bookings").find((b) => b.id === bookingId);

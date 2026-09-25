@@ -17,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui";
 import { content } from "@/content";
-import { Can } from "@/features/auth/components/permission-gate";
 import { SearchBox } from "@/features/shared/search-box";
 import { formatDate } from "@/lib/dates";
 import { useCustomerList } from "../hooks/use-customers";
@@ -40,9 +39,7 @@ export function CustomerList() {
           <h1>{t.title}</h1>
           <p className="text-lg text-muted">{t.description}</p>
         </div>
-        <Can permission="customers.edit">
-          <Button onClick={() => setAdding(true)}>{t.add}</Button>
-        </Can>
+        <Button onClick={() => setAdding(true)}>{t.add}</Button>
       </div>
 
       <SearchBox

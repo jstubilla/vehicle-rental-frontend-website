@@ -1,9 +1,7 @@
 import { content } from "@/content";
-import { requiredPermission } from "@/lib/permissions";
 
 /**
- * The admin sidebar. Each entry appears only for roles that have the permission the
- * page needs (taken from lib/permissions.ts, so the sidebar and the route guard agree).
+ * The admin sidebar. Every signed-in staff member is an admin, so everyone sees every entry.
  * New admin pages are added here as they are built.
  */
 const NAV_ITEMS = [
@@ -17,7 +15,6 @@ const NAV_ITEMS = [
   { href: "/admin/pricing", label: content.admin.nav.pricing },
   { href: "/admin/reviews", label: content.admin.nav.reviews },
   { href: "/admin/users", label: content.admin.nav.users },
-  { href: "/admin/roles", label: content.admin.nav.roles },
 ] as const;
 
-export const ADMIN_NAV = NAV_ITEMS.map((item) => ({ ...item, permission: requiredPermission(item.href) }));
+export const ADMIN_NAV = NAV_ITEMS;

@@ -18,7 +18,7 @@ const rows: Row[] = [
   ["Follow up Gerald Uy on the quotation", "lead-06", -2, "usr-03", "open", ""],
   ["Confirm pick-up details with Juan Dela Cruz", "cus-01", 2, "usr-05", "open", "NAIA pick-up, 10:00 AM."],
   ["Prepare monthly invoice for Mark Villanueva", "cus-05", 5, "usr-04", "open", "Corporate account. Send to accounts@villanueva-logistics.example."],
-  ["Prepare a wedding van quote for Vincent Ang", "lead-10", 1, "usr-02", "open", "14 guests. Suggest the Nissan Urvan plus one sedan."],
+  ["Prepare a wedding van quote for Vincent Ang", "lead-10", 1, "usr-02", "open", "14 guests. Suggest a van plus one sedan."],
   ["Explain EV charging to Lorna Feliciano", "lead-09", 3, "usr-03", "open", ""],
   ["Follow up with Bea Salonga about the Cebu rental", "lead-07", -1, "usr-02", "open", ""],
   ["Ask Camille Rivera for the next tour dates", "cus-20", -5, "usr-02", "done", "Sent a message. Waiting for the schedule."],

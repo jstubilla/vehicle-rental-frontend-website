@@ -14,7 +14,6 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { content } from "@/content";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useTaskMutations } from "../hooks/use-task-mutations";
 import { useLinkedTasks } from "../hooks/use-tasks";
 import { TaskDue } from "./task-due";
@@ -22,14 +21,11 @@ import { TaskFormModal } from "./task-form-modal";
 
 const t = content.admin.tasks;
 
-/** The follow-ups for one lead or customer, with a quick way to add another. Hidden for roles without task access. */
+/** The follow-ups for one lead or customer, with a quick way to add another. */
 export function LinkedTasksCard({ type, id }: { type: "lead" | "customer"; id: string }) {
-  const { can } = useAuth();
   const tasks = useLinkedTasks(type, id);
   const { setDone } = useTaskMutations();
   const [adding, setAdding] = useState(false);
-
-  if (!can("tasks.manage")) return null;
 
   return (
     <Card as="section" aria-labelledby={`linked-tasks-${id}`}>

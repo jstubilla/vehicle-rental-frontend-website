@@ -56,7 +56,7 @@ test("a visitor completes all six steps, including a declined payment", async ({
   });
 
   await test.step("Catalog: the trip total is shown and Book now carries the dates", async () => {
-    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Toyota Vios" }) });
+    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Sedan" }) });
     await expect(vios).toContainText(content.vehicleCard.totalFor(3));
     await expect(vios).toContainText(formatCurrency(5400));
     await vios.getByRole("link", { name: content.vehicleCard.bookNow }).click();
@@ -71,7 +71,7 @@ test("a visitor completes all six steps, including a declined payment", async ({
 
   await test.step("Step 2: the chosen vehicle is selected and the total is shown", async () => {
     await expect(page).toHaveURL(/\/book\/vehicle/);
-    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Toyota Vios" }) });
+    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Sedan" }) });
     await expect(vios.getByRole("button", { name: new RegExp(b.vehicle.selected) })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -143,10 +143,10 @@ test("a visitor completes all six steps, including a declined payment", async ({
   });
 
   await test.step("Booking is open: the same car can be booked again for the same dates", async () => {
-    await visit(page, `/book/dates${tripQuery}&vehicle=toyota-vios-2024`);
+    await visit(page, `/book/dates${tripQuery}&vehicle=sedan`);
     await page.getByRole("button", { name: b.common.continue }).click();
     await expect(page).toHaveURL(/\/book\/vehicle/);
-    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Toyota Vios" }) });
+    const vios = page.getByRole("article").filter({ has: page.getByRole("heading", { name: "Sedan" }) });
     await expect(vios.getByRole("button", { name: b.vehicle.select })).toBeEnabled();
     await vios.getByRole("button", { name: b.vehicle.select }).click();
     await expect(page.getByRole("link", { name: b.common.continue })).toBeEnabled();
@@ -167,7 +167,7 @@ test("a visitor can use a Google Maps link instead of typing an address", async 
 });
 
 test("paying at pick-up leaves the booking pending", async ({ page }) => {
-  await reachPayment(page, "toyota-wigo-2024", 30, 2);
+  await reachPayment(page, "hatchback", 30, 2);
 
   await page.getByRole("radio", { name: new RegExp(b.payment.methods.pay_at_pickup.label) }).check();
   await expect(page.getByText(b.payment.pickupNotice)).toBeVisible();
@@ -188,14 +188,14 @@ test("later steps cannot be opened before the earlier ones are done", async ({ p
 });
 
 test("a price change before paying charges nothing and asks the visitor to check again", async ({ page }) => {
-  await reachPayment(page, "toyota-wigo-2024", 40, 2);
+  await reachPayment(page, "hatchback", 40, 2);
   await page.getByLabel(b.payment.terms).check();
 
-  // The owner raises the Wigo's daily rate from 1,400 to 1,700 while the visitor is on this page.
+  // The owner raises the hatchback's daily rate from 1,400 to 1,700 while the visitor is on this page.
   await page.evaluate(() => {
     const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
     const db = JSON.parse(localStorage.getItem(key)!);
-    db.vehicles.find((vehicle: { slug: string }) => vehicle.slug === "toyota-wigo-2024").pricePerDay = 1700;
+    db.vehicles.find((vehicle: { slug: string }) => vehicle.slug === "hatchback").pricePerDay = 1700;
     localStorage.setItem(key, JSON.stringify(db));
   });
 

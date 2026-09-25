@@ -1,5 +1,4 @@
-import type { Permission } from "@/lib/constants";
-import { SESSION_TTL_SECONDS, sessionCan, type Session } from "@/lib/session";
+import { SESSION_TTL_SECONDS, type Session } from "@/lib/session";
 import { readTable } from "@/mocks/store";
 import { ApiError, simulateNetwork } from "./client";
 
@@ -11,7 +10,7 @@ export const DEMO_PASSWORD = "demo1234";
 
 const SESSION_URL = "/api/mock-session";
 
-/** The signed-in user, remembered so API functions can check permissions. */
+/** The signed-in user, remembered so API functions can check that someone is signed in. */
 let currentSession: Session | null = null;
 
 export async function login(email: string, password: string): Promise<Session> {
@@ -23,16 +22,10 @@ export async function login(email: string, password: string): Promise<Session> {
   }
   if (!user.active) throw new ApiError("This account is deactivated", 403, "account_inactive");
 
-  const role = readTable("roles").find((r) => r.id === user.roleId);
-  if (!role) throw new ApiError("This account has no role", 403, "account_inactive");
-
   const session: Session = {
     userId: user.id,
     name: user.name,
     email: user.email,
-    roleName: role.name,
-    // A snapshot: changes to a role apply the next time the person signs in.
-    permissions: role.permissions,
     expiresAt: Date.now() + SESSION_TTL_SECONDS * 1000,
   };
 
@@ -61,13 +54,11 @@ export async function logout(): Promise<void> {
 }
 
 /**
- * Used inside admin API functions: refuses the call if the signed-in user's role
- * lacks the permission. The screens also hide what a role cannot do, but this
- * is the layer that actually stops it (and the one a real backend repeats).
+ * Used inside admin API functions: refuses the call if nobody is signed in. Every
+ * signed-in staff member is an admin and may do everything. The route guard in
+ * proxy.ts is the first line; a real backend repeats this check on every request.
  */
-export function assertCan(permission: Permission): Session {
-  if (!currentSession || !sessionCan(currentSession, permission)) {
-    throw new ApiError("You do not have permission to do that", 403, "forbidden");
-  }
+export function assertAdmin(): Session {
+  if (!currentSession) throw new ApiError("Please sign in", 401, "forbidden");
   return currentSession;
 }

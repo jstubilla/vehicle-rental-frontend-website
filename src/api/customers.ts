@@ -1,12 +1,11 @@
 import { searchCustomers, type CustomerListParams, type CustomerRow } from "@/lib/customer-search";
-import { sessionCan } from "@/lib/session";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Booking, Customer, Paginated } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 export async function listCustomers(params: CustomerListParams): Promise<Paginated<CustomerRow>> {
-  assertCan("customers.view");
+  assertAdmin();
   await simulateNetwork();
   const bookings = readTable("bookings");
   const rows: CustomerRow[] = readTable("customers").map((customer) => ({
@@ -18,26 +17,23 @@ export async function listCustomers(params: CustomerListParams): Promise<Paginat
 
 export interface CustomerProfile {
   customer: Customer;
-  /** Empty unless the signed-in role may view bookings. */
   bookings: { booking: Booking; vehicleName: string }[];
 }
 
 export async function getCustomerProfile(id: string): Promise<CustomerProfile | null> {
-  const session = assertCan("customers.view");
+  assertAdmin();
   await simulateNetwork();
   const customer = readTable("customers").find((c) => c.id === id);
   if (!customer) return null;
 
   const vehicles = readTable("vehicles");
-  const bookings = sessionCan(session, "bookings.view")
-    ? readTable("bookings")
-        .filter((b) => b.customerId === id)
-        .sort((a, b) => b.pickupDate.localeCompare(a.pickupDate))
-        .map((booking) => ({
-          booking,
-          vehicleName: vehicles.find((v) => v.id === booking.vehicleId)?.name ?? "",
-        }))
-    : [];
+  const bookings = readTable("bookings")
+    .filter((b) => b.customerId === id)
+    .sort((a, b) => b.pickupDate.localeCompare(a.pickupDate))
+    .map((booking) => ({
+      booking,
+      vehicleName: vehicles.find((v) => v.id === booking.vehicleId)?.name ?? "",
+    }));
   return { customer, bookings };
 }
 
@@ -55,7 +51,7 @@ function assertEmailFree(customers: Customer[], email: string, exceptId?: string
 }
 
 export async function createCustomer(input: CustomerInput): Promise<Customer> {
-  const session = assertCan("customers.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const customers = readTable("customers");
@@ -90,7 +86,7 @@ export async function createCustomer(input: CustomerInput): Promise<Customer> {
 }
 
 export async function updateCustomer(id: string, input: CustomerInput): Promise<Customer> {
-  assertCan("customers.edit");
+  assertAdmin();
   await simulateNetwork();
 
   const customers = readTable("customers");
@@ -114,7 +110,7 @@ export async function updateCustomer(id: string, input: CustomerInput): Promise<
 
 /** Deletes a customer and their activity log. Customers with bookings are kept. */
 export async function deleteCustomer(id: string): Promise<void> {
-  assertCan("customers.edit");
+  assertAdmin();
   await simulateNetwork();
 
   if (readTable("bookings").some((b) => b.customerId === id)) {

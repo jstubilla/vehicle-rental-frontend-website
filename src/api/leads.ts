@@ -3,7 +3,7 @@ import type { LeadSource, LeadStage } from "@/lib/constants";
 import { searchLeads, type LeadListParams, type LeadRow } from "@/lib/lead-search";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity, Customer, Lead, Paginated } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 function toLeadRows(): LeadRow[] {
@@ -17,14 +17,14 @@ function toLeadRows(): LeadRow[] {
 }
 
 export async function listLeads(params: LeadListParams): Promise<Paginated<LeadRow>> {
-  assertCan("leads.view");
+  assertAdmin();
   await simulateNetwork();
   return searchLeads(toLeadRows(), params);
 }
 
 /** Every lead, newest first, for the pipeline board (which shows them all at once). */
 export async function listPipelineLeads(): Promise<LeadRow[]> {
-  assertCan("leads.view");
+  assertAdmin();
   await simulateNetwork();
   return toLeadRows().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
@@ -37,7 +37,7 @@ export interface LeadDetail {
 }
 
 export async function getLead(id: string): Promise<LeadDetail | null> {
-  assertCan("leads.view");
+  assertAdmin();
   await simulateNetwork();
   const lead = readTable("leads").find((l) => l.id === id);
   if (!lead) return null;
@@ -76,7 +76,7 @@ function addActivities(...items: Activity[]) {
 }
 
 export async function createLead(input: LeadInput): Promise<Lead> {
-  const session = assertCan("leads.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const now = new Date().toISOString();
@@ -99,7 +99,7 @@ export async function createLead(input: LeadInput): Promise<Lead> {
 
 /** Edits a lead's details. The stage is changed with changeLeadStage so the change is logged. */
 export async function updateLead(id: string, input: Omit<LeadInput, "stage">): Promise<Lead> {
-  assertCan("leads.edit");
+  assertAdmin();
   await simulateNetwork();
 
   const leads = readTable("leads");
@@ -120,7 +120,7 @@ export async function updateLead(id: string, input: Omit<LeadInput, "stage">): P
 }
 
 export async function changeLeadStage(id: string, stage: LeadStage): Promise<Lead> {
-  const session = assertCan("leads.edit");
+  const session = assertAdmin();
   await simulateNetwork();
 
   const leads = readTable("leads");
@@ -148,8 +148,8 @@ export async function changeLeadStage(id: string, stage: LeadStage): Promise<Lea
  * same email already exists, the lead is linked to them instead of making a duplicate.
  */
 export async function convertLeadToCustomer(id: string): Promise<{ customerId: string }> {
-  const session = assertCan("leads.edit");
-  assertCan("customers.edit");
+  const session = assertAdmin();
+  assertAdmin();
   await simulateNetwork();
 
   const leads = readTable("leads");
@@ -202,7 +202,7 @@ export async function convertLeadToCustomer(id: string): Promise<{ customerId: s
 }
 
 export async function deleteLead(id: string): Promise<void> {
-  assertCan("leads.edit");
+  assertAdmin();
   await simulateNetwork();
   writeTable("leads", readTable("leads").filter((l) => l.id !== id));
   writeTable("activities", readTable("activities").filter((a) => !(a.entityType === "lead" && a.entityId === id)));

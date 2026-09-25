@@ -25,8 +25,8 @@ export interface SummaryData {
 
 const vehicleMeta = (vehicle: Vehicle) =>
   vehicle.seats !== undefined
-    ? `${content.enums.vehicleCategory[vehicle.category]} · ${content.vehicleCard.seats(vehicle.seats)}`
-    : content.enums.vehicleCategory[vehicle.category];
+    ? `${vehicle.examples} · ${content.vehicleCard.seats(vehicle.seats)}`
+    : vehicle.examples;
 
 /** Summary of a booking that is still being filled in. */
 export function summaryFromFlow({

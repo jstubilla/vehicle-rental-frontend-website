@@ -1,14 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ApiError } from "@/api/client";
-import type { StaffRow } from "@/api/users";
-import { Alert, Button, Checkbox, FormField, Input, Modal, Select } from "@/components/ui";
+import { Alert, Button, Checkbox, FormField, Input, Modal } from "@/components/ui";
+import type { User } from "@/types";
 import { content } from "@/content";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { SHOW_MOCK_CONTROLS } from "@/lib/site";
-import { useRoleOptions, useUserMutations, userErrorMessage } from "../hooks/use-staff";
+import { useUserMutations, userErrorMessage } from "../hooks/use-staff";
 import { userFormSchema, type UserFormValues } from "../schemas";
 
 const t = content.admin.users.form;
@@ -17,7 +17,7 @@ interface UserFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Pass a user to edit; leave out to add a new one. */
-  user?: StaffRow;
+  user?: User;
 }
 
 export function UserFormModal({ open, onOpenChange, user }: UserFormModalProps) {
@@ -29,9 +29,8 @@ export function UserFormModal({ open, onOpenChange, user }: UserFormModalProps) 
   );
 }
 
-function UserForm({ user, onClose }: { user?: StaffRow; onClose: () => void }) {
+function UserForm({ user, onClose }: { user?: User; onClose: () => void }) {
   const { session } = useAuth();
-  const roles = useRoleOptions();
   const { create, update } = useUserMutations();
   const mutation = user ? update : create;
 
@@ -40,11 +39,10 @@ function UserForm({ user, onClose }: { user?: StaffRow; onClose: () => void }) {
     defaultValues: {
       name: user?.name ?? "",
       email: user?.email ?? "",
-      roleId: user?.roleId ?? "",
       active: user?.active ?? true,
     },
   });
-  const { register, control, setError, formState } = form;
+  const { register, setError, formState } = form;
   const { errors } = formState;
   const editingSelf = user !== undefined && user.id === session?.userId;
 
@@ -72,23 +70,6 @@ function UserForm({ user, onClose }: { user?: StaffRow; onClose: () => void }) {
       </FormField>
       <FormField label={t.email} required error={errors.email?.message}>
         <Input {...register("email")} type="email" autoComplete="off" />
-      </FormField>
-      <FormField label={t.role} required hint={user ? content.admin.users.roleChangeNote : undefined} error={errors.roleId?.message}>
-        {/* Controlled, because the roles load after the form opens. */}
-        <Controller
-          control={control}
-          name="roleId"
-          render={({ field }) => (
-            <Select name={field.name} value={field.value} onChange={field.onChange} onBlur={field.onBlur} ref={field.ref}>
-              <option value="">{t.rolePlaceholder}</option>
-              {roles.data?.map((role) => (
-                <option key={role.id} value={role.id}>
-                  {role.name}
-                </option>
-              ))}
-            </Select>
-          )}
-        />
       </FormField>
       <Checkbox {...register("active")} label={t.active} disabled={editingSelf} />
       {SHOW_MOCK_CONTROLS && <p className="text-sm text-muted">{t.passwordNote}</p>}

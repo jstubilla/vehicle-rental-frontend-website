@@ -1,7 +1,7 @@
 import type { ContactType } from "@/lib/constants";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { ContactDetail } from "@/types";
-import { assertCan } from "./auth";
+import { assertAdmin } from "./auth";
 import { ApiError, simulateNetwork } from "./client";
 
 /** Extra phone numbers and emails on a customer or a lead. */
@@ -21,7 +21,7 @@ function changeRow<T extends WithContacts>(rows: T[], id: string, change: (list:
 }
 
 async function change(owner: ContactOwner, id: string, edit: (list: ContactDetail[]) => ContactDetail[]) {
-  assertCan(owner === "customer" ? "customers.edit" : "leads.edit");
+  assertAdmin();
   await simulateNetwork();
   if (owner === "customer") writeTable("customers", changeRow(readTable("customers"), id, edit));
   else writeTable("leads", changeRow(readTable("leads"), id, edit));

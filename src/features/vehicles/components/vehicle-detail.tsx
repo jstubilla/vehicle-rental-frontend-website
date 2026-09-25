@@ -34,8 +34,9 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
 
   const available = vehicle.status === "available";
   const specs = [
+    [t.specs.example, vehicle.examples],
     [t.specs.category, content.enums.vehicleCategory[vehicle.category]],
-    ...(vehicle.seats !== undefined ? [[t.specs.seats, String(vehicle.seats)] as const] : []),
+    ...(vehicle.seats !== undefined ? [[t.specs.seats, t.upTo(vehicle.seats)] as const] : []),
   ];
 
   return (

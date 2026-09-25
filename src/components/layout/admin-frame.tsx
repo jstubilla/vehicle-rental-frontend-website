@@ -16,7 +16,7 @@ const t = content.admin;
  */
 export function AdminFrame({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { session, isLoading, can } = useAuth();
+  const { session, isLoading } = useAuth();
   const { logout, isLoggingOut } = useLogout();
 
   useEffect(() => {
@@ -32,8 +32,6 @@ export function AdminFrame({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const nav = ADMIN_NAV.filter((item) => item.permission === null || can(item.permission));
-
   return (
     <AdminShell
       brand={
@@ -42,7 +40,7 @@ export function AdminFrame({ children }: { children: React.ReactNode }) {
           <span className="sr-only">{t.frame.brand}</span>
         </>
       }
-      nav={nav}
+      nav={ADMIN_NAV}
       labels={{
         navigation: t.nav.label,
         openMenu: t.frame.openMenu,
@@ -51,7 +49,7 @@ export function AdminFrame({ children }: { children: React.ReactNode }) {
         logout: isLoggingOut ? t.frame.loggingOut : t.frame.logout,
         viewSite: t.nav.viewSite,
       }}
-      user={{ name: session.name, role: session.roleName }}
+      user={{ name: session.name, caption: t.frame.brand }}
       onLogout={logout}
       logoutBusy={isLoggingOut}
     >

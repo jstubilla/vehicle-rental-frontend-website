@@ -24,7 +24,7 @@ export interface AdminShellProps {
     logout: string;
     viewSite: string;
   };
-  user: { name: string; role: string };
+  user: { name: string; caption?: string };
   onLogout: () => void;
   logoutBusy?: boolean;
   siteHref?: string;
@@ -76,7 +76,7 @@ export function AdminShell({
       <p className="text-sm">
         <span className="block text-muted">{labels.signedInAs}</span>
         <span className="block font-semibold">{user.name}</span>
-        <span className="block text-muted">{user.role}</span>
+        {user.caption && <span className="block text-muted">{user.caption}</span>}
       </p>
       <div className="flex items-center gap-2">
         <Button asChild variant="link" size="sm">

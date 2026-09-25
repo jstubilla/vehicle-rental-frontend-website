@@ -1,7 +1,7 @@
 import type { ImageAsset } from "@/assets/config";
 import type { Vehicle } from "@/types";
 
-/** Four placeholder photos per vehicle (front, side, three-quarter, rear). */
+/** Four placeholder photos per vehicle type (front, side, three-quarter, rear). */
 function photos(name: string): ImageAsset[] {
   return ["Front view", "Side view", "Three-quarter view", "Rear view"].map((view) => ({
     src: null,
@@ -13,21 +13,20 @@ function photos(name: string): ImageAsset[] {
 
 type Seed = Omit<Vehicle, "images">;
 
+/**
+ * One entry per TYPE of vehicle, in the order shown to customers. The example is a guide, not a promise:
+ * customers get "this or similar". Daily rates are the ones the earlier example cars had (staff change them
+ * on the Pricing screen). Seats are the most the type carries.
+ */
 const vehicles: Seed[] = [
-  { id: "veh-01", slug: "toyota-wigo-2024", name: "Toyota Wigo", category: "sedan", seats: 5, pricePerDay: 1400, plateNumber: "NCA 1024", status: "available", featured: false },
-  { id: "veh-02", slug: "mitsubishi-mirage-g4-2023", name: "Mitsubishi Mirage G4", category: "sedan", seats: 5, pricePerDay: 1500, plateNumber: "NDB 2231", status: "available", featured: false },
-  { id: "veh-03", slug: "toyota-vios-2024", name: "Toyota Vios", category: "sedan", seats: 5, pricePerDay: 1800, plateNumber: "NEA 4410", status: "available", featured: true },
-  { id: "veh-04", slug: "honda-city-2024", name: "Honda City", category: "sedan", seats: 5, pricePerDay: 2100, plateNumber: "NFC 8830", status: "available", featured: false },
-  { id: "veh-05", slug: "mitsubishi-xpander-2024", name: "Mitsubishi Xpander", category: "van", seats: 7, pricePerDay: 2600, plateNumber: "NGD 5512", status: "available", featured: true },
-  { id: "veh-06", slug: "toyota-innova-2023", name: "Toyota Innova", category: "van", seats: 7, pricePerDay: 2800, plateNumber: "NHE 3308", status: "maintenance", featured: false },
-  { id: "veh-07", slug: "toyota-corolla-cross-hybrid-2024", name: "Toyota Corolla Cross Hybrid", category: "suv", seats: 5, pricePerDay: 3600, plateNumber: "NJF 7745", status: "available", featured: false },
-  { id: "veh-08", slug: "byd-atto-3-2024", name: "BYD Atto 3", category: "suv", seats: 5, pricePerDay: 4000, plateNumber: "NKG 9021", status: "available", featured: false },
-  { id: "veh-09", slug: "toyota-fortuner-2024", name: "Toyota Fortuner", category: "suv", seats: 7, pricePerDay: 4200, plateNumber: "NLH 1187", status: "available", featured: true },
-  { id: "veh-10", slug: "toyota-hilux-2023", name: "Toyota Hilux", category: "suv", seats: 5, pricePerDay: 3500, plateNumber: "NMJ 6650", status: "available", featured: false },
-  { id: "veh-11", slug: "nissan-urvan-2022", name: "Nissan Urvan", category: "van", seats: 15, pricePerDay: 3200, plateNumber: "NNK 2249", status: "available", featured: false },
-  { id: "veh-12", slug: "toyota-hiace-grandia-2024", name: "Toyota HiAce Grandia", category: "van", seats: 12, pricePerDay: 4800, plateNumber: "NPL 8873", status: "available", featured: true },
-  { id: "veh-13", slug: "honda-click-125i-2024", name: "Honda Click 125i", category: "125cc", pricePerDay: 450, plateNumber: "MC 1102", status: "available", featured: false },
-  { id: "veh-14", slug: "yamaha-aerox-155-2023", name: "Yamaha Aerox 155", category: "155cc", pricePerDay: 600, plateNumber: "MC 2245", status: "available", featured: false },
+  { id: "veh-01", slug: "suv", name: "SUV", category: "suv", examples: "Toyota Fortuner or similar", seats: 7, pricePerDay: 4200, status: "available", featured: true },
+  { id: "veh-02", slug: "mpv", name: "Multi-purpose vehicle (MPV)", category: "mpv", examples: "Mitsubishi Xpander or similar", seats: 8, pricePerDay: 2600, status: "available", featured: true },
+  { id: "veh-03", slug: "sedan", name: "Sedan", category: "sedan", examples: "Toyota Vios or similar", seats: 5, pricePerDay: 1800, status: "available", featured: true },
+  { id: "veh-04", slug: "hatchback", name: "Hatchback", category: "hatchback", examples: "Toyota Wigo or similar", seats: 5, pricePerDay: 1400, status: "available", featured: false },
+  { id: "veh-05", slug: "van", name: "Van", category: "van", examples: "Toyota HiAce or similar", seats: 15, pricePerDay: 4800, status: "available", featured: true },
+  { id: "veh-06", slug: "pickup", name: "Pick-up truck", category: "pickup", examples: "Toyota Hilux or similar", seats: 5, pricePerDay: 3500, status: "available", featured: false },
+  { id: "veh-07", slug: "125cc", name: "125cc motorcycle", category: "125cc", examples: "Honda Click 125i or similar", pricePerDay: 450, status: "available", featured: false },
+  { id: "veh-08", slug: "155cc", name: "155cc motorcycle", category: "155cc", examples: "Yamaha Aerox 155 or similar", pricePerDay: 600, status: "available", featured: false },
 ];
 
 export const seedVehicles: Vehicle[] = vehicles.map((v) => ({ ...v, images: photos(v.name) }));

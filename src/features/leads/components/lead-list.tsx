@@ -19,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui";
 import { content } from "@/content";
-import { Can } from "@/features/auth/components/permission-gate";
 import { SearchBox } from "@/features/shared/search-box";
 import { useUsers } from "@/features/users/hooks/use-users";
 import { LEAD_SOURCES, LEAD_STAGES } from "@/lib/constants";
@@ -48,9 +47,7 @@ export function LeadList() {
           <h1>{t.title}</h1>
           <p className="text-lg text-muted">{t.description}</p>
         </div>
-        <Can permission="leads.edit">
-          <Button onClick={() => setAdding(true)}>{t.add}</Button>
-        </Can>
+        <Button onClick={() => setAdding(true)}>{t.add}</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

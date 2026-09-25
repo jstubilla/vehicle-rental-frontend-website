@@ -67,7 +67,7 @@ test("Escape closes the calendar without changing the date", async ({ page }) =>
 });
 
 test("a dialog keeps focus inside it, closes with Escape and returns focus to its button", async ({ page }) => {
-  await loginAs(page, "Admin");
+  await loginAs(page);
   await visit(page, "/admin/customers");
   const add = page.getByRole("button", { name: content.admin.customers.add });
   await add.focus();
@@ -102,7 +102,7 @@ test("the phone menu opens and closes from the keyboard and gives focus back", a
 });
 
 test("a pipeline card can be moved to the next stage using only the keyboard", async ({ page }) => {
-  await loginAs(page, "Sales");
+  await loginAs(page);
   await visit(page, "/admin/pipeline");
 
   const stage = (name: keyof typeof content.enums.leadStage) =>

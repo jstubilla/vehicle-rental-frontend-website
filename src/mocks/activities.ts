@@ -27,7 +27,7 @@ const rows: Row[] = [
   ["lead-09", "status_change", "Stage changed from Contacted to Qualified.", "usr-03", 12, "14:10"],
   ["lead-09", "note", "Wants a test drive and an explanation of charging.", "usr-03", 12, "14:20"],
   ["lead-10", "status_change", "Stage changed from Contacted to Qualified.", "usr-02", 14, "11:00"],
-  ["lead-10", "call", "Needs 14 seats. Suggested the Nissan Urvan.", "usr-02", 14, "11:15"],
+  ["lead-10", "call", "Needs 14 seats. Suggested a van.", "usr-02", 14, "11:15"],
   ["lead-11", "status_change", "Stage changed from Qualified to Won.", "usr-02", 28, "16:00"],
   ["lead-11", "note", "Corporate account set up with monthly invoicing.", "usr-02", 28, "16:10"],
   ["lead-12", "status_change", "Stage changed from Qualified to Won.", "usr-03", 23, "10:30"],
