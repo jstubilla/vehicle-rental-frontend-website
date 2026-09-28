@@ -11,6 +11,9 @@ export const dateFromToday = (days: number): string => addDaysISO(todayISO(), da
 export async function visit(page: Page, path: string): Promise<void> {
   await page.goto(path);
   await page.waitForLoadState("networkidle");
+  // On the public site a full-screen "Powered by" screen covers a fresh load for a moment. Wait for it to
+  // leave, as a visitor would, so clicks and accessibility scans see the real page.
+  await expect(page.locator("[data-splash]")).toHaveCount(0, { timeout: 15_000 });
 }
 
 /** The demo staff login. Everyone who signs in is an admin, so there is only one to pick. */
@@ -35,11 +38,15 @@ export const pageAlerts = (page: Page) => page.getByRole("main").getByRole("aler
 /**
  * Runs the axe accessibility checker on the current page and fails with a readable list
  * of problems. Covers WCAG 2.0/2.1/2.2 A and AA plus axe's best-practice rules.
+ * `skipRules` switches off named rules, for the rare screen where one cannot apply (say why at the call).
+ * `scope` (a CSS selector) checks just that part of the page.
  */
-export async function expectNoA11yViolations(page: Page): Promise<void> {
-  const results = await new AxeBuilder({ page })
+export async function expectNoA11yViolations(page: Page, skipRules: string[] = [], scope?: string): Promise<void> {
+  let axe = new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"])
-    .analyze();
+    .disableRules(skipRules);
+  if (scope) axe = axe.include(scope);
+  const results = await axe.analyze();
 
   const problems = results.violations.map((violation) => {
     const where = violation.nodes

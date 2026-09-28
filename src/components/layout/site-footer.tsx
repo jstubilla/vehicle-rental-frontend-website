@@ -12,6 +12,7 @@ export function SiteFooter() {
       socials={<SocialLinks links={content.socials} className="flex-col items-start gap-2" />}
       socialsTitle={content.footer.socialsTitle}
       legal={content.footer.legal}
+      credit={content.footer.credit}
     />
   );
 }

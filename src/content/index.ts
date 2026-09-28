@@ -3,13 +3,17 @@
  * hardcoding text, so wording can be changed (or translated later) in one place.
  * As pages are added, add their sections below.
  */
+/** The terms checkbox is a sentence with a link in it, so the sentence is kept in two parts. */
+const TERMS_LEAD = "I agree to the ";
+const TERMS_LINK = "rental terms and conditions";
+
 export const content = {
   site: {
     name: "Car Rental Co.",
     tagline: "Placeholder tagline goes here",
     description:
       "Placeholder description: rent a car in the Philippines with simple online booking.",
-    contactPhone: "+63 917 000 0000",
+    contactPhone: "0954 326 7335",
     contactEmail: "hello@example.com",
   },
 
@@ -61,6 +65,8 @@ export const content = {
         links: [
           { label: "Contact us", href: "/contact" },
           { label: "Leave a review", href: "/review" },
+          { label: "Privacy Policy", href: "/privacy" },
+          { label: "Rental terms", href: "/terms" },
           { label: "Staff login", href: "/admin/login" },
         ],
       },
@@ -68,6 +74,7 @@ export const content = {
     phoneLabel: "Call us",
     socialsTitle: "Follow us",
     legal: "© 2026 Car Rental Co. All rights reserved.",
+    credit: "Powered by Viani",
   },
 
   /** Built-in labels used inside UI kit components (mostly accessibility text). */
@@ -100,6 +107,12 @@ export const content = {
       warning: "Warning",
       danger: "Error",
     },
+  },
+
+  /** The placeholder loading screen (the company animation will replace the placeholder line). */
+  loadingScreen: {
+    label: "Loading",
+    placeholder: "Loading animation goes here",
   },
 
   /** Wording for the reusable empty / error / loading states. */
@@ -303,6 +316,114 @@ export const content = {
     },
   },
 
+  /** Placeholder legal pages. The company must replace all of this with its approved text before going live. */
+  legal: {
+    notice: "Placeholder: this text must be replaced with the company's approved version before the website goes live.",
+    blank: "[to be set by the company]",
+    privacyNote: { lead: "Read how we use your information in our", link: "Privacy Policy" },
+    privacy: {
+      meta: {
+        title: "Privacy Policy",
+        description: "Placeholder: how we collect, use and keep your personal information.",
+      },
+      title: "Privacy Policy",
+      subtitle: "Placeholder: how we handle your personal information.",
+      sections: [
+        {
+          title: "What personal data we collect",
+          body: [
+            "Placeholder: we collect your name, email address, phone number, driver's license number, booking details and any review you write.",
+          ],
+        },
+        {
+          title: "Why we use it",
+          body: ["Placeholder: [reasons to be set by the company]."],
+        },
+        {
+          title: "Who can see it",
+          body: ["Placeholder: company staff can see this information."],
+        },
+        {
+          title: "How long we keep it",
+          body: ["Placeholder: [retention period to be set by the company]."],
+        },
+        {
+          title: "Saved details and cookies",
+          body: [
+            "Placeholder: if you have an account, your name, email, phone number and driver's license number are saved to it so we can offer to fill them in on future bookings. They are only filled in if you choose yes.",
+            "Placeholder: they are kept until you ask us to delete them.",
+            "Placeholder: a login cookie is used only to keep you signed in.",
+          ],
+        },
+        {
+          title: "Payment providers and emails",
+          body: [
+            "Placeholder: payments may be handled by PayPal, Wise, GCash or Maya, and their own privacy policies apply.",
+            "Placeholder: we send emails such as booking confirmations and login codes.",
+          ],
+        },
+        {
+          title: "Your rights and how to ask",
+          body: ["Placeholder: [your rights to be set out by the company]. To ask, contact us using the details below."],
+        },
+        {
+          title: "Privacy contact",
+          body: ["Name: [name]", "Email: [email]"],
+        },
+      ],
+    },
+    terms: {
+      meta: {
+        title: "Rental Terms and Conditions",
+        description: "Placeholder: the terms that apply when you rent a vehicle from us.",
+      },
+      title: "Rental Terms and Conditions",
+      subtitle: "Placeholder: the terms that apply to every rental.",
+      sections: [
+        {
+          title: "Who may rent",
+          body: ["Placeholder: [driver's minimum age and license requirements to be set by the company]."],
+        },
+        {
+          title: "Booking and payment",
+          body: ["Placeholder: [how booking and payment work, to be set by the company]."],
+        },
+        {
+          title: "Rates and rental days",
+          body: ["Placeholder: rates are per day. A rental day is 24 hours, so 25 hours counts as 2 days."],
+        },
+        {
+          title: "Deposit",
+          body: ["Placeholder: [deposit to be set by the company]."],
+        },
+        {
+          title: "Fuel and mileage",
+          body: ["Placeholder: [fuel and mileage rules to be set by the company]."],
+        },
+        {
+          title: "Damage, accidents and insurance",
+          body: ["Placeholder: [damage, accident and insurance terms to be set by the company]."],
+        },
+        {
+          title: "Late returns",
+          body: ["Placeholder: [late return terms to be set by the company]."],
+        },
+        {
+          title: "Cancellations and changes",
+          body: ["Placeholder: [cancellation and change terms to be set by the company]."],
+        },
+        {
+          title: "With a driver, tours and point-to-point trips",
+          body: ["Placeholder: [terms for these services to be set by the company]."],
+        },
+        {
+          title: "Contact",
+          body: ["Placeholder: [contact details to be set by the company]."],
+        },
+      ],
+    },
+  },
+
   about: {
     meta: {
       title: "About us",
@@ -328,9 +449,9 @@ export const content = {
     team: {
       title: "Meet the team",
       members: [
-        { name: "Team member", role: "Role" },
-        { name: "Team member", role: "Role" },
-        { name: "Team member", role: "Role" },
+        { name: "Peter Agravidor", role: "Owner" },
+        { name: "Erika Lasac", role: "Co-owner" },
+        { name: "Cynde Agraviador", role: "Admin" },
       ],
     },
     cta: { title: "Questions before you book?", button: "Contact us" },
@@ -526,7 +647,9 @@ export const content = {
         "You pay when you collect the vehicle. Your booking stays pending until our team confirms it.",
       pay: (amount: string) => `Pay ${amount} and confirm booking`,
       confirmPickup: "Confirm booking",
-      terms: "I agree to the rental terms and conditions",
+      termsLead: TERMS_LEAD,
+      termsLink: TERMS_LINK,
+      terms: TERMS_LEAD + TERMS_LINK,
       termsError: "Please accept the terms to continue.",
       processing: "Processing your payment. Please do not close this page.",
       failedTitle: "Payment failed",

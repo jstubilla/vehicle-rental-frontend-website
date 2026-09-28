@@ -28,6 +28,7 @@ Because of that, re-skinning is mostly editing two places, and the pages barely 
 | Dark mode | `[data-theme="dark"]` block at the bottom of `tokens.css` | Live: a `ThemeToggle` button switches it, and the choice is remembered. Edit values here, same as the light ones above. |
 | How a button, input, card, badge, table, dialog, etc. *looks* (borders, padding, states, icons) | The matching file in `src/components/ui/` | See the component list in section 4. |
 | The logo | `src/assets/config.ts` (`logo`) plus the file in `public/images/` | Set `src` to e.g. `/images/logo.svg`. Until then a text wordmark shows. |
+| The loading animation (a full-screen "Powered by Viani" screen on every refresh of the public site, and inside the page while moving between pages) | `LoadingAnimation` at the top of `src/components/ui/loading-screen.tsx` | A placeholder line for now. Replace the contents of that one function with the company animation; `src/app/(public)/loading.tsx` and everything else stay as they are. The animation must respect `prefers-reduced-motion`. How long the refresh screen stays up (at least) is `SPLASH_MIN_MS` in `src/lib/site.ts` (1500 ms); the behavior is in `src/components/layout/site-splash.tsx`. |
 | Photos (hero, about, team, vehicles…) | `src/assets/config.ts` (`images`) plus files in `public/images/` | Each entry has `src`, `alt` (screen reader text), `label` (placeholder text), and `ratio`. Vehicle photos are per vehicle in `src/mocks/vehicles.ts`. |
 | Any wording (headings, buttons, messages) | `src/content/index.ts` | Only the developer-only `/styleguide` page has its own text. |
 | Page *layout* (what goes where, columns, order of sections) | The page file in `src/app/` and the section files in `src/components/sections/` and `src/components/layout/` | Layout classes only (`grid`, `flex`, `gap-*`, `lg:grid-cols-2`). |
@@ -118,6 +119,8 @@ Go component by component against Figma, starting with the most used: Button, In
 | About | `/about` | `src/app/(public)/about/page.tsx` | Company story and team |
 | Contact | `/contact` | `src/app/(public)/contact/page.tsx` | Contact details and message form (creates a New lead) |
 | Leave a review | `/review` | `src/app/(public)/review/page.tsx` | Name, star rating, comment and booking reference. Saved privately (linked from the footer) |
+| Privacy Policy | `/privacy` | `src/app/(public)/privacy/page.tsx` | Placeholder legal page (all wording in `src/content/index.ts`, `legal.privacy`), with a "must be replaced" notice. Linked from the footer and under the forms that collect personal details |
+| Rental Terms and Conditions | `/terms` | `src/app/(public)/terms/page.tsx` | Placeholder legal page (`legal.terms`), with the same notice. Linked from the footer and from the payment step's checkbox (opens in a new tab) |
 | Log in | `/login` | `src/app/(public)/login/page.tsx` | Customer login: Google, Apple, email and password, or an email code (mock) |
 | Sign up | `/signup` | `src/app/(public)/signup/page.tsx` | Create a customer account. Saved details can fill in the booking's details step |
 | Booking, step 1 to 6 | `/book/dates`, `/book/vehicle`, `/book/details`, `/book/check`, `/book/payment`, `/book/confirmation/[reference]` | `src/app/(public)/book/**` | Dates and place, vehicle, driver details, check, payment (pays and confirms the booking), confirmation |
@@ -156,7 +159,7 @@ Other files that are not pages but affect what visitors get: `src/app/sitemap.ts
 | Actions | `Button` (variants: primary, secondary, outline, ghost, danger, link; sizes; loading), `DropdownMenu` |
 | Form controls | `Input`, `Textarea`, `Select`, `Checkbox`, `RadioGroup`, `DatePicker`, `TimeSelect`, `FormField` and `FieldGroup` (label, hint, error, and the correct screen-reader wiring) |
 | Containers | `Card` (with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`), `Modal`, `ConfirmModal`, `Tabs`, `Table` (scrolls sideways on phones), `Container`, `Section`, `PageHeader` |
-| Feedback | `Alert`, `Badge`, `Toast`, `Spinner`, `Skeleton`, `EmptyState`, `ErrorState` |
+| Feedback | `Alert`, `Badge`, `Toast`, `Spinner`, `Skeleton`, `LoadingScreen` (public page loading, with the animation slot), `EmptyState`, `ErrorState` |
 | Navigation | `Navbar`, `Footer`, `AdminShell` (sidebar plus top bar), `Pagination`, `Stepper` (booking progress), `SkipLink`, `ThemeToggle` |
 | Display | `Media` (image or placeholder), `Logo`, `SocialLinks`, `StatCard`, `BarChart` |
 | Icons | `icons.tsx` (a single file of small SVG icons) |

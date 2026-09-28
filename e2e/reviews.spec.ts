@@ -16,6 +16,8 @@ const h1 = (page: Page, name: string) => page.getByRole("heading", { level: 1, n
 const homeReviews = (page: Page) => page.getByRole("region", { name: home.title });
 
 async function fillValidForm(page: Page, comment: string, reference = VALID_REFERENCE) {
+  // The "Powered by" screen covers a fresh page for a moment, and the forced click below would land on it.
+  await expect(page.locator("[data-splash]")).toHaveCount(0, { timeout: 15_000 });
   await page.getByLabel(t.name).fill("Rosalinda Fuentes");
   await page.getByRole("radio", { name: content.ui.rating.option(4) }).check({ force: true });
   await page.getByRole("textbox", { name: new RegExp(`^${t.comment}`) }).fill(comment);

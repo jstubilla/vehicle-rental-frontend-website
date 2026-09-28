@@ -17,7 +17,6 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
 export function Card({ variant = "default", as: Tag = "div", className, ...props }: CardProps) {
   return (
     <Tag
-      // Cards are light in dark mode; data-surface switches the light theme values on inside them.
       data-surface={variant === "default" ? "card" : undefined}
       className={cn("flex flex-col rounded-lg text-foreground", variants[variant], className)}
       {...props}

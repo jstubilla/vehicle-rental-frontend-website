@@ -91,6 +91,28 @@ export const GoogleIcon = ({ className, ...p }: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+export const CarIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <path d="M5 11 6.5 6h11L19 11" />
+    <path d="M3 11h18v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+    <circle cx="7.5" cy="14" r="1" />
+    <circle cx="16.5" cy="14" r="1" />
+  </Icon>
+);
+export const CreditCardIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <rect x="2" y="5" width="20" height="14" rx="2" />
+    <path d="M2 10h20" />
+  </Icon>
+);
+export const SteeringWheelIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="2" />
+    <path d="M12 5v5M6.4 16.5l4-2.9M17.6 16.5l-4-2.9" />
+  </Icon>
+);
+
 /** The Apple logo. It takes the text color, so it is dark in light mode and light in dark mode. */
 export const AppleIcon = ({ className, ...p }: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={cn("size-5 shrink-0", className)} {...p}>

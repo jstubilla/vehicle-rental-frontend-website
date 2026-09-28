@@ -3,6 +3,7 @@
 import { Controller } from "react-hook-form";
 import { Alert, Button, FieldGroup, FormField, Input, StarRatingInput, Textarea } from "@/components/ui";
 import { content } from "@/content";
+import { PrivacyNote } from "@/features/shared/privacy-note";
 import { useReviewForm } from "../hooks/use-review-form";
 
 const t = content.reviews.form;
@@ -55,6 +56,7 @@ export function ReviewForm() {
       </FormField>
 
       <p className="text-sm text-muted">{t.privacyNote}</p>
+      <PrivacyNote />
 
       <Button type="submit" size="lg" loading={isSubmitting} className="self-start">
         {isSubmitting ? t.sending : t.submit}

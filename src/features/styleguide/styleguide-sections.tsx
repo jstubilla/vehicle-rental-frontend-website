@@ -23,6 +23,7 @@ import {
   FieldGroup,
   FormField,
   Input,
+  LoadingScreen,
   Media,
   Modal,
   Pagination,
@@ -319,6 +320,7 @@ export function StyleguideSections() {
           <ErrorState onRetry={() => toast({ title: "Retrying…" })} />
         </div>
         <div className="flex flex-col gap-2">
+          <LoadingScreen className="min-h-48 rounded-md border border-border" />
           <Spinner />
           <Skeleton className="h-6 w-1/2" />
           <Skeleton className="h-6 w-3/4" />

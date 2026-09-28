@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button, Card, CardContent, FormField, Input, Textarea } from "@/components/ui";
 import { content } from "@/content";
+import { PrivacyNote } from "@/features/shared/privacy-note";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { useDetailsStep } from "../hooks/use-details-step";
 import { useStepGuard } from "../hooks/use-step-guard";
@@ -84,6 +85,8 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
         <FormField label={t.notes}>
           <Textarea {...register("notes")} />
         </FormField>
+
+        <PrivacyNote />
 
         <StepActions backHref={previousStepPath("details")}>
           <Button type="submit" size="lg">

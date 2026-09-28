@@ -3,6 +3,7 @@
 import { Controller } from "react-hook-form";
 import { Alert, Button, Checkbox, FormField, Input, Select, Textarea } from "@/components/ui";
 import { content } from "@/content";
+import { PrivacyNote } from "@/features/shared/privacy-note";
 import { useVehicleList } from "@/features/vehicles/hooks/use-vehicles";
 import { useContactForm } from "./use-contact-form";
 
@@ -85,6 +86,8 @@ export function ContactForm({ defaultVehicleId }: { defaultVehicleId?: string })
           </p>
         )}
       </div>
+
+      <PrivacyNote />
 
       <Button type="submit" size="lg" loading={isSubmitting} className="self-start">
         {isSubmitting ? t.sending : t.submit}

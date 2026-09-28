@@ -11,30 +11,35 @@
  * To re-skin: edit layer 1. Components never contain colors (npm run check:tokens enforces it).
  *
  * THEMES
- *  - Light values are the base. Dark values are in [data-theme="dark"].
+ *  - Light values are the base. Dark values are in [data-theme="dark"], and are a complete,
+ *    self-contained set: nothing in dark mode falls back to a light value.
  *  - src/lib/theme.ts + ThemeToggle switch data-theme on <html>; the choice is remembered and
  *    defaults to the system preference. An inline script in src/app/layout.tsx applies it
  *    before first paint (no flash).
- *  - In dark mode CARDS ARE LIGHT (dark text on #dee4eb / #ffffff). Card-like components
- *    carry data-surface="card", which switches the light values back on inside them, so
- *    text, borders, links and inputs there stay readable without per-component colors.
+ *  - Dark mode is a uniform dark navy palette supplied by the client (cards, popovers and
+ *    inputs are darker/lighter shades of the same navy, not a separate light theme). Card-like
+ *    components still carry a data-surface="card" attribute from an earlier design; it has no
+ *    CSS attached to it now and can be ignored.
  *
  * CONTRAST NOTES (measured, WCAG AA = 4.5:1 text, 3:1 borders/rings)
- *  - Brand blue #006efd is used for fills and focus rings only. As TEXT it measures 4.3:1 on
- *    light and 3.5:1 on dark surfaces, so --link is a shade of it per context.
- *  - Brand orange #fd802b takes NAVY text (6.3:1). White on it is 2.5:1: do not use.
- *    As text (prices) it only works on dark backgrounds (6.3-7.5:1); on light surfaces
- *    --price is a darker orange (5.9:1).
- *  - White on the blue button fill is 4.52:1: passes, with almost no margin.
- *  - Not in the brand palette, added to fill gaps: status colors, hover shades, --bg-muted,
- *    --text-secondary in dark mode, and the darker link/price/border shades above.
+ *  - Light theme: brand blue #006efd is 4.3:1 as text, so --link is a darker shade (#0057c4).
+ *    Brand orange #fd802b takes navy text (6.3:1); white on it is 2.5:1, so it is never used.
+ *  - Dark theme (client palette): the accent blue #3687ff is 4.8:1 as text on the page background
+ *    and 4.26:1 on cards, so --link uses a lighter tint (#7bb0ff, 6.7-7.5:1) for body text. As a
+ *    BUTTON FILL, white text on #3687ff is only 3.46:1 (fails), so --primary-foreground is the
+ *    same dark navy already used for orange buttons (4.58:1), not white.
+ *  - The orange #ff812c passes as text directly (5.9-6.7:1) and takes the same navy foreground
+ *    as buttons (6.37:1); white on it is 2.49:1 and is never used, same as the light theme.
+ *  - --border is a soft divider (client palette, ~2:1) and is decorative only; --border-strong
+ *    is a lighter blue chosen to keep the 3:1 real form controls need.
+ *  - Not in the client palette, added to fill gaps: status colors, hover shades, --bg-muted,
+ *    and the darker/lighter link, border and hover shades above.
  *
  * Fonts, spacing, radius and shadows below are still wireframe placeholders.
  */
 
 /* ---------- Theme values: LIGHT (base) ---------- */
-:root,
-[data-theme="dark"] [data-surface="card"] {
+:root {
   --bg-main: #f7fafd; /* page background */
   --bg-surface: #fafcfe; /* nav bar, footer, section bands, admin chrome */
   --bg-muted: #eef3f8; /* hover, table header, striped rows */
@@ -63,7 +68,7 @@
   --success-foreground: #ffffff;
   --warning: #a16207;
   --warning-foreground: #ffffff;
-  --danger: #b91c1c; /* also used as error TEXT, including on the #dee4eb dark-mode card (5.05:1) */
+  --danger: #b91c1c; /* also used as error TEXT (6.3:1 on --card) */
   --danger-hover: #991b1b;
   --danger-foreground: #ffffff;
   --info: #0369a1;
@@ -73,33 +78,33 @@
   --placeholder-foreground: #445a7a;
 }
 
-/* ---------- Theme values: DARK ---------- */
+/* ---------- Theme values: DARK (client palette) ---------- */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg-main: #011125;
-  --bg-surface: #0c233d;
-  --bg-muted: #16324f;
-  --card: #dee4eb; /* cards stay light; see data-surface="card" above */
-  --field: #0c233d;
-  --text-primary: #dee4eb;
-  --text-secondary: #9fb0c4;
-  --border: #1c3350;
-  --border-strong: #5a7aab;
-  --overlay: rgb(1 17 37 / 0.7);
+  --bg-main: #0b1f36; /* page background */
+  --bg-surface: #10243d; /* nav bar, footer, section bands, admin chrome */
+  --bg-muted: #12304f; /* hover, table header, striped rows */
+  --card: #102945; /* cards, popovers, modals, the search panel */
+  --field: #142e4d; /* text inputs */
+  --text-primary: #f8faff;
+  --text-secondary: #b8c7db;
+  --border: #365a85; /* card and section outlines (decorative, not a control boundary) */
+  --border-strong: #6f93c2; /* form control borders (needs 3:1, see contrast notes) */
+  --overlay: rgb(11 31 54 / 0.7);
 
-  --link: #4da3ff; /* lighter than brand blue: #006efd is 3.5:1 on --bg-surface */
-  --price: #fd802b;
-  --primary: #006efd;
-  --primary-hover: #005ed7;
-  --primary-foreground: #ffffff;
-  --accent: #fd802b;
-  --accent-hover: #ff9346;
+  --link: #7bb0ff; /* lighter tint of --primary: see contrast notes */
+  --price: #ff812c;
+  --primary: #3687ff; /* icons, selected/active states, buttons, focus */
+  --primary-hover: #5b9dff;
+  --primary-foreground: #0c233d; /* navy: white fails on this blue, see contrast notes */
+  --accent: #ff812c; /* booking CTAs and prices */
+  --accent-hover: #ff9a52;
   --accent-foreground: #0c233d;
   --secondary: #16324f;
   --secondary-hover: #1d3f61;
-  --secondary-foreground: #dee4eb;
-  --ring: #4da3ff;
+  --secondary-foreground: #f8faff;
+  --ring: #3687ff;
 
   --success: #4ade80;
   --success-foreground: #0c233d;
@@ -111,13 +116,8 @@
   --info: #38bdf8;
   --info-foreground: #0c233d;
 
-  --placeholder: #16324f;
-  --placeholder-foreground: #9fb0c4;
-}
-
-/* The card fill itself stays #dee4eb in dark mode (the light values above would have reset it). */
-[data-theme="dark"] [data-surface="card"] {
-  --card: #dee4eb;
+  --placeholder: #12304f;
+  --placeholder-foreground: #b8c7db;
 }
 
 /* ---------- Tailwind names: point at the theme values above ---------- */
@@ -234,6 +234,7 @@
   --z-nav: 20;
   --z-overlay: 40;
   --z-toast: 60;
+  --z-splash: 80;
 
   /* ---------- Focus ---------- */
   --focus-ring-width: 2px;

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Alert, Button, Card, CardContent, Checkbox, FieldGroup, RadioGroup } from "@/components/ui";
+import { Alert, Button, Card, CardContent, Checkbox, FieldGroup, NewTabLink, RadioGroup } from "@/components/ui";
 import { content } from "@/content";
 import { formatCurrency } from "@/lib/currency";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/constants";
@@ -107,7 +107,12 @@ export function PaymentStep() {
 
         <div className="flex flex-col gap-1">
           <Checkbox
-            label={t.terms}
+            label={
+              <>
+                {t.termsLead}
+                <NewTabLink href="/terms">{t.termsLink}</NewTabLink>
+              </>
+            }
             checked={accepted}
             aria-invalid={showTermsError && !accepted ? true : undefined}
             onChange={(e) => {

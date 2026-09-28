@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, FormField, Input } from "@/components/ui";
 import { content } from "@/content";
+import { PrivacyNote } from "@/features/shared/privacy-note";
 import { useSignup } from "../hooks/use-signup";
 
 const t = content.account.signup;
@@ -32,6 +33,7 @@ export function SignupForm() {
           <FormField label={t.password} required hint={t.passwordHint} error={errors.password?.message}>
             <Input {...register("password")} type="password" autoComplete="new-password" />
           </FormField>
+          <PrivacyNote />
           <Button type="submit" size="lg" loading={isSubmitting}>
             {isSubmitting ? t.submitting : t.submit}
           </Button>

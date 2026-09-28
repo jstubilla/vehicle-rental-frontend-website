@@ -283,7 +283,7 @@ test.describe("dark mode", () => {
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   });
 
-  test("cards are light with dark text, and the page around them is dark", async ({ page }) => {
+  test("cards are a lighter navy than the page, with light text and an orange price", async ({ page }) => {
     await visit(page, "/vehicles");
     const card = page.getByRole("article").first();
     await expect(card).toBeVisible();
@@ -296,10 +296,10 @@ test.describe("dark mode", () => {
         price: getComputedStyle(price).color,
       };
     });
-    expect(colors.page).toBe("rgb(1, 17, 37)"); // #011125
-    expect(colors.card).toBe("rgb(222, 228, 235)"); // #dee4eb
-    expect(colors.text).toBe("rgb(12, 35, 61)"); // #0c233d
-    expect(colors.price).toBe("rgb(168, 67, 0)"); // darker orange: brand orange is unreadable on a light card
+    expect(colors.page).toBe("rgb(11, 31, 54)"); // #0b1f36
+    expect(colors.card).toBe("rgb(16, 41, 69)"); // #102945
+    expect(colors.text).toBe("rgb(248, 250, 255)"); // #f8faff
+    expect(colors.price).toBe("rgb(255, 129, 44)"); // #ff812c
   });
 
   const PUBLIC: PageCase[] = [

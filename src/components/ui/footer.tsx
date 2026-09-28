@@ -25,6 +25,8 @@ export interface FooterProps {
   socials?: ReactNode;
   socialsTitle?: string;
   legal?: string;
+  /** Optional credit shown on the right of the bottom strip (on phones, under the legal line). */
+  credit?: string;
   variant?: FooterVariant;
   className?: string;
 }
@@ -38,6 +40,7 @@ export function Footer({
   socials,
   socialsTitle,
   legal,
+  credit,
   variant = "default",
   className,
 }: FooterProps) {
@@ -50,7 +53,7 @@ export function Footer({
           {phone && (
             <p className="text-sm">
               <span className="text-muted">{phone.label}: </span>
-              <a href={`tel:${phone.number.replace(/[^+d]/g, "")}`} className="font-medium">
+              <a href={`tel:${phone.number.replace(/[^+\d]/g, "")}`} className="font-medium">
                 {phone.number}
               </a>
             </p>
@@ -79,9 +82,12 @@ export function Footer({
           </div>
         )}
       </Container>
-      {legal && (
+      {(legal || credit) && (
         <div className="border-t border-border">
-          <Container className="py-4 text-sm text-muted">{legal}</Container>
+          <Container className="flex flex-col gap-1 py-4 text-sm text-muted md:flex-row md:items-center md:justify-between">
+            {legal && <p>{legal}</p>}
+            {credit && <p>{credit}</p>}
+          </Container>
         </div>
       )}
     </footer>

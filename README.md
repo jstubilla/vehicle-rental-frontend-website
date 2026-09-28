@@ -50,6 +50,7 @@ Optional: copy `.env.example` to `.env.local` to change the settings in
 | `/book/dates` | The six-step booking flow |
 | `/contact` | Contact form (each message becomes a lead in the admin) |
 | `/review` | Leave a review (private; staff choose which ones show on the home page) |
+| `/privacy`, `/terms` | Placeholder Privacy Policy and Rental Terms (linked from the footer, the payment step and the forms). **Replace them before going live.** |
 | `/login`, `/signup` | Customer accounts (mock). A signed-in customer is asked whether to fill in their saved details when booking |
 | `/admin` | Admin area (sign in first) |
 | `/styleguide` | Every reusable component in one page (for developers) |
@@ -89,6 +90,7 @@ Other folders worth knowing:
 | --- | --- |
 | `src/content/index.ts` | **All wording.** Nothing else contains text that visitors read. |
 | `src/assets/config.ts` | The logo and every image |
+| `src/components/ui/loading-screen.tsx` | The placeholder loading screen, shown on every refresh of the public site (minimum time: `SPLASH_MIN_MS` in `src/lib/site.ts`). Put the company loading animation in its `LoadingAnimation` function (see `docs/DESIGN-HANDOFF.md`) |
 | `src/mocks` | The fake data (8 vehicle types, 20 customers, 15 bookings, 15 leads, and more) |
 | `src/api` | The only door to the data. Every function is `async`, like a real API. |
 | `src/proxy.ts` | Guards `/admin` (Next.js 16 calls this file a "proxy"; older versions call it "middleware") |
@@ -314,10 +316,11 @@ Decisions made where the brief did not say. Each is easy to change; please check
 - A social-sharing image (`openGraph.images`), and a favicon and app icons in the final brand.
 - Placeholder wording is everywhere in `src/content/index.ts` (about text, terms, phone,
   email, address). It needs the client's real details.
-- Real terms and conditions and a privacy notice (the payment step links to none yet).
+- Real terms and conditions and a privacy notice (placeholder pages exist and are already linked from the footer, the payment step and the forms).
 
 **For going live (needs a backend):**
 
+- Replace the placeholder Privacy Policy and Rental Terms with versions approved by the client.
 - Replace `src/api` with real requests (section 5), real login and permissions on the server, and a real
   payment gateway (section 6).
 - Emails (booking confirmations, contact-form receipts), and any notifications for staff.
