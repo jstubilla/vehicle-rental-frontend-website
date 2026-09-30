@@ -9,6 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ChevronLeftIcon,
   ConfirmModal,
   EmptyState,
   ErrorState,
@@ -67,7 +68,10 @@ export function LeadDetail({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-6">
       <Button asChild variant="link" className="self-start">
-        <Link href="/admin/leads">← {t.detail.back}</Link>
+        <Link href="/admin/leads" className="inline-flex items-center gap-1">
+          <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          {t.detail.back}
+        </Link>
       </Button>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

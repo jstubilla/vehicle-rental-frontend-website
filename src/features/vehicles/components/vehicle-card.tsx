@@ -19,7 +19,10 @@ export function VehicleCard({ vehicle, rental = null, days = null }: VehicleCard
   const available = vehicle.status === "available";
 
   return (
-    <Card as="article" className="h-full">
+    <Card
+      as="article"
+      className="h-full transition duration-200 ease-out hover:-translate-y-1 hover:border-primary hover:shadow-md focus-within:-translate-y-1 focus-within:border-primary focus-within:shadow-md"
+    >
       <Media
         asset={vehicle.images[0] ?? images.vehicle}
         sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"

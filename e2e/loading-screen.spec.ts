@@ -7,19 +7,32 @@ import { expectNoA11yViolations, visit } from "./helpers";
 const LOADING_SELECTOR = `[role="status"][aria-label="${content.loadingScreen.label}"]:not([data-splash])`;
 const loading = (page: Page) => page.locator(LOADING_SELECTOR);
 const splash = (page: Page) => page.locator("[data-splash]");
+/** The animated logo. Only visible when the visitor has not asked for reduced motion. */
+const animation = (scope: ReturnType<typeof loading>) => scope.locator('img[src="/images/loading.gif"]');
+/** The still frame shown instead when the visitor has asked for reduced motion. */
+const stillFrame = (scope: ReturnType<typeof loading>) => scope.locator('img[src="/images/loading-static.png"]');
 
 /**
  * The loading screen used inside the page (while moving between pages) is shown on the developer-only
  * styleguide page too. It is checked there because a real page move is over too fast to look at reliably.
  */
-test("the loading screen renders its placeholder and the credit, as a status with a 'Loading' label", async ({ page }) => {
+test("the loading screen renders the animation and the credit, as a status with a 'Loading' label", async ({ page }) => {
   await visit(page, "/styleguide");
   await expect(splash(page)).toHaveCount(0, { timeout: 15_000 });
   const screen = loading(page);
   await expect(screen).toBeVisible();
-  await expect(screen).toContainText(content.loadingScreen.placeholder);
+  await expect(animation(screen)).toBeVisible();
   await expect(screen).toContainText(content.footer.credit);
   await expect(screen).toHaveAttribute("role", "status");
+});
+
+test("a visitor who asks for reduced motion sees the still frame instead of the animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await visit(page, "/styleguide");
+  await expect(splash(page)).toHaveCount(0, { timeout: 15_000 });
+  const screen = loading(page);
+  await expect(stillFrame(screen)).toBeVisible();
+  await expect(animation(screen)).toBeHidden();
 });
 
 for (const theme of ["light", "dark"] as const) {
@@ -39,12 +52,14 @@ for (const theme of ["light", "dark"] as const) {
 /** The screen shown on every full page load or refresh. */
 
 test.describe("the screen shown on every refresh", () => {
-  test("shows 'Powered by Viani' on a fresh load, for at least the minimum time, then leaves", async ({ page }) => {
+  test("shows the animation and 'Powered by VAIANI' on a fresh load, for at least the minimum time, then leaves", async ({
+    page,
+  }) => {
     const started = Date.now();
     await page.goto("/", { waitUntil: "commit" });
     await expect(splash(page)).toBeVisible();
     await expect(splash(page)).toContainText(content.footer.credit);
-    await expect(splash(page)).toContainText(content.loadingScreen.placeholder);
+    await expect(animation(splash(page))).toBeVisible();
 
     await expect(splash(page)).toHaveCount(0, { timeout: 15_000 });
     expect(Date.now() - started).toBeGreaterThanOrEqual(SPLASH_MIN_MS - 300);

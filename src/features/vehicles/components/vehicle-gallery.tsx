@@ -25,8 +25,8 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
                 aria-pressed={index === selected}
                 onClick={() => setSelected(index)}
                 className={cn(
-                  "block w-full rounded-lg border-2 border-transparent",
-                  index === selected && "border-primary",
+                  "block w-full rounded-lg border-2 border-transparent transition-colors duration-150",
+                  index === selected ? "border-primary" : "hover:border-border-strong",
                 )}
               >
                 <Media asset={{ ...image, label: `${index + 1}` }} sizes="20vw" className="border-0" />

@@ -6,15 +6,15 @@ export type ButtonVariant = "primary" | "accent" | "secondary" | "outline" | "gh
 export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-md border font-medium whitespace-nowrap no-underline disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-md border font-medium whitespace-nowrap no-underline transition duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-50";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "border-primary bg-primary text-primary-foreground hover:bg-primary-hover",
-  accent: "border-accent bg-accent text-accent-foreground hover:bg-accent-hover",
+  primary: "border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary-hover hover:shadow-md",
+  accent: "border-accent bg-accent text-accent-foreground shadow-sm hover:bg-accent-hover hover:shadow-md",
   secondary: "border-secondary bg-secondary text-secondary-foreground hover:bg-secondary-hover",
   outline: "border-border-strong bg-transparent text-foreground hover:bg-surface-muted",
   ghost: "border-transparent bg-transparent text-foreground hover:bg-surface-muted",
-  danger: "border-danger bg-danger text-danger-foreground hover:bg-danger-hover",
+  danger: "border-danger bg-danger text-danger-foreground shadow-sm hover:bg-danger-hover hover:shadow-md",
   link: "min-h-0 border-transparent bg-transparent px-0 text-link underline underline-offset-4 hover:no-underline",
 };
 

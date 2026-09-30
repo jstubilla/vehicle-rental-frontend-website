@@ -11,7 +11,7 @@ export const metadata: Metadata = buildMetadata({ ...t.meta, path: "/review" });
 export default function ReviewPage() {
   return (
     <>
-      <Section className="pb-0">
+      <Section className="pb-0 md:pb-0">
         <PageHeader title={t.title} description={t.subtitle} />
       </Section>
 

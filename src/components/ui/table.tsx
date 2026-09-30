@@ -6,6 +6,7 @@ import type {
 } from "react";
 import { cn } from "@/lib/cn";
 import { content } from "@/content";
+import { SortIcon } from "./icons";
 
 export type TableVariant = "default" | "striped";
 export type SortDirection = "asc" | "desc" | "none";
@@ -25,7 +26,7 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
 export function Table({ variant = "default", label, wrapperClassName, className, ...props }: TableProps) {
   return (
     <div
-      className={cn("relative w-full overflow-x-auto rounded-lg border border-border", wrapperClassName)}
+      className={cn("relative w-full overflow-x-auto rounded-lg border border-border shadow-sm", wrapperClassName)}
       {...(label ? { role: "region", "aria-label": label, tabIndex: 0 } : {})}
     >
       <table
@@ -77,9 +78,7 @@ export function TableHead({ sortDirection, onSort, className, children, ...props
           className="inline-flex items-center gap-1 font-semibold"
         >
           {children}
-          <span aria-hidden="true">
-            {sortDirection === "asc" ? "▲" : sortDirection === "desc" ? "▼" : "↕"}
-          </span>
+          <SortIcon direction={sortDirection} aria-hidden="true" className="size-3.5" />
           {sortDirection !== "none" && (
             <span className="sr-only">
               ({sortDirection === "asc" ? content.ui.sort.ascending : content.ui.sort.descending})

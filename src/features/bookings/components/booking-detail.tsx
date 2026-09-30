@@ -8,6 +8,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ChevronLeftIcon,
   ConfirmModal,
   EmptyState,
   ErrorState,
@@ -67,7 +68,10 @@ export function BookingDetail({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-6">
       <Button asChild variant="link" className="self-start">
-        <Link href="/admin/bookings">← {t.back}</Link>
+        <Link href="/admin/bookings" className="inline-flex items-center gap-1">
+          <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          {t.back}
+        </Link>
       </Button>
 
       <div className="flex flex-col gap-2">

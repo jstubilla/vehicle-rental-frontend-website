@@ -1,10 +1,23 @@
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+
 /**
- * Fonts. The wireframe uses system fonts (set in tokens.css), so nothing loads here.
- *
- * When the designer's fonts arrive, load them with next/font, e.g.
- *   import { Inter } from "next/font/google";
- *   const inter = Inter({ subsets: ["latin"], variable: "--font-designer-body" });
- * add `inter.variable` to `fontClassNames` below, and point --font-body in
- * tokens.css at it: --font-body: var(--font-designer-body), system-ui, sans-serif;
+ * Fonts. Self-hosted via next/font (no runtime request to Google, no layout shift).
+ * Plus Jakarta Sans carries headings; Inter carries body text, labels, buttons and
+ * data. Both feed tokens.css (--font-heading / --font-body) as CSS variables, so the
+ * rest of the app never imports a font directly.
  */
-export const fontClassNames = "";
+const headingFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-designer-heading",
+  display: "swap",
+});
+
+const bodyFont = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-designer-body",
+  display: "swap",
+});
+
+export const fontClassNames = `${headingFont.variable} ${bodyFont.variable}`;

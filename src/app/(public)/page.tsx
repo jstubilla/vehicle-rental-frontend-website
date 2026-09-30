@@ -33,13 +33,18 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={businessSchema()} />
-      <Section className="pb-0">
-        <div className="grid items-center gap-8 lg:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            <h1>{t.hero.title}</h1>
-            <p className="text-lg text-muted">{t.hero.subtitle}</p>
+      <Section className="pb-0 md:pb-0">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div className="flex flex-col gap-5">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl">{t.hero.title}</h1>
+            <p className="max-w-md text-lg text-muted">{t.hero.subtitle}</p>
           </div>
-          <Media asset="hero" priority sizes="(min-width: 64rem) 50vw, 100vw" />
+          <Media
+            asset="hero"
+            priority
+            sizes="(min-width: 64rem) 50vw, 100vw"
+            className="max-h-64 lg:max-h-none"
+          />
         </div>
       </Section>
 

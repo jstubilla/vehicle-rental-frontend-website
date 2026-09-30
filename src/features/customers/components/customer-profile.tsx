@@ -11,6 +11,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ChevronLeftIcon,
   ConfirmModal,
   EmptyState,
   ErrorState,
@@ -92,7 +93,10 @@ export function CustomerProfile({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-6">
       <Button asChild variant="link" className="self-start">
-        <Link href="/admin/customers">← {t.profile.back}</Link>
+        <Link href="/admin/customers" className="inline-flex items-center gap-1">
+          <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          {t.profile.back}
+        </Link>
       </Button>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">

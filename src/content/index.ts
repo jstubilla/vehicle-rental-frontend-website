@@ -10,9 +10,8 @@ const TERMS_LINK = "rental terms and conditions";
 export const content = {
   site: {
     name: "Car Rental Co.",
-    tagline: "Placeholder tagline goes here",
-    description:
-      "Placeholder description: rent a car in the Philippines with simple online booking.",
+    tagline: "Simple car rentals across the Philippines",
+    description: "Rent a car in the Philippines with simple online booking and clear daily rates in PHP.",
     contactPhone: "0954 326 7335",
     contactEmail: "hello@example.com",
   },
@@ -74,7 +73,7 @@ export const content = {
     phoneLabel: "Call us",
     socialsTitle: "Follow us",
     legal: "© 2026 Car Rental Co. All rights reserved.",
-    credit: "Powered by Viani",
+    credit: "Powered by VAIANI",
   },
 
   /** Built-in labels used inside UI kit components (mostly accessibility text). */
@@ -109,10 +108,9 @@ export const content = {
     },
   },
 
-  /** The placeholder loading screen (the company animation will replace the placeholder line). */
+  /** The loading screen shown on every refresh and while moving between pages. */
   loadingScreen: {
     label: "Loading",
-    placeholder: "Loading animation goes here",
   },
 
   /** Wording for the reusable empty / error / loading states. */
@@ -196,12 +194,11 @@ export const content = {
 
   home: {
     meta: {
-      description:
-        "Placeholder description: browse our cars, pick your dates and book online in minutes. Prices in PHP.",
+      description: "Browse our cars, pick your dates and book online in minutes. Prices in PHP.",
     },
     hero: {
       title: "Rent a car in the Philippines",
-      subtitle: "Placeholder: simple online booking with clear daily prices in PHP.",
+      subtitle: "Simple online booking with clear daily prices in PHP.",
     },
     featured: {
       title: "Featured vehicles",
@@ -427,23 +424,23 @@ export const content = {
   about: {
     meta: {
       title: "About us",
-      description: "Placeholder description: learn about our company, our values and our team.",
+      description: "Learn about our company, our values and our team.",
     },
     title: "About us",
-    subtitle: "Placeholder: a short line about the company.",
+    subtitle: "A local car rental team serving customers across the Philippines.",
     story: {
       title: "Our story",
       body: [
         "Placeholder: tell the story of the company here. Who started it, when, and why.",
-        "Placeholder: a second paragraph about the fleet, the service and what makes customers come back.",
+        "We keep our fleet well maintained and our prices clear, so there are no surprises when you book. Many customers come back because the process is simple and the service is dependable.",
       ],
     },
     values: {
       title: "What we stand for",
       items: [
-        { title: "Reliable vehicles", body: "Placeholder: how the fleet is maintained and checked." },
-        { title: "Clear pricing", body: "Placeholder: daily rates in PHP with no surprises." },
-        { title: "Friendly service", body: "Placeholder: how the team looks after customers." },
+        { title: "Reliable vehicles", body: "Every vehicle is checked and serviced regularly, so it's ready when you are." },
+        { title: "Clear pricing", body: "Daily rates in PHP, shown upfront with no hidden fees." },
+        { title: "Friendly service", body: "Our team is on hand to help with your booking and answer any questions along the way." },
       ],
     },
     team: {
@@ -460,26 +457,26 @@ export const content = {
   specialOffers: {
     meta: {
       title: "Special offers",
-      description: "Placeholder description: weekly and monthly rates, a driver, tours and point-to-point trips.",
+      description: "Weekly and monthly rates, a driver, tours and point-to-point trips.",
     },
     title: "Special offers",
-    subtitle: "Placeholder: ways to save, or to get more out of your rental.",
+    subtitle: "Ways to save, or to get more out of your rental.",
     offers: [
       {
         title: "Weekly and monthly rates",
-        body: "Placeholder: book by the week or the month for a lower daily rate than a short rental.",
+        body: "Book by the week or the month for a lower daily rate than a short rental.",
       },
       {
         title: "With a driver",
-        body: "Placeholder: add a licensed driver to your booking for an extra charge, and let us do the driving.",
+        body: "Add a licensed driver to your booking for an extra charge, and let us do the driving.",
       },
       {
         title: "Tours package",
-        body: "Placeholder: a vehicle, a driver and a planned route for day trips and sightseeing.",
+        body: "A vehicle, a driver and a planned route for day trips and sightseeing.",
       },
       {
         title: "Point-to-point pick-up and drop-off",
-        body: "Placeholder: start in one city or province and end in another, instead of returning to where you started.",
+        body: "Start in one city or province and end in another, instead of returning to where you started.",
       },
     ],
     cta: { title: "Ask about any of these", button: "Contact us" },
@@ -489,7 +486,7 @@ export const content = {
     meta: {
       title: "Our vehicles",
       description:
-        "Placeholder description: compare SUVs, MPVs, sedans, hatchbacks, vans, pick-up trucks and motorcycles with clear daily rates in PHP.",
+        "Compare SUVs, MPVs, sedans, hatchbacks, vans, pick-up trucks and motorcycles with clear daily rates in PHP.",
     },
     title: "Our vehicles",
     description: "Filter by type, price and seats. Share the page to share your search.",
@@ -636,7 +633,7 @@ export const content = {
         wise: { label: "Wise", description: "Pay with your Wise account." },
         pay_at_pickup: {
           label: "Pay at pick-up",
-          description: "Placeholder: pay when you collect the vehicle.",
+          description: "Pay when you collect the vehicle.",
         },
       },
       cardNotice:
@@ -713,9 +710,9 @@ export const content = {
       statusLabel: "Status",
       nextTitle: "What happens next",
       nextSteps: [
-        "Placeholder: we email you a confirmation with all the details.",
-        "Placeholder: bring your driver's license and this reference to the pick-up point.",
-        "Placeholder: return the vehicle at the agreed time and place.",
+        "We email you a confirmation with all the details.",
+        "Bring your driver's license and this reference to the pick-up point.",
+        "Return the vehicle at the agreed time and place.",
       ],
       toHome: "Back to home",
       browse: "Browse more vehicles",
@@ -727,7 +724,7 @@ export const content = {
   contact: {
     meta: {
       title: "Contact us",
-      description: "Placeholder description: call, email or send us a message and we will get back to you.",
+      description: "Call, email or send us a message and we will get back to you.",
     },
     title: "Contact us",
     subtitle: "Questions about a rental? Send us a message.",

@@ -1,7 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle, CalendarIcon, CarIcon, CreditCardIcon, SteeringWheelIcon, Section } from "@/components/ui";
-
-/** One icon per step, in order. The four steps are always this same journey (dates, vehicle, payment, pick-up). */
-const STEP_ICONS = [CalendarIcon, CarIcon, CreditCardIcon, SteeringWheelIcon];
+import { Section } from "@/components/ui";
 
 export function HowItWorks({
   title,
@@ -12,39 +9,27 @@ export function HowItWorks({
 }) {
   return (
     <Section variant="muted" aria-labelledby="how-it-works-heading">
-      <h2 id="how-it-works-heading" className="mb-6">
+      <h2 id="how-it-works-heading" className="mb-8">
         {title}
       </h2>
-      <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step, index) => {
-          const StepIcon = STEP_ICONS[index];
-          return (
-            <li key={step.title}>
-              <Card className="h-full">
-                <CardHeader className="gap-3">
-                  <div className="flex items-center gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-primary font-semibold text-primary"
-                    >
-                      {index + 1}
-                    </span>
-                    {StepIcon && (
-                      <span
-                        aria-hidden="true"
-                        className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-foreground"
-                      >
-                        <StepIcon className="size-5" />
-                      </span>
-                    )}
-                  </div>
-                  <CardTitle as="h3">{step.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-muted">{step.body}</CardContent>
-              </Card>
-            </li>
-          );
-        })}
+      <ol className="flex flex-col gap-8 sm:flex-row sm:gap-4">
+        {steps.map((step, index) => (
+          <li key={step.title} className="relative flex flex-1 flex-col items-center gap-3 text-center">
+            {index > 0 && (
+              <span aria-hidden="true" className="absolute top-5 right-1/2 hidden h-px w-full bg-border sm:block" />
+            )}
+            <span
+              aria-hidden="true"
+              className="relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground"
+            >
+              {index + 1}
+            </span>
+            <div className="flex flex-col gap-1">
+              <h3>{step.title}</h3>
+              <p className="text-muted">{step.body}</p>
+            </div>
+          </li>
+        ))}
       </ol>
     </Section>
   );

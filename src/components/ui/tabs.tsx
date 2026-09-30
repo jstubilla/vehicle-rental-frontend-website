@@ -33,10 +33,7 @@ export function Tabs({
 export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrimitive.List>) {
   const variant = useContext(VariantContext);
   return (
-    <TabsPrimitive.List
-      className={cn("flex overflow-x-auto", listVariants[variant], className)}
-      {...props}
-    />
+    <TabsPrimitive.List className={cn("flex", listVariants[variant], className)} {...props} />
   );
 }
 

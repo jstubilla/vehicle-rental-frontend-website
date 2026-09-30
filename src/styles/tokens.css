@@ -35,7 +35,15 @@
  *  - Not in the client palette, added to fill gaps: status colors, hover shades, --bg-muted,
  *    and the darker/lighter link, border and hover shades above.
  *
- * Fonts, spacing, radius and shadows below are still wireframe placeholders.
+ * TYPOGRAPHY, SHAPE AND ELEVATION
+ *  - Two fonts (src/assets/fonts.ts, self-hosted via next/font): Plus Jakarta Sans for headings,
+ *    Inter for body text, labels, buttons and data. No color values here — this is a visual-only
+ *    restyle, the palette above is unchanged.
+ *  - Shadows are real (not "none"): a tight contact shadow plus a soft ambient one, tinted from
+ *    --text-primary (light) / near-black (dark), never a new hue. Defined per theme just like colors
+ *    (--shadow-*-value above, mapped in the inline @theme block below) because dark surfaces need a
+ *    darker, more opaque shadow than light ones to read as depth at all.
+ *  - Radius is one step up across the board (sm/md/lg = 4/8/12px) for a softer, less boxy feel.
  */
 
 /* ---------- Theme values: LIGHT (base) ---------- */
@@ -50,6 +58,16 @@
   --border: #9aa8be; /* card and section outlines */
   --border-strong: #6b7b94; /* form control borders (needs 3:1) */
   --overlay: rgb(12 35 61 / 0.5); /* modal backdrop */
+  /* Elevation: a neutral shadow tinted from --text-primary, not a new color. Two layers each (a tight
+     contact shadow plus a softer ambient one) so depth reads as real light, not a flat drop shadow. */
+  --shadow-color-sm: 12 35 61;
+  --shadow-color-lg: 12 35 61;
+  --shadow-sm-value:
+    0 1px 2px 0 rgb(var(--shadow-color-sm) / 0.06), 0 1px 1px 0 rgb(var(--shadow-color-sm) / 0.04);
+  --shadow-md-value:
+    0 6px 16px -4px rgb(var(--shadow-color-lg) / 0.1), 0 2px 6px -2px rgb(var(--shadow-color-sm) / 0.06);
+  --shadow-lg-value:
+    0 20px 40px -12px rgb(var(--shadow-color-lg) / 0.18), 0 6px 12px -6px rgb(var(--shadow-color-sm) / 0.08);
 
   --link: #0057c4; /* links as text: darker than brand blue, see contrast notes */
   --price: #a84300; /* prices as text: darker than brand orange, see contrast notes */
@@ -92,6 +110,15 @@
   --border: #365a85; /* card and section outlines (decorative, not a control boundary) */
   --border-strong: #6f93c2; /* form control borders (needs 3:1, see contrast notes) */
   --overlay: rgb(11 31 54 / 0.7);
+  /* Dark surfaces need darker, more opaque shadows to read against navy; same neutral tint, no new hue. */
+  --shadow-color-sm: 2 7 14;
+  --shadow-color-lg: 2 7 14;
+  --shadow-sm-value:
+    0 1px 2px 0 rgb(var(--shadow-color-sm) / 0.45), 0 1px 1px 0 rgb(var(--shadow-color-sm) / 0.3);
+  --shadow-md-value:
+    0 8px 20px -4px rgb(var(--shadow-color-lg) / 0.55), 0 2px 8px -2px rgb(var(--shadow-color-sm) / 0.35);
+  --shadow-lg-value:
+    0 24px 48px -12px rgb(var(--shadow-color-lg) / 0.65), 0 8px 16px -8px rgb(var(--shadow-color-sm) / 0.4);
 
   --link: #7bb0ff; /* lighter tint of --primary: see contrast notes */
   --price: #ff812c;
@@ -161,13 +188,21 @@
 
   --color-placeholder: var(--placeholder);
   --color-placeholder-foreground: var(--placeholder-foreground);
+
+  /* Shadows, like colors, differ per theme (see the shadow-*-value declarations above), so they are
+     resolved here with `inline` rather than in the fixed @theme block below. */
+  --shadow-*: initial;
+  --shadow-sm: var(--shadow-sm-value);
+  --shadow-md: var(--shadow-md-value);
+  --shadow-lg: var(--shadow-lg-value);
 }
 
 @theme static {
   /* ---------- Typography ---------- */
-  --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  /* Falls back to the system stack when the designer fonts are not loaded, e.g. on the print stylesheet. */
+  --font-body: var(--font-designer-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --font-heading: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+  --font-heading: var(--font-designer-heading), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
@@ -187,29 +222,31 @@
   --text-3xl--line-height: 2.375rem;
   --text-4xl: 2.25rem;
   --text-4xl--line-height: 2.75rem;
+  /* Display-only sizes, for a hero headline. Not used by the base h1 (see globals.css), which stays at
+     the tighter scale everywhere else so admin and booking pages don't inherit a hero-sized heading. */
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 3.25rem;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 3.75rem;
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 
   /* ---------- Shape ---------- */
   --radius-*: initial;
-  --radius-sm: 0.125rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
   --radius-full: 9999px;
-
-  /* Shadows are intentionally "none" in the wireframe. */
-  --shadow-*: initial;
-  --shadow-sm: none;
-  --shadow-md: none;
-  --shadow-lg: none;
 
   /* ---------- Spacing ---------- */
   --spacing: 0.25rem; /* base unit: p-4 = 1rem */
   --spacing-gutter: 1rem; /* horizontal page padding on phones */
-  --spacing-section: 3rem; /* vertical space between page sections */
+  --spacing-section: 3.5rem; /* vertical space between page sections, on phones */
+  --spacing-section-lg: 5.5rem; /* the same, from the md breakpoint up: use "md:py-section-lg" */
   --spacing-control: 2.75rem; /* height of buttons & inputs (44px tap target) */
   --spacing-control-sm: 2.25rem;
   --spacing-control-lg: 3.25rem;

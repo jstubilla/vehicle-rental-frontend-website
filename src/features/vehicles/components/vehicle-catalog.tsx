@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, EmptyState, ErrorState, FormField, Pagination, Section, Select } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorState, FormField, Pagination, Section, Select } from "@/components/ui";
 import { content } from "@/content";
 import { VEHICLE_SORTS } from "@/lib/constants";
 import type { VehicleFilters } from "@/lib/vehicle-filters";
@@ -27,7 +27,7 @@ export function VehicleCatalog({ initial }: VehicleCatalogProps) {
   }
 
   return (
-    <Section className="pt-0" aria-label={t.resultsLabel}>
+    <Section className="pt-0 md:pt-0" aria-label={t.resultsLabel}>
       <div className="flex flex-col gap-6">
         <h2 className="sr-only">{t.resultsLabel}</h2>
         {rental && days && <TripSummary rental={rental} days={days} />}
@@ -45,12 +45,14 @@ export function VehicleCatalog({ initial }: VehicleCatalogProps) {
               {search.activeFilterCount > 0 && ` (${search.activeFilterCount})`}
             </Button>
             <div id="vehicle-filters" className={filtersOpen ? "mt-4 block lg:mt-0" : "hidden lg:block"}>
-              <VehicleFiltersPanel
-                filters={filters}
-                onChange={search.setFilters}
-                onReset={search.reset}
-                activeCount={search.activeFilterCount}
-              />
+              <Card className="p-4 md:p-6">
+                <VehicleFiltersPanel
+                  filters={filters}
+                  onChange={search.setFilters}
+                  onReset={search.reset}
+                  activeCount={search.activeFilterCount}
+                />
+              </Card>
             </div>
           </div>
 

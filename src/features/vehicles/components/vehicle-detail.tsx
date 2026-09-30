@@ -9,6 +9,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ChevronLeftIcon,
   Section,
 } from "@/components/ui";
 import { content } from "@/content";
@@ -43,7 +44,10 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
     <Section>
       <div className="flex flex-col gap-6">
         <Button asChild variant="link" className="self-start">
-          <Link href="/vehicles">← {t.back}</Link>
+          <Link href="/vehicles" className="inline-flex items-center gap-1">
+            <ChevronLeftIcon className="size-4" aria-hidden="true" />
+            {t.back}
+          </Link>
         </Button>
 
         <div className="grid gap-6 lg:grid-cols-3">

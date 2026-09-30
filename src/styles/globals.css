@@ -12,6 +12,14 @@
 
   body {
     @apply bg-background font-body text-base text-foreground antialiased;
+    /* Numerals (prices, dates, table figures) line up instead of shifting width digit to digit. */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Themed from the palette so a text selection never falls back to the browser's blue default. */
+  ::selection {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
   }
 
   h1,

@@ -36,7 +36,7 @@ export function Section({
 }) {
   return (
     <section
-      className={cn("py-section", variant === "muted" && "bg-surface", className)}
+      className={cn("py-section md:py-section-lg", variant === "muted" && "bg-surface", className)}
       {...props}
     >
       <Container size={size} className={containerClassName}>
@@ -52,11 +52,14 @@ export function PageHeader({
   description,
   actions,
   className,
+  titleClassName,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   className?: string;
+  /** Override the <h1>'s size, e.g. to give one page's title more weight than the site default. */
+  titleClassName?: string;
 }) {
   return (
     <div
@@ -66,7 +69,7 @@ export function PageHeader({
       )}
     >
       <div className="flex flex-col gap-2">
-        <h1>{title}</h1>
+        <h1 className={titleClassName}>{title}</h1>
         {description && <p className="max-w-narrow text-lg text-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

@@ -11,7 +11,7 @@ export interface LegalDocumentProps {
 export function LegalDocument({ title, subtitle, sections }: LegalDocumentProps) {
   return (
     <>
-      <Section className="pb-0">
+      <Section className="pb-0 md:pb-0">
         <PageHeader title={title} description={subtitle} />
         <Alert variant="warning" title={content.legal.notice} className="mt-6 max-w-narrow" />
       </Section>

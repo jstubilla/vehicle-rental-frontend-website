@@ -25,12 +25,12 @@ export default async function VehiclesPage({
 
   return (
     <>
-      <Section className="pb-6">
+      <Section className="pb-6 md:pb-6">
         <PageHeader title={t.title} description={t.description} />
       </Section>
       <Suspense
         fallback={
-          <Section className="pt-0">
+          <Section className="pt-0 md:pt-0">
             <VehicleGridSkeleton />
           </Section>
         }

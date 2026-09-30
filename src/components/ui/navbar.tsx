@@ -52,7 +52,7 @@ export function Navbar({ brand, links, actions, utility, variant = "default", cl
       }}
     >
       {utility && (
-        <div className="hidden border-b border-border md:block">
+        <div className="hidden border-b border-border lg:block">
           <Container className="flex min-h-control-sm items-center justify-between text-sm">
             {utility}
           </Container>
@@ -61,7 +61,7 @@ export function Navbar({ brand, links, actions, utility, variant = "default", cl
       <Container className="flex min-h-control-lg items-center justify-between gap-4">
         {brand}
 
-        <nav aria-label={content.nav.primaryLabel} className="hidden md:block">
+        <nav aria-label={content.nav.primaryLabel} className="hidden lg:block">
           <ul className="flex items-center gap-6">
             {links.map((link) => (
               <li key={link.href}>
@@ -78,12 +78,12 @@ export function Navbar({ brand, links, actions, utility, variant = "default", cl
         </nav>
 
         <div className="flex items-center gap-2">
-          {actions && <div className="hidden md:block">{actions}</div>}
+          {actions && <div className="hidden lg:block">{actions}</div>}
           <ThemeToggle />
           <Button
             variant="outline"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? content.ui.closeMenu : content.ui.openMenu}
@@ -95,7 +95,7 @@ export function Navbar({ brand, links, actions, utility, variant = "default", cl
       </Container>
 
       {open && (
-        <div id="mobile-menu" className="border-t border-border md:hidden">
+        <div id="mobile-menu" className="border-t border-border lg:hidden">
           <Container className="flex flex-col gap-2 py-4">
             <nav aria-label={content.nav.primaryLabel}>
               <ul className="flex flex-col">

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { CtaBanner } from "@/components/sections/cta-banner";
-import { Card, CardContent, CardHeader, CardTitle, Media, PageHeader, Section } from "@/components/ui";
+import { Media, PageHeader, Section, ShieldCheckIcon, SmileIcon, TagIcon } from "@/components/ui";
 import { content } from "@/content";
 import { buildMetadata } from "@/lib/seo";
 
@@ -8,10 +8,13 @@ const t = content.about;
 
 export const metadata: Metadata = buildMetadata({ ...t.meta, path: "/about" });
 
+/** One icon per value, in order (the three values are always this same fixed list). */
+const VALUE_ICONS = [ShieldCheckIcon, TagIcon, SmileIcon];
+
 export default function AboutPage() {
   return (
     <>
-      <Section className="pb-0">
+      <Section className="pb-0 md:pb-0">
         <PageHeader title={t.title} description={t.subtitle} />
       </Section>
 
@@ -33,17 +36,28 @@ export default function AboutPage() {
         <h2 id="values-heading" className="mb-6">
           {t.values.title}
         </h2>
-        <ul className="grid gap-4 md:grid-cols-3">
-          {t.values.items.map((item) => (
-            <li key={item.title}>
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle as="h3">{item.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-muted">{item.body}</CardContent>
-              </Card>
-            </li>
-          ))}
+        <ul className="max-w-3xl divide-y divide-border border-y border-border">
+          {t.values.items.map((item, index) => {
+            const ValueIcon = VALUE_ICONS[index];
+            return (
+              <li key={item.title}>
+                <div className="flex items-start gap-5 py-6 md:gap-6 md:py-7">
+                  {ValueIcon && (
+                    <span
+                      aria-hidden="true"
+                      className="flex size-10 shrink-0 items-center justify-center text-primary"
+                    >
+                      <ValueIcon className="size-6" />
+                    </span>
+                  )}
+                  <div className="flex flex-col gap-1.5">
+                    <h3 className="text-xl font-semibold">{item.title}</h3>
+                    <p className="max-w-2xl text-muted">{item.body}</p>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       </Section>
 
