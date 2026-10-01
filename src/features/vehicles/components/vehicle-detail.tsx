@@ -2,18 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  ChevronLeftIcon,
-  Section,
-} from "@/components/ui";
+import { Button, ButtonArrow, ChevronLeftIcon, Price, Section } from "@/components/ui";
 import { content } from "@/content";
-import { formatCurrency } from "@/lib/currency";
+import { cn } from "@/lib/cn";
 import { parseRentalSearch } from "@/lib/rental";
 import type { Vehicle } from "@/types";
 import { useVehicle } from "../hooks/use-vehicles";
@@ -41,66 +32,68 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
   ];
 
   return (
-    <Section>
-      <div className="flex flex-col gap-6">
-        <Button asChild variant="link" className="self-start">
-          <Link href="/vehicles" className="inline-flex items-center gap-1">
-            <ChevronLeftIcon className="size-4" aria-hidden="true" />
-            {t.back}
-          </Link>
-        </Button>
+    <Section className="pt-6 md:pt-8">
+      <div className="flex flex-col gap-4 md:gap-6">
+        <Link
+          href="/vehicles"
+          className="inline-flex min-h-control-sm items-center gap-1 self-start text-sm font-semibold underline-offset-4 hover:underline"
+        >
+          <ChevronLeftIcon className="size-4" aria-hidden="true" />
+          {t.back}
+        </Link>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="flex flex-col gap-8 lg:col-span-2">
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-7">
             <VehicleGallery images={vehicle.images} />
-
-            <section aria-labelledby="specs-heading" className="flex flex-col gap-2">
-              <h2 id="specs-heading">{t.specsTitle}</h2>
-              <dl className="max-w-sm divide-y divide-border">
-                {specs.map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between gap-4 py-3">
-                    <dt className="text-muted">{label}</dt>
-                    <dd className="font-medium">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
           </div>
 
-          <aside aria-label={vehicle.name} className="order-first lg:order-none lg:col-span-1">
-            <Card className="lg:sticky lg:top-24">
-              <CardHeader>
-                <h1 className="text-2xl md:text-3xl">{vehicle.name}</h1>
-                <p>
-                  <span className="text-3xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
-                  <span className="text-muted">{t.perDay}</span>
-                </p>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                  <CardTitle as="h2" className="text-base">
-                    {t.availabilityTitle}
-                  </CardTitle>
-                  <p>
-                    <Badge variant={available ? "success" : "warning"}>
-                      {available ? t.availableNow : t.unavailableNow}
-                    </Badge>
+          <aside aria-label={vehicle.name} className="order-first lg:order-none lg:col-span-5">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-24">
+              <div className="flex flex-col gap-4">
+                <h1>{vehicle.name}</h1>
+                <section aria-labelledby="specs-heading">
+                  <h2 id="specs-heading" className="sr-only">
+                    {t.specsTitle}
+                  </h2>
+                  <dl className="flex flex-wrap gap-x-8 gap-y-3">
+                    {specs.map(([label, value]) => (
+                      <div key={label} className="flex flex-col">
+                        <dt className="text-sm text-muted">{label}</dt>
+                        <dd className="font-medium">{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              </div>
+
+              {/* The decision block: raised like the home page's booking bar, since this is where you book. */}
+              <div className="flex flex-col gap-5 rounded-lg border border-border bg-card p-5 shadow-float md:p-6">
+                <Price amount={vehicle.pricePerDay} unit={t.perDay} size="xl" />
+                <div className="flex flex-col">
+                  <h2 className="text-sm font-normal text-muted">{t.availabilityTitle}</h2>
+                  <p className={cn("font-semibold", available ? "text-success" : "text-warning")}>
+                    {available ? t.availableNow : t.unavailableNow}
                   </p>
                 </div>
-                {available ? (
-                  <Button asChild size="lg" variant="accent">
-                    <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
+                <div className="flex flex-col gap-3">
+                  {available ? (
+                    <Button asChild size="lg" variant="accent">
+                      <Link href={bookHref(vehicle.slug, rental)}>
+                        {t.bookNow}
+                        <ButtonArrow />
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button size="lg" variant="accent" disabled>
+                      {t.bookNow}
+                    </Button>
+                  )}
+                  <Button asChild variant="outline">
+                    <Link href={`/contact?vehicle=${vehicle.slug}`}>{t.askAbout}</Link>
                   </Button>
-                ) : (
-                  <Button size="lg" variant="accent" disabled>
-                    {t.bookNow}
-                  </Button>
-                )}
-                <Button asChild variant="outline">
-                  <Link href={`/contact?vehicle=${vehicle.slug}`}>{t.askAbout}</Link>
-                </Button>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            </div>
           </aside>
         </div>
       </div>

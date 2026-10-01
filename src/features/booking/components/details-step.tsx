@@ -49,7 +49,7 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
               </h2>
               <p className="text-muted">{t.savedDetails.description}</p>
               <div className="flex flex-wrap gap-2">
-                <Button type="button" onClick={() => answerSavedDetails(true)}>
+                <Button type="button" variant="secondary" onClick={() => answerSavedDetails(true)}>
                   {t.savedDetails.yes}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => answerSavedDetails(false)}>
@@ -89,15 +89,16 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
         <PrivacyNote />
 
         <StepActions backHref={previousStepPath("details")}>
-          <Button type="submit" size="lg">
+          <Button type="submit" size="lg" variant="accent" arrow>
             {content.booking.common.continue}
           </Button>
         </StepActions>
       </form>
 
-      <aside className="min-w-0 lg:col-span-1">
+      <aside className="order-first min-w-0 lg:order-none lg:col-span-1">
         <BookingSummary
           data={summaryFromFlow({ state, vehicle, quote })}
+          collapsible
           className="lg:sticky lg:top-24"
         />
       </aside>

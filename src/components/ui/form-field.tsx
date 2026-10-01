@@ -69,7 +69,7 @@ export function FormField({ label, hint, error, required, hideLabel, className, 
           </p>
         )}
         {error && (
-          <p id={errorId} role="alert" className="text-sm font-medium text-danger">
+          <p id={errorId} role="alert" className="text-sm font-medium text-danger transition-[opacity,transform] duration-(--duration-fast) ease-out-strong starting:-translate-y-0.5 starting:opacity-0">
             {error}
           </p>
         )}
@@ -98,7 +98,7 @@ export function FieldGroup({ label, hint, error, required, className, children }
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="text-sm font-medium text-danger">
+        <p id={errorId} role="alert" className="text-sm font-medium text-danger transition-[opacity,transform] duration-(--duration-fast) ease-out-strong starting:-translate-y-0.5 starting:opacity-0">
           {error}
         </p>
       )}

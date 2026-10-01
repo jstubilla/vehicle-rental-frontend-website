@@ -9,7 +9,7 @@ const TERMS_LINK = "rental terms and conditions";
 
 export const content = {
   site: {
-    name: "Car Rental Co.",
+    name: "Ela's Car Rental",
     tagline: "Simple car rentals across the Philippines",
     description: "Rent a car in the Philippines with simple online booking and clear daily rates in PHP.",
     contactPhone: "0954 326 7335",
@@ -17,8 +17,8 @@ export const content = {
   },
 
   seo: {
-    titleTemplate: "%s | Car Rental Co.",
-    defaultTitle: "Car Rental Co. | Rent a car in the Philippines",
+    titleTemplate: "%s | Ela's Car Rental",
+    defaultTitle: "Ela's Car Rental | Rent a car in the Philippines",
     locale: "en_PH",
   },
 
@@ -65,13 +65,13 @@ export const content = {
           { label: "Leave a review", href: "/review" },
           { label: "Privacy Policy", href: "/privacy" },
           { label: "Rental terms", href: "/terms" },
-          { label: "Staff login", href: "/admin/login" },
         ],
       },
     ],
     phoneLabel: "Call us",
+    staffLogin: { label: "Staff login", href: "/admin/login" },
     socialsTitle: "Follow us",
-    legal: "© 2026 Car Rental Co. All rights reserved.",
+    legal: "© 2026 Ela's Car Rental. All rights reserved.",
     credit: "Powered by VAIANI",
   },
 
@@ -197,7 +197,8 @@ export const content = {
     },
     hero: {
       title: "Rent a car in the Philippines",
-      subtitle: "Simple online booking with clear daily prices in PHP.",
+      /** Two sentences: the price promise leads (set in full text color), how you book follows. */
+      subtitle: { lead: "Clear daily prices in pesos.", rest: "Booked online in minutes." },
     },
     featured: {
       title: "Featured vehicles",
@@ -221,11 +222,8 @@ export const content = {
       errorTitle: "We could not load the reviews",
       write: "Write a review",
     },
-    cta: {
-      title: "Ready to hit the road?",
-      description: "Pick your dates and book in a few minutes.",
-      button: "Book now",
-    },
+    /** Closes the home page under the reviews; the button reuses nav.bookCta. */
+    cta: { title: "Ready to book your car?" },
   },
 
   reviews: {

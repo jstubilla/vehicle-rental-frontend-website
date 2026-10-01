@@ -4,7 +4,8 @@ import { BookingShell } from "@/features/booking/components/booking-shell";
 
 // Booking pages are transactional, so they are kept out of search results.
 export const metadata: Metadata = {
-  title: content.booking.meta.title,
+  // The step pages set their own titles; the template keeps the brand on each tab title.
+  title: { default: content.booking.meta.title, template: content.seo.titleTemplate },
   description: content.booking.meta.description,
   robots: { index: false, follow: false },
 };

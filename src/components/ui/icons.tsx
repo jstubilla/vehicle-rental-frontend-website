@@ -20,6 +20,17 @@ function Icon({ className, children, ...props }: SVGProps<SVGSVGElement>) {
   );
 }
 
+export const ArrowRightIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}><path d="M5 12h14M13 6l6 6-6 6" /></Icon>
+);
+/** A picture frame: marks an empty image slot until a real photo is set. */
+export const ImageIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Icon {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <circle cx="9" cy="10" r="1.5" />
+    <path d="m21 16-5-5-9 9" />
+  </Icon>
+);
 export const ChevronDownIcon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><path d="m6 9 6 6 6-6" /></Icon>
 );
@@ -112,45 +123,10 @@ export const CreditCardIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M2 10h20" />
   </Icon>
 );
-export const SteeringWheelIcon = (p: SVGProps<SVGSVGElement>) => (
+/** A single open arc: paired with Tailwind's `animate-spin` for loading buttons. */
+export const SpinnerIcon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}>
-    <circle cx="12" cy="12" r="9" />
-    <circle cx="12" cy="12" r="2" />
-    <path d="M12 5v5M6.4 16.5l4-2.9M17.6 16.5l-4-2.9" />
-  </Icon>
-);
-export const MapPinIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}>
-    <path d="M19 10c0 5.25-7 12-7 12s-7-6.75-7-12a7 7 0 0 1 14 0Z" />
-    <circle cx="12" cy="10" r="2.5" />
-  </Icon>
-);
-/** Two points on a route, connected by a line: for a trip between two places rather than one fixed spot. */
-export const RouteIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}>
-    <circle cx="5" cy="6" r="2.5" />
-    <path d="M7 7.5 15 16" />
-    <circle cx="17" cy="18" r="2.5" />
-  </Icon>
-);
-export const ShieldCheckIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}>
-    <path d="M12 3 5 6v5c0 5 3 8.5 7 10 4-1.5 7-5 7-10V6l-7-3Z" />
-    <path d="m9 12 2 2 4-4" />
-  </Icon>
-);
-export const TagIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}>
-    <path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.57 3H4a1 1 0 0 0-1 1v5.57a2 2 0 0 0 .59 1.41l9.6 9.6a2 2 0 0 0 2.82 0l4.6-4.6a2 2 0 0 0 0-2.82Z" />
-    <circle cx="7.5" cy="7.5" r="1.25" fill="currentColor" stroke="none" />
-  </Icon>
-);
-export const SmileIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}>
-    <circle cx="12" cy="12" r="9" />
-    <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-    <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
-    <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+    <path d="M12 3a9 9 0 1 0 9 9" />
   </Icon>
 );
 

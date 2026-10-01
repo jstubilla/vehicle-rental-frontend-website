@@ -22,12 +22,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={fontClassNames} suppressHydrationWarning>
       <head>
+        {/* The font variables sit on <html> so tokens.css (--font-heading / --font-body, resolved at :root) can see them. */}
         {/* Sets the saved (or dark, the default) theme before paint, so there is no flash of the wrong one. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className={fontClassNames}>
+      <body>
         <SkipLink />
         <Providers>{children}</Providers>
       </body>

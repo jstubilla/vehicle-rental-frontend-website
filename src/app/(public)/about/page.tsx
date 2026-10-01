@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CtaBanner } from "@/components/sections/cta-banner";
-import { Media, PageHeader, Section, ShieldCheckIcon, SmileIcon, TagIcon } from "@/components/ui";
+import { EditorialSection } from "@/components/sections/editorial-section";
+import { Band, Media, PageHeader, Section } from "@/components/ui";
 import { content } from "@/content";
 import { buildMetadata } from "@/lib/seo";
 
@@ -8,75 +9,67 @@ const t = content.about;
 
 export const metadata: Metadata = buildMetadata({ ...t.meta, path: "/about" });
 
-/** One icon per value, in order (the three values are always this same fixed list). */
-const VALUE_ICONS = [ShieldCheckIcon, TagIcon, SmileIcon];
-
+/**
+ * Opens like the home page (display title beside the photo), reads as an editorial page, and sets the
+ * values apart in the site's one tinted band before the team and the closing ask.
+ */
 export default function AboutPage() {
   return (
     <>
-      <Section className="pb-0 md:pb-0">
-        <PageHeader title={t.title} description={t.subtitle} />
-      </Section>
-
-      <Section aria-labelledby="story-heading">
-        <div className="grid items-center gap-8 lg:grid-cols-2">
-          <div className="flex flex-col gap-4">
-            <h2 id="story-heading">{t.story.title}</h2>
-            {t.story.body.map((paragraph) => (
-              <p key={paragraph} className="text-muted">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          <Media asset="about" sizes="(min-width: 64rem) 50vw, 100vw" />
+      <Section>
+        <div className="grid items-end gap-8 lg:grid-cols-12 lg:gap-12">
+          <PageHeader display title={t.title} description={t.subtitle} className="lg:col-span-7 lg:pb-12" />
+          <Media
+            asset="about"
+            priority
+            sizes="(min-width: 64rem) 40vw, 100vw"
+            className="aspect-wide lg:col-span-5 lg:aspect-photo"
+          />
         </div>
       </Section>
 
-      <Section variant="muted" aria-labelledby="values-heading">
-        <h2 id="values-heading" className="mb-6">
-          {t.values.title}
-        </h2>
-        <ul className="max-w-3xl divide-y divide-border border-y border-border">
-          {t.values.items.map((item, index) => {
-            const ValueIcon = VALUE_ICONS[index];
-            return (
-              <li key={item.title}>
-                <div className="flex items-start gap-5 py-6 md:gap-6 md:py-7">
-                  {ValueIcon && (
-                    <span
-                      aria-hidden="true"
-                      className="flex size-10 shrink-0 items-center justify-center text-primary"
-                    >
-                      <ValueIcon className="size-6" />
-                    </span>
-                  )}
-                  <div className="flex flex-col gap-1.5">
-                    <h3 className="text-xl font-semibold">{item.title}</h3>
-                    <p className="max-w-2xl text-muted">{item.body}</p>
-                  </div>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </Section>
+      <EditorialSection id="story" title={t.story.title}>
+        {t.story.body.map((paragraph) => (
+          <p key={paragraph} className="max-w-prose text-lg text-muted">
+            {paragraph}
+          </p>
+        ))}
+      </EditorialSection>
 
-      <Section aria-labelledby="team-heading">
-        <h2 id="team-heading" className="mb-6">
-          {t.team.title}
-        </h2>
-        <ul className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+      <Band>
+        <Section aria-labelledby="values-heading">
+          <div className="flex flex-col gap-8 md:gap-10">
+            <h2 id="values-heading">{t.values.title}</h2>
+            <ul className="ledger grid md:grid-cols-3 md:gap-x-10">
+              {t.values.items.map((item) => (
+                <li key={item.title} className="flex flex-col gap-2 py-6 md:pb-0">
+                  <h3 className="text-xl font-extrabold tracking-display md:text-2xl">{item.title}</h3>
+                  <p className="text-muted">{item.body}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Section>
+      </Band>
+
+      <EditorialSection id="team" title={t.team.title} rule={false}>
+        <ul className="grid gap-x-6 gap-y-8 sm:grid-cols-3">
           {t.team.members.map((member, index) => (
-            <li key={index} className="flex flex-col gap-3">
-              <Media asset="team" sizes="(min-width: 48rem) 33vw, 100vw" />
-              <div>
-                <p className="font-semibold">{member.name}</p>
+            // Phones: a compact row (photo beside the name) instead of three full-width photos.
+            <li key={index} className="flex items-center gap-4 sm:flex-col sm:items-stretch sm:gap-3">
+              <Media
+                asset="team"
+                sizes="(min-width: 64rem) 20vw, (min-width: 40rem) 33vw, 6rem"
+                className="w-24 shrink-0 sm:w-auto"
+              />
+              <div className="flex flex-col gap-0.5">
+                <p className="font-heading text-lg font-bold tracking-tight">{member.name}</p>
                 <p className="text-sm text-muted">{member.role}</p>
               </div>
             </li>
           ))}
         </ul>
-      </Section>
+      </EditorialSection>
 
       <CtaBanner title={t.cta.title} buttonLabel={t.cta.button} href="/contact" />
     </>

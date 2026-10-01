@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { images, type ImageAsset, type ImageKey, type ImageRatio } from "@/assets/config";
+import { ImageIcon } from "./icons";
 
 const ratios: Record<ImageRatio, string> = {
   video: "aspect-video",
@@ -17,19 +18,28 @@ export interface MediaProps {
   priority?: boolean;
   /** Tells the browser how wide the image is at each screen size. */
   sizes?: string;
+  /** Ease the picture in a little while a surrounding `group` is hovered. */
+  zoom?: boolean;
 }
 
 /**
- * Shows a real image (via next/image) when the asset has a `src`, otherwise a
- * gray labeled placeholder box. Swapping assets never touches the calling code.
+ * Shows a real image (via next/image) when the asset has a `src`, otherwise a designed empty slot
+ * (fine hatching, a frame icon and the slot's label). Swapping assets never touches the calling code.
+ * `zoom`: the picture eases in slightly while a surrounding `group` (e.g. a vehicle card) is hovered.
  */
-export function Media({ asset, className, priority, sizes = "100vw" }: MediaProps) {
+export function Media({ asset, className, priority, sizes = "100vw", zoom = false }: MediaProps) {
   const resolved = typeof asset === "string" ? images[asset] : asset;
+  const layer = cn(
+    zoom &&
+      "transition-transform duration-(--duration-slow) ease-out-strong motion-safe:group-hover:scale-[1.04]",
+  );
 
   return (
     <div
       className={cn(
         "relative w-full overflow-hidden rounded-lg border border-border bg-placeholder text-placeholder-foreground",
+        // A hairline inside the edge, so a photo's own edge never bleeds into the page.
+        "after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:ring-1 after:ring-foreground/5 after:ring-inset",
         ratios[resolved.ratio],
         className,
       )}
@@ -41,15 +51,16 @@ export function Media({ asset, className, priority, sizes = "100vw" }: MediaProp
           fill
           sizes={sizes}
           priority={priority}
-          className="object-cover"
+          className={cn("object-cover", layer)}
         />
       ) : (
         <div
           role="img"
           aria-label={resolved.alt}
-          className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm font-medium"
+          className={cn("media-slot absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center", layer)}
         >
-          {resolved.label}
+          <ImageIcon aria-hidden="true" className="size-6 opacity-70" />
+          <span className="max-w-[24ch] text-xs font-medium">{resolved.label}</span>
         </div>
       )}
     </div>

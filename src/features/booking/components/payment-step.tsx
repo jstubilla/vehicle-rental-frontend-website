@@ -159,9 +159,10 @@ export function PaymentStep() {
         </StepActions>
       </div>
 
-      <aside className="min-w-0 lg:col-span-1">
+      <aside className="order-first min-w-0 lg:order-none lg:col-span-1">
         <BookingSummary
           data={summaryFromFlow({ state, vehicle, quote })}
+          collapsible
           className="lg:sticky lg:top-24"
         />
       </aside>

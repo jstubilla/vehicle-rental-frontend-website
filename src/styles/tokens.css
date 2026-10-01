@@ -73,7 +73,8 @@
  *    --text-primary (light) / near-black (dark), never a new hue. Defined per theme just like colors
  *    (--shadow-*-value above, mapped in the inline @theme block below) because dark surfaces need a
  *    darker, more opaque shadow than light ones to read as depth at all.
- *  - Radius is one step up across the board (sm/md/lg = 4/8/12px) for a softer, less boxy feel.
+ *  - Radius is small and consistent (sm/md/lg = 3/6/8px): a dependable rental counter, not a soft app.
+ *    Hierarchy comes from type and spacing; sections are divided by hairline rules, not tinted bands.
  */
 
 /* ---------- Theme values: LIGHT (base) ---------- */
@@ -124,6 +125,14 @@
 
   --placeholder: #e3e8ee;
   --placeholder-foreground: #445a7a;
+  --placeholder-line: rgb(12 35 61 / 0.06); /* the fine hatching in an empty image slot */
+  --hero-image-opacity: 0.32; /* the home backdrop photo: a wash on the light page, so navy text stays crisp */
+
+  /* Buttons with a fill: a 1px top highlight and a tight drop, so they read as pressable objects. */
+  --shadow-button-value: inset 0 1px 0 0 rgb(255 255 255 / 0.28), 0 1px 2px 0 rgb(12 35 61 / 0.18);
+  /* The hero's booking bar: lifted clearly above the page and the band it crosses into. */
+  --shadow-float-value:
+    0 32px 64px -24px rgb(12 35 61 / 0.28), 0 12px 24px -12px rgb(12 35 61 / 0.12), 0 0 0 1px rgb(12 35 61 / 0.04);
 }
 
 /* ---------- Theme values: DARK (client palette) ---------- */
@@ -175,6 +184,12 @@
 
   --placeholder: #1a2434;
   --placeholder-foreground: #a4b2c8;
+  --placeholder-line: rgb(164 178 200 / 0.07);
+  --hero-image-opacity: 0.6; /* the home backdrop photo: present, but under the headline's contrast */
+
+  --shadow-button-value: inset 0 1px 0 0 rgb(255 255 255 / 0.3), 0 1px 2px 0 rgb(2 7 14 / 0.5);
+  --shadow-float-value:
+    0 40px 80px -24px rgb(2 7 14 / 0.8), 0 16px 32px -16px rgb(2 7 14 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.04);
 }
 
 /* ---------- Tailwind names: point at the theme values above ---------- */
@@ -225,6 +240,8 @@
   --shadow-sm: var(--shadow-sm-value);
   --shadow-md: var(--shadow-md-value);
   --shadow-lg: var(--shadow-lg-value);
+  --shadow-button: var(--shadow-button-value);
+  --shadow-float: var(--shadow-float-value);
 }
 
 @theme static {
@@ -255,9 +272,16 @@
   /* Display-only sizes, for a hero headline. Not used by the base h1 (see globals.css), which stays at
      the tighter scale everywhere else so admin and booking pages don't inherit a hero-sized heading. */
   --text-5xl: 3rem;
-  --text-5xl--line-height: 3.25rem;
+  --text-5xl--line-height: 3.125rem;
   --text-6xl: 3.75rem;
-  --text-6xl--line-height: 3.75rem;
+  --text-6xl--line-height: 3.875rem;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 4.5rem;
+
+  /* Letter spacing. Display is for the hero headline only; tight for every other heading. */
+  --tracking-display: -0.035em;
+  --tracking-tight: -0.02em;
+  --tracking-label: 0.01em;
 
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -267,24 +291,26 @@
 
   /* ---------- Shape ---------- */
   --radius-*: initial;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
   --radius-full: 9999px;
 
   /* ---------- Spacing ---------- */
   --spacing: 0.25rem; /* base unit: p-4 = 1rem */
   --spacing-gutter: 1rem; /* horizontal page padding on phones */
-  --spacing-section: 3.5rem; /* vertical space between page sections, on phones */
-  --spacing-section-lg: 5.5rem; /* the same, from the md breakpoint up: use "md:py-section-lg" */
+  --spacing-section: 3rem; /* vertical space between page sections, on phones */
+  --spacing-section-lg: 4.5rem; /* the same, from the md breakpoint up: use "md:py-section-lg" */
   --spacing-control: 2.75rem; /* height of buttons & inputs (44px tap target) */
   --spacing-control-sm: 2.25rem;
   --spacing-control-lg: 3.25rem;
+  --spacing-header: 3.75rem; /* at least the public header's height (57-58px measured); the home backdrop starts this far up, under it */
   --spacing-sidebar: 16rem; /* admin sidebar width */
 
   /* ---------- Layout ---------- */
   --container-page: 72rem; /* max width of page content */
   --container-narrow: 44rem; /* text-heavy pages */
+  --container-prose: 65ch; /* body text measure */
   --container-form: 32rem; /* single-column forms */
 
   --breakpoint-sm: 40rem;
@@ -306,6 +332,20 @@
   /* ---------- Focus ---------- */
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
+
+  /* ---------- Motion ---------- */
+  /* Easings are Tailwind utilities (ease-out-strong). Durations have no Tailwind namespace, so use them
+     as duration-(--duration-fast), and as raw --duration-* values inside the keyframes in globals.css. Entrances/exits use the strong
+     curves; plain hover/color changes keep Tailwind's built-in "ease-out". */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-modal: 250ms;
+  --duration-slow: 600ms; /* image zoom on hover, scroll reveals: movement you watch, not wait for */
+  --duration-draw: 900ms; /* the one line that draws itself in (the steps on the home page) */
 }
 
 /*

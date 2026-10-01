@@ -86,7 +86,7 @@ test.describe("what the public sees", () => {
   test("only the reviews staff chose to show", async ({ page }) => {
     await visit(page, "/");
     const section = homeReviews(page);
-    await expect(section.getByRole("listitem")).toHaveCount(shownSeed.length);
+    await expect(section.getByRole("figure")).toHaveCount(shownSeed.length);
     for (const review of shownSeed) await expect(section.getByText(review.comment)).toBeVisible();
     for (const review of hiddenSeed) await expect(page.getByText(review.comment)).toHaveCount(0);
     await expect(section.getByRole("img", { name: content.ui.rating.stars(5) }).first()).toBeVisible();
@@ -105,7 +105,7 @@ test.describe("staff", () => {
 
     // Private: not on the website yet.
     await visit(page, "/");
-    await expect(homeReviews(page).getByRole("listitem")).toHaveCount(shownSeed.length);
+    await expect(homeReviews(page).getByRole("figure")).toHaveCount(shownSeed.length);
     await expect(page.getByText(comment)).toHaveCount(0);
 
     await loginAs(page);
@@ -126,7 +126,7 @@ test.describe("staff", () => {
     await again.click();
     await expect(again).not.toBeChecked();
     await visit(page, "/");
-    await expect(homeReviews(page).getByRole("listitem")).toHaveCount(shownSeed.length);
+    await expect(homeReviews(page).getByRole("figure")).toHaveCount(shownSeed.length);
     await expect(page.getByText(comment)).toHaveCount(0);
   });
 
@@ -179,7 +179,7 @@ for (const theme of ["light", "dark"] as const) {
 
     test("home page with the shown reviews", async ({ page }) => {
       await visit(page, "/");
-      await expect(homeReviews(page).getByRole("listitem")).toHaveCount(shownSeed.length);
+      await expect(homeReviews(page).getByRole("figure")).toHaveCount(shownSeed.length);
       await expectNoA11yViolations(page);
     });
 

@@ -30,7 +30,13 @@ export function BookingShell({ children }: { children: ReactNode }) {
     <Section>
       <div className="flex flex-col gap-8">
         <Stepper steps={steps} currentIndex={currentIndex} />
-        {children}
+        {/* Keyed by route, so each step settles in as you move through the booking instead of swapping in place. */}
+        <div
+          key={pathname}
+          className="transition-[opacity,transform] duration-(--duration-modal) ease-out-strong starting:translate-y-1.5 starting:opacity-0"
+        >
+          {children}
+        </div>
       </div>
     </Section>
   );

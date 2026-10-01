@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { listFeaturedVehicles } from "@/api/vehicles";
 import { CtaBanner } from "@/components/sections/cta-banner";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { JsonLd } from "@/components/seo/json-ld";
-import { Button, Media, Section } from "@/components/ui";
+import { ArrowLink, Band, Container, HeroBackdrop, Section } from "@/components/ui";
 import { content } from "@/content";
 import { PublicReviews } from "@/features/reviews/components/public-reviews";
 import { FeaturedVehicles } from "@/features/vehicles/components/featured-vehicles";
@@ -33,46 +32,67 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={businessSchema()} />
-      <Section className="pb-0 md:pb-0">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="flex flex-col gap-5">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl">{t.hero.title}</h1>
-            <p className="max-w-md text-lg text-muted">{t.hero.subtitle}</p>
+
+      {/*
+        Hero: the headline and the booking bar are the hero, over a backdrop photo; the search is what people came for,
+        so it is the one raised object, full width, hanging over into the band below so the hero hands off
+        to the vehicles instead of just ending. Wide screens set the subtitle opposite the headline's last line.
+      */}
+      <section
+        id="search"
+        className="relative scroll-mt-24 pt-10 md:pt-16 lg:pt-20"
+        aria-labelledby="hero-heading"
+      >
+        {/* A photo from the very top of the page, washed behind the headline and faded into the page. */}
+        {/*
+          It runs on behind the booking bar and fades out just past its foot, inside the band's clear top.
+          Stacking (no isolate here on purpose): photo at the back, then the band's rising tint, then the
+          booking bar (z-10), so the tint never washes over the bar where the two overlap.
+        */}
+        <HeroBackdrop asset="backdrop" className="-bottom-24 md:-bottom-28" />
+        <Container>
+          <div className="grid gap-6 lg:grid-cols-12 lg:items-baseline-last lg:gap-12">
+            <h1 id="hero-heading" className="text-display lg:col-span-7">
+              {t.hero.title}
+            </h1>
+            {/*
+              Wide screens: the subtitle's last line sits exactly on the headline's last baseline (grid
+              last-baseline alignment), under a ledger rule that runs out to the booking bar's right edge.
+              The price promise is set in full text color; how you book follows, muted.
+            */}
+            <div className="ledger lg:col-span-5 lg:justify-self-end lg:w-full lg:max-w-sm">
+              <p className="pt-4 text-lg lg:pt-5 lg:text-xl">
+                <span className="block font-heading font-semibold tracking-tight text-foreground">{t.hero.subtitle.lead}</span>
+                <span className="block text-muted">{t.hero.subtitle.rest}</span>
+              </p>
+            </div>
           </div>
-          <Media
-            asset="hero"
-            priority
-            sizes="(min-width: 64rem) 50vw, 100vw"
-            className="max-h-64 lg:max-h-none"
-          />
-        </div>
-      </Section>
-
-      <Section id="search" className="scroll-mt-24">
-        <QuickSearch />
-      </Section>
-
-      <Section variant="muted" aria-labelledby="featured-heading">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="flex flex-col gap-2">
-            <h2 id="featured-heading">{t.featured.title}</h2>
-            <p className="text-muted">{t.featured.description}</p>
+          <div className="relative z-10 mt-8 -mb-16 md:mt-10 md:-mb-20 lg:mt-14">
+            <QuickSearch />
           </div>
-          <Button asChild variant="outline">
-            <Link href="/vehicles">{t.featured.viewAll}</Link>
-          </Button>
-        </div>
-        <FeaturedVehicles initialData={featured} />
-      </Section>
+        </Container>
+      </section>
 
-      <HowItWorks title={t.howItWorks.title} steps={t.howItWorks.steps} />
+      <Band variant="continuous">
+        <Section aria-labelledby="featured-heading" className="pt-28 md:pt-36">
+          <div className="mb-8 flex flex-col gap-2 md:mb-10 md:flex-row md:items-end md:justify-between md:gap-6">
+            <div className="flex flex-col gap-1">
+              <h2 id="featured-heading">{t.featured.title}</h2>
+              <p className="text-muted">{t.featured.description}</p>
+            </div>
+            <ArrowLink href="/vehicles" className="self-start md:self-auto">
+              {t.featured.viewAll}
+            </ArrowLink>
+          </div>
+          <FeaturedVehicles initialData={featured} />
+        </Section>
+
+        <HowItWorks title={t.howItWorks.title} steps={t.howItWorks.steps} />
+      </Band>
+
       <PublicReviews />
-      <CtaBanner
-        title={t.cta.title}
-        description={t.cta.description}
-        buttonLabel={t.cta.button}
-        href={content.nav.bookCta.href}
-      />
+
+      <CtaBanner title={t.cta.title} buttonLabel={content.nav.bookCta.label} href={content.nav.bookCta.href} />
     </>
   );
 }

@@ -33,9 +33,9 @@ export function LoginForm() {
 
   return (
     <div className="flex w-full max-w-form flex-col gap-6">
-      <Card>
+      <Card variant="raised">
         <CardHeader>
-          <CardTitle as="h1" className="text-2xl">
+          <CardTitle as="h1" className="text-3xl font-extrabold tracking-display">
             {t.title}
           </CardTitle>
           <p className="text-muted">{t.subtitle}</p>
@@ -86,7 +86,7 @@ export function LoginForm() {
                 <FormField label={t.password} required error={password.form.formState.errors.password?.message}>
                   <Input {...password.form.register("password")} type="password" autoComplete="current-password" />
                 </FormField>
-                <Button type="submit" size="lg" loading={password.isSubmitting}>
+                <Button type="submit" size="lg" variant="accent" loading={password.isSubmitting}>
                   {password.isSubmitting ? t.submitting : t.submit}
                 </Button>
               </form>
@@ -99,7 +99,7 @@ export function LoginForm() {
                   <FormField label={t.email} required error={code.emailForm.formState.errors.email?.message}>
                     <Input {...code.emailForm.register("email")} type="email" autoComplete="email" />
                   </FormField>
-                  <Button type="submit" size="lg" loading={code.isSending}>
+                  <Button type="submit" size="lg" variant="accent" loading={code.isSending}>
                     {code.isSending ? t.sendingCode : t.sendCode}
                   </Button>
                 </form>
@@ -120,7 +120,7 @@ export function LoginForm() {
                       maxLength={6}
                     />
                   </FormField>
-                  <Button type="submit" size="lg" loading={code.isVerifying}>
+                  <Button type="submit" size="lg" variant="accent" loading={code.isVerifying}>
                     {code.isVerifying ? t.submitting : t.verify}
                   </Button>
                   <Button type="button" variant="link" className="self-start" onClick={code.changeEmail}>

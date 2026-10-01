@@ -9,9 +9,10 @@ export function SiteFooter() {
       description={content.site.description}
       phone={{ label: content.footer.phoneLabel, number: content.site.contactPhone }}
       columns={content.footer.columns}
-      socials={<SocialLinks links={content.socials} className="flex-col items-start gap-2" />}
+      socials={<SocialLinks links={content.socials} />}
       socialsTitle={content.footer.socialsTitle}
       legal={content.footer.legal}
+      legalLinks={[content.footer.staffLogin]}
       credit={content.footer.credit}
     />
   );

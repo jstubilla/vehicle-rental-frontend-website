@@ -36,12 +36,33 @@ export async function loginAs(page: Page, from = "/admin/login"): Promise<void> 
 export const pageAlerts = (page: Page) => page.getByRole("main").getByRole("alert");
 
 /**
+ * Waits for any running CSS transition/animation to settle (e.g. a dialog's entrance fade),
+ * so a scan right after `toBeVisible()` doesn't sample a mid-animation frame and read a
+ * transiently-lower contrast than the finished state has. Skips animations that loop forever
+ * (the skeleton shimmer, a loading button's spinner) so this never hangs; 1s safety cap besides.
+ */
+async function waitForAnimationsToSettle(page: Page): Promise<void> {
+  await page.evaluate(() =>
+    Promise.race([
+      Promise.all(
+        document
+          .getAnimations()
+          .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+          .map((a) => a.finished.catch(() => {})),
+      ),
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+    ]),
+  );
+}
+
+/**
  * Runs the axe accessibility checker on the current page and fails with a readable list
  * of problems. Covers WCAG 2.0/2.1/2.2 A and AA plus axe's best-practice rules.
  * `skipRules` switches off named rules, for the rare screen where one cannot apply (say why at the call).
  * `scope` (a CSS selector) checks just that part of the page.
  */
 export async function expectNoA11yViolations(page: Page, skipRules: string[] = [], scope?: string): Promise<void> {
+  await waitForAnimationsToSettle(page);
   let axe = new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"])
     .disableRules(skipRules);

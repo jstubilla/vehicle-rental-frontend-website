@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui";
+import { Button, ButtonArrow } from "@/components/ui";
 import { content } from "@/content";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { useStepGuard } from "../hooks/use-step-guard";
@@ -40,8 +40,11 @@ export function CheckStep() {
       </nav>
 
       <StepActions backHref={previousStepPath("check")}>
-        <Button asChild size="lg">
-          <Link href={nextStepPath("check")}>{t.toPayment}</Link>
+        <Button asChild size="lg" variant="accent">
+          <Link href={nextStepPath("check")}>
+            {t.toPayment}
+            <ButtonArrow />
+          </Link>
         </Button>
       </StepActions>
     </div>

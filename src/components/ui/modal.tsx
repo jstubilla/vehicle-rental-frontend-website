@@ -56,7 +56,13 @@ export function Modal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-(--z-overlay) grid place-items-center overflow-y-auto bg-overlay p-gutter">
+        <Dialog.Overlay
+          className={cn(
+            "fixed inset-0 z-(--z-overlay) grid place-items-center overflow-y-auto bg-overlay p-gutter",
+            "data-[state=open]:animate-[overlay-in_var(--duration-modal)_var(--ease-out-strong)]",
+            "data-[state=closed]:animate-[overlay-out_var(--duration-fast)_var(--ease-out-strong)]",
+          )}
+        >
           <Dialog.Content
             data-surface="card"
             onOpenAutoFocus={() => {
@@ -71,6 +77,8 @@ export function Modal({
             {...(description ? {} : { "aria-describedby": undefined })}
             className={cn(
               "relative w-full rounded-lg border bg-card p-4 text-foreground shadow-lg md:p-6",
+              "data-[state=open]:animate-[content-in_var(--duration-modal)_var(--ease-out-strong)]",
+              "data-[state=closed]:animate-[content-out_var(--duration-fast)_var(--ease-out-strong)]",
               sizes[size],
               variants[variant],
               className,

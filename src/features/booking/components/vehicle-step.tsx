@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Alert, Button, ErrorState, Skeleton } from "@/components/ui";
+import { Alert, Button, ButtonArrow, ErrorState, Skeleton } from "@/components/ui";
 import { content } from "@/content";
 import { useVehicleList } from "@/features/vehicles/hooks/use-vehicles";
 import { useBookingFlow } from "../hooks/use-booking-flow";
@@ -65,20 +65,24 @@ export function VehicleStep() {
         <StepActions backHref={previousStepPath("vehicle")}>
           {!canContinue && !selectedUnavailable && <p className="self-center text-sm text-muted">{t.selectPrompt}</p>}
           {canContinue ? (
-            <Button asChild size="lg">
-              <Link href={nextStepPath("vehicle")}>{content.booking.common.continue}</Link>
+            <Button asChild size="lg" variant="accent">
+              <Link href={nextStepPath("vehicle")}>
+                {content.booking.common.continue}
+                <ButtonArrow />
+              </Link>
             </Button>
           ) : (
-            <Button size="lg" disabled>
+            <Button size="lg" variant="accent" disabled>
               {content.booking.common.continue}
             </Button>
           )}
         </StepActions>
       </div>
 
-      <aside className="min-w-0 lg:col-span-1">
+      <aside className="order-first min-w-0 lg:order-none lg:col-span-1">
         <BookingSummary
           data={summaryFromFlow({ state, vehicle, quote })}
+          collapsible
           className="lg:sticky lg:top-24"
         />
       </aside>

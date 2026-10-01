@@ -23,13 +23,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
     <div className={cn("relative", className)}>
       <select
         ref={ref}
-        className={cn(controlStyles, controlVariants[variant], "appearance-none pr-10")}
+        className={cn("peer", controlStyles, controlVariants[variant], "appearance-none pr-10")}
         {...field}
         {...props}
       >
         {children}
       </select>
-      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted" />
+      {/* Turns over while the list is open (the :open state, where the browser supports it) and
+          brightens on hover. The list itself is the browser's own, so it keeps native keyboard and phone behavior. */}
+      <ChevronDownIcon className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted transition-[rotate,color] duration-(--duration-base) ease-out-strong peer-hover:text-foreground peer-open:rotate-180 peer-disabled:text-muted" />
     </div>
   );
 });

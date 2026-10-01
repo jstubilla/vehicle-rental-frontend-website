@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { CtaBanner } from "@/components/sections/cta-banner";
-import {
-  CalendarIcon,
-  MapPinIcon,
-  PageHeader,
-  RouteIcon,
-  Section,
-  SteeringWheelIcon,
-} from "@/components/ui";
+import Link from "next/link";
+import { Button, ButtonArrow, Card, PageHeader, Section } from "@/components/ui";
 import { content } from "@/content";
 import { buildMetadata } from "@/lib/seo";
 
@@ -15,47 +8,49 @@ const t = content.specialOffers;
 
 export const metadata: Metadata = buildMetadata({ ...t.meta, path: "/special-offers" });
 
-/** One icon per offer, in order (the four offers are always this same fixed list). */
-const OFFER_ICONS = [CalendarIcon, SteeringWheelIcon, MapPinIcon, RouteIcon];
-
-/** Static marketing copy only: nothing here is wired into the booking price. */
+/**
+ * Static marketing copy only: nothing here is wired into the booking price.
+ *
+ * Wide screens: the title and the one way to act on the offers (ask us) hold the left column while the
+ * offers run down the right as a ruled ledger. Phones: title, offers, then the ask, so it still comes last.
+ */
 export default function SpecialOffersPage() {
   return (
-    <>
-      <Section className="pb-0 md:pb-0">
-        <PageHeader title={t.title} description={t.subtitle} titleClassName="text-4xl md:text-5xl" />
-      </Section>
+    <Section>
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="contents lg:sticky lg:top-28 lg:col-span-5 lg:flex lg:flex-col lg:gap-12 lg:self-start">
+          <PageHeader title={t.title} description={t.subtitle} display />
 
-      <Section aria-labelledby="offers-heading">
-        <h2 id="offers-heading" className="sr-only">
-          {t.title}
-        </h2>
-        <ul className="max-w-3xl divide-y divide-border border-y border-border">
-          {t.offers.map((offer, index) => {
-            const OfferIcon = OFFER_ICONS[index];
-            return (
-              <li key={offer.title}>
-                <div className="flex items-start gap-5 py-6 md:gap-6 md:py-7">
-                  {OfferIcon && (
-                    <span
-                      aria-hidden="true"
-                      className="flex size-10 shrink-0 items-center justify-center text-primary"
-                    >
-                      <OfferIcon className="size-6" />
-                    </span>
-                  )}
-                  <div className="flex flex-col gap-1.5">
-                    <h3 className="text-xl font-semibold">{offer.title}</h3>
-                    <p className="max-w-2xl text-muted">{offer.body}</p>
-                  </div>
-                </div>
+          <Card
+            as="section"
+            variant="raised"
+            aria-labelledby="offers-cta-heading"
+            className="order-last gap-5 p-5 sm:flex-row sm:items-center sm:justify-between md:p-6 lg:order-none lg:flex-col lg:items-start"
+          >
+            <h2 id="offers-cta-heading">{t.cta.title}</h2>
+            <Button asChild size="lg" variant="accent" className="self-start sm:self-auto lg:self-start">
+              <Link href="/contact">
+                {t.cta.button}
+                <ButtonArrow />
+              </Link>
+            </Button>
+          </Card>
+        </div>
+
+        <section aria-labelledby="offers-heading" className="lg:col-span-7">
+          <h2 id="offers-heading" className="sr-only">
+            {t.title}
+          </h2>
+          <ul className="ledger border-b border-border">
+            {t.offers.map((offer) => (
+              <li key={offer.title} className="flex flex-col gap-3 py-8 md:py-10">
+                <h3 className="text-2xl font-extrabold tracking-display md:text-3xl">{offer.title}</h3>
+                <p className="max-w-prose text-lg text-muted">{offer.body}</p>
               </li>
-            );
-          })}
-        </ul>
-      </Section>
-
-      <CtaBanner title={t.cta.title} buttonLabel={t.cta.button} href="/contact" />
-    </>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </Section>
   );
 }

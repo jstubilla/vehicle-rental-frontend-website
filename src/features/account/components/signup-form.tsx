@@ -14,9 +14,9 @@ export function SignupForm() {
   const { errors } = formState;
 
   return (
-    <Card className="w-full max-w-form">
+    <Card variant="raised" className="w-full max-w-form">
       <CardHeader>
-        <CardTitle as="h1" className="text-2xl">
+        <CardTitle as="h1" className="text-3xl font-extrabold tracking-display">
           {t.title}
         </CardTitle>
         <p className="text-muted">{t.subtitle}</p>
@@ -34,7 +34,7 @@ export function SignupForm() {
             <Input {...register("password")} type="password" autoComplete="new-password" />
           </FormField>
           <PrivacyNote />
-          <Button type="submit" size="lg" loading={isSubmitting}>
+          <Button type="submit" size="lg" variant="accent" loading={isSubmitting}>
             {isSubmitting ? t.submitting : t.submit}
           </Button>
         </form>

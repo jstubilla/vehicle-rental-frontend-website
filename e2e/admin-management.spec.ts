@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
-import { formatCurrency } from "../src/lib/currency";
+import { formatCurrency, formatPhp, formatUsd } from "../src/lib/currency";
 import { seedBookings } from "../src/mocks/bookings";
 import { loginAs, pageAlerts, visit } from "./helpers";
 
@@ -95,7 +95,10 @@ test.describe("pricing", () => {
 
     // Same browser, so the public website sees the change.
     await visit(page, "/vehicles/sedan");
-    await expect(page.getByRole("complementary", { name: "Sedan" })).toContainText(formatCurrency(1900));
+    // The public site shows a daily rate without centavos, with the USD amount after it.
+    await expect(page.getByRole("complementary", { name: "Sedan" })).toContainText(
+      `${formatPhp(1900)} ${formatUsd(1900)}`,
+    );
   });
 });
 

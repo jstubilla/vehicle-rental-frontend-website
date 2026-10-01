@@ -89,7 +89,7 @@ export function ContactForm({ defaultVehicleId }: { defaultVehicleId?: string })
 
       <PrivacyNote />
 
-      <Button type="submit" size="lg" loading={isSubmitting} className="self-start">
+      <Button type="submit" size="lg" variant="accent" loading={isSubmitting} className="self-start">
         {isSubmitting ? t.sending : t.submit}
       </Button>
     </form>

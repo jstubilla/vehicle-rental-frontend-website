@@ -97,7 +97,11 @@ export function DatePicker({
           sideOffset={4}
           aria-label={content.ui.selectDate}
           data-surface="card"
-          className="z-(--z-overlay) rounded-md border border-border-strong bg-card p-3 text-foreground shadow-md"
+          className={cn(
+            "z-(--z-overlay) origin-(--radix-popover-content-transform-origin) rounded-md border border-border-strong bg-card p-3 text-foreground shadow-md",
+            "data-[state=open]:animate-[popover-in_var(--duration-base)_var(--ease-out-strong)]",
+            "data-[state=closed]:animate-[popover-out_var(--duration-fast)_var(--ease-out-strong)]",
+          )}
         >
           <DayPicker
             mode="single"

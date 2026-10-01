@@ -3,7 +3,7 @@
 import { Button, FormField, Select } from "@/components/ui";
 import { content } from "@/content";
 import { PRICE_FILTER_STEPS, SEAT_FILTER_OPTIONS, VEHICLE_CATEGORIES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/currency";
+import { formatPhp } from "@/lib/currency";
 import type { VehicleFilters } from "@/lib/vehicle-filters";
 
 interface VehicleFiltersProps {
@@ -59,7 +59,7 @@ export function VehicleFiltersPanel({ filters, onChange, onReset, activeCount }:
           <option value="">{t.noMinimum}</option>
           {PRICE_FILTER_STEPS.map((p) => (
             <option key={p} value={p} disabled={filters.maxPrice !== undefined && p > filters.maxPrice}>
-              {formatCurrency(p)}
+              {formatPhp(p)}
             </option>
           ))}
         </Select>
@@ -73,7 +73,7 @@ export function VehicleFiltersPanel({ filters, onChange, onReset, activeCount }:
           <option value="">{t.noMaximum}</option>
           {PRICE_FILTER_STEPS.map((p) => (
             <option key={p} value={p} disabled={filters.minPrice !== undefined && p < filters.minPrice}>
-              {formatCurrency(p)}
+              {formatPhp(p)}
             </option>
           ))}
         </Select>

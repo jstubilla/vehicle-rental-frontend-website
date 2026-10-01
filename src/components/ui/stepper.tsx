@@ -37,7 +37,10 @@ export function Stepper({ steps, currentIndex, className }: StepperProps) {
               <span
                 key={step.id}
                 aria-hidden="true"
-                className={cn("h-1.5 flex-1 rounded-full", index <= currentIndex ? "bg-primary" : "bg-surface-muted")}
+                className={cn(
+                  "h-1.5 flex-1 rounded-full transition-colors duration-(--duration-base) ease-out",
+                  index <= currentIndex ? "bg-primary" : "bg-surface-muted",
+                )}
               />
             ))}
           </div>
@@ -52,7 +55,7 @@ export function Stepper({ steps, currentIndex, className }: StepperProps) {
               <span
                 aria-hidden="true"
                 className={cn(
-                  "inline-flex size-7 items-center justify-center rounded-full border text-sm font-medium",
+                  "inline-flex size-7 items-center justify-center rounded-full border text-sm font-medium transition-colors duration-(--duration-base) ease-out",
                   state === "todo" && "border-border-strong text-muted",
                   state === "current" && "border-primary bg-primary text-primary-foreground",
                   state === "done" && "border-primary text-foreground",

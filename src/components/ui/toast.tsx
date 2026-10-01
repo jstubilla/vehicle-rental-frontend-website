@@ -62,6 +62,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             data-surface="card"
             className={cn(
               "flex items-start gap-3 rounded-lg border bg-card p-4 text-foreground shadow-lg",
+              "data-[state=open]:animate-[toast-in_var(--duration-modal)_var(--ease-out-strong)]",
+              "data-[state=closed]:animate-[toast-out_var(--duration-fast)_var(--ease-out-strong)]",
               variants[item.variant ?? "default"],
             )}
           >

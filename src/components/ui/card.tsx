@@ -1,12 +1,14 @@
 import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export type CardVariant = "default" | "outline" | "muted";
+/** "raised" floats above the page (shadow-float): for the one block a page wants acted on. */
+export type CardVariant = "default" | "outline" | "muted" | "raised";
 
 const variants: Record<CardVariant, string> = {
   default: "border border-border bg-card shadow-sm",
   outline: "border border-border-strong bg-transparent",
   muted: "border border-transparent bg-surface-muted",
+  raised: "border border-border bg-card shadow-float",
 };
 
 export interface CardProps extends HTMLAttributes<HTMLElement> {

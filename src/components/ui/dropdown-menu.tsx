@@ -38,7 +38,9 @@ export function DropdownMenu({ trigger, items, align = "end", className }: Dropd
           sideOffset={4}
           data-surface="card"
           className={cn(
-            "z-(--z-overlay) min-w-48 rounded-md border border-border-strong bg-card p-1 text-foreground shadow-md",
+            "z-(--z-overlay) min-w-48 origin-(--radix-dropdown-menu-content-transform-origin) rounded-md border border-border-strong bg-card p-1 text-foreground shadow-md",
+            "data-[state=open]:animate-[popover-in_var(--duration-base)_var(--ease-out-strong)]",
+            "data-[state=closed]:animate-[popover-out_var(--duration-fast)_var(--ease-out-strong)]",
             className,
           )}
         >

@@ -55,11 +55,13 @@ function LoadingAnimation({ big = false }: { big?: boolean }) {
 export interface LoadingScreenProps {
   /** Cover the whole window (the screen shown on every refresh) instead of sitting inside the page. */
   fullscreen?: boolean;
+  /** Fade the screen out. It stops catching clicks at once; the caller removes it once the fade is over. */
+  leaving?: boolean;
   className?: string;
 }
 
 /** Loading screen for the public site: the animation slot plus the "Powered by" credit. */
-export function LoadingScreen({ fullscreen = false, className }: LoadingScreenProps) {
+export function LoadingScreen({ fullscreen = false, leaving = false, className }: LoadingScreenProps) {
   return (
     <div
       role="status"
@@ -68,6 +70,8 @@ export function LoadingScreen({ fullscreen = false, className }: LoadingScreenPr
       className={cn(
         "flex flex-col items-center justify-center gap-4 px-gutter py-section text-center",
         fullscreen ? "fixed inset-0 z-(--z-splash) bg-background" : "min-h-[60vh]",
+        "transition-opacity duration-(--duration-modal) ease-out-strong",
+        leaving && "pointer-events-none opacity-0",
         className,
       )}
     >

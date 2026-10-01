@@ -2,7 +2,7 @@ import { content } from "@/content";
 
 /**
  * ALL images and the logo are configured here. To swap a placeholder for a real
- * image: put the file in /public/images and set its `src` (e.g. "/images/hero.jpg").
+ * image: put the file in /public/images and set its `src` (e.g. "/images/about.jpg").
  * For images hosted elsewhere, also allow the domain in next.config.ts (images.remotePatterns).
  */
 
@@ -35,7 +35,15 @@ export const logo = {
 };
 
 export const images = {
-  hero: { src: null, alt: "Hero image", label: "Hero image", ratio: "wide" },
+  // TEST ONLY: a free Unsplash photo (Unsplash License) of the Patapat Viaduct, Ilocos Norte, to judge the
+  // home backdrop with a real image. Replace with your own ("/images/backdrop.jpg") and drop
+  // images.remotePatterns in next.config.ts. Set src to null to show no backdrop at all.
+  backdrop: {
+    src: "https://images.unsplash.com/photo-1545876966-1dec0948ec2c",
+    alt: "",
+    label: "Home backdrop",
+    ratio: "wide",
+  },
   about: { src: null, alt: "About us image", label: "About us image", ratio: "photo" },
   team: { src: null, alt: "Our team", label: "Team photo", ratio: "photo" },
   contact: { src: null, alt: "Map or office photo", label: "Map / office photo", ratio: "photo" },

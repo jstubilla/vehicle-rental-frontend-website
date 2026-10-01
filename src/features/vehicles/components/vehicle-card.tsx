@@ -1,74 +1,110 @@
 import Link from "next/link";
 import { images } from "@/assets/config";
-import { Badge, Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Media } from "@/components/ui";
+import { Badge, Button, Card, Media, Price } from "@/components/ui";
 import { content } from "@/content";
+import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/currency";
 import { calcRentalTotal, type RentalSearch } from "@/lib/rental";
 import type { Vehicle } from "@/types";
 import { bookHref, vehicleHref } from "../links";
+
+export type VehicleCardLayout = "tile" | "feature" | "row";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   /** Chosen dates, if the visitor searched. Shows the total for the trip. */
   rental?: RentalSearch | null;
   days?: number | null;
+  /**
+   * "tile": the catalog card. "feature": the large lead card on the home page.
+   * "row": a compact horizontal entry, listed beside a feature card.
+   */
+  layout?: VehicleCardLayout;
 }
 
-export function VehicleCard({ vehicle, rental = null, days = null }: VehicleCardProps) {
+/**
+ * One vehicle. The whole card links to the detail page (the name's link stretches over it);
+ * "Book now" is the one separate action, a shortcut straight into the booking.
+ */
+export function VehicleCard({ vehicle, rental = null, days = null, layout = "tile" }: VehicleCardProps) {
   const t = content.vehicleCard;
   const available = vehicle.status === "available";
+  const href = vehicleHref(vehicle.slug, rental);
+  const isRow = layout === "row";
 
   return (
     <Card
       as="article"
-      className="h-full transition duration-200 ease-out hover:-translate-y-1 hover:border-primary hover:shadow-md focus-within:-translate-y-1 focus-within:border-primary focus-within:shadow-md"
+      className={cn(
+        // Hover: the card lifts a step and its picture eases in. Both stay small: it is a list people scan.
+        "group relative h-full overflow-hidden transition-[border-color,box-shadow,transform] duration-(--duration-modal) ease-out-strong hover:border-border-strong hover:shadow-lg focus-within:border-border-strong motion-safe:hover:-translate-y-0.5",
+        isRow && "flex-row",
+      )}
     >
       <Media
+        zoom
         asset={vehicle.images[0] ?? images.vehicle}
-        sizes="(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
-        className="rounded-b-none border-0 border-b"
+        sizes={
+          layout === "feature"
+            ? "(min-width: 64rem) 55vw, 100vw"
+            : isRow
+              ? "10rem"
+              : "(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
+        }
+        className={cn(
+          "rounded-none border-0",
+          isRow ? "aspect-square w-28 shrink-0 border-r sm:w-40 sm:aspect-photo" : "aspect-video border-b",
+        )}
       />
-      <CardHeader>
-        <CardTitle as="h3">
-          <Link href={vehicleHref(vehicle.slug, rental)} className="text-inherit no-underline hover:underline">
-            {vehicle.name}
-          </Link>
-        </CardTitle>
-        <CardDescription>
-          {vehicle.examples}
-          {vehicle.seats !== undefined && ` · ${t.seats(vehicle.seats)}`}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-1">
-        <p>
-          <span className="text-2xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
-          <span className="text-sm text-muted">{t.perDay}</span>
-        </p>
-        {days && (
+
+      <div className={cn("flex flex-1 flex-col gap-4 p-4", layout === "feature" && "md:gap-6 md:p-6", isRow && "gap-2 py-3")}>
+        <div className="flex flex-col gap-1">
+          <h3 className={cn(layout === "feature" ? "text-xl md:text-2xl" : "text-lg")}>
+            <Link
+              href={href}
+              className="text-inherit no-underline underline-offset-4 after:absolute after:inset-0 group-hover:underline"
+            >
+              {vehicle.name}
+            </Link>
+          </h3>
           <p className="text-sm text-muted">
-            {t.totalFor(days)}: {formatCurrency(calcRentalTotal(vehicle.pricePerDay, days))}
+            {vehicle.examples}
+            {vehicle.seats !== undefined && ` · ${t.seats(vehicle.seats)}`}
           </p>
-        )}
-        {!available && (
-          <p>
-            <Badge variant="warning">{t.unavailable}</Badge>
-          </p>
-        )}
-      </CardContent>
-      <CardFooter className="flex-wrap">
-        <Button asChild variant="outline" size="sm">
-          <Link href={vehicleHref(vehicle.slug, rental)}>{t.viewDetails}</Link>
-        </Button>
-        {available ? (
-          <Button asChild size="sm" variant="accent">
-            <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
-          </Button>
-        ) : (
-          <Button size="sm" variant="accent" disabled>
-            {t.bookNow}
-          </Button>
-        )}
-      </CardFooter>
+        </div>
+
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-2">
+          <div className="flex flex-col gap-1">
+            <Price
+              amount={vehicle.pricePerDay}
+              unit={t.perDay}
+              size={layout === "feature" ? "xl" : "md"}
+              usd={isRow ? "none" : "below"}
+            />
+            {days && (
+              <p className="text-sm text-muted">
+                {t.totalFor(days)}: {formatCurrency(calcRentalTotal(vehicle.pricePerDay, days))}
+              </p>
+            )}
+            {!available && (
+              <p>
+                <Badge variant="warning">{t.unavailable}</Badge>
+              </p>
+            )}
+          </div>
+
+          {!isRow &&
+            (available ? (
+              <Button asChild size="sm" variant="outline" className="relative z-10">
+                <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" disabled className="relative z-10">
+                {t.bookNow}
+              </Button>
+            ))}
+        </div>
+      </div>
     </Card>
   );
 }

@@ -26,23 +26,36 @@
   h2,
   h3,
   h4 {
-    @apply font-heading font-semibold tracking-tight text-foreground;
+    @apply font-heading font-bold tracking-tight text-foreground;
+    text-wrap: balance;
   }
 
   h1 {
     @apply text-3xl md:text-4xl;
   }
 
+  /* Section headings stay calm: the hero and page titles carry the scale. */
   h2 {
-    @apply text-2xl md:text-3xl;
+    @apply text-xl font-semibold md:text-2xl;
   }
 
   h3 {
-    @apply text-xl;
+    @apply text-lg font-semibold;
   }
 
   h4 {
-    @apply text-lg;
+    @apply text-base font-semibold;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Browser surfaces follow the palette too. */
+  html {
+    scrollbar-color: var(--border-strong) var(--bg-main);
+    accent-color: var(--accent);
+    caret-color: var(--accent);
   }
 
   a {
@@ -65,5 +78,243 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Display type: the home hero headline and the special offers title (a page that is all type). */
+@utility text-display {
+  font-size: var(--text-5xl);
+  line-height: var(--text-5xl--line-height);
+  font-weight: var(--font-weight-extrabold);
+  letter-spacing: var(--tracking-display);
+  @media (width >= 64rem) {
+    font-size: var(--text-6xl);
+    line-height: var(--text-6xl--line-height);
+  }
+  @media (width >= 80rem) {
+    font-size: var(--text-7xl);
+    line-height: var(--text-7xl--line-height);
+  }
+}
+
+/* An empty image slot: fine diagonal hatching, the convention for "a photo goes here". */
+.media-slot {
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--placeholder-line) 0 1px,
+    transparent 1px 0.75rem
+  );
+}
+
+/*
+ * Scroll reveals (see <Reveal>): a block below the fold waits slightly lowered and transparent,
+ * then settles once it enters the view. Children marked [data-reveal-item] follow in turn.
+ */
+[data-reveal] {
+  transition:
+    opacity var(--duration-slow) var(--ease-out-strong),
+    transform var(--duration-slow) var(--ease-out-strong);
+}
+[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(1.25rem);
+}
+[data-reveal] [data-reveal-item] {
+  transition:
+    opacity var(--duration-slow) var(--ease-out-strong),
+    transform var(--duration-slow) var(--ease-out-strong);
+}
+[data-reveal="pending"] [data-reveal-item] {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+[data-reveal] [data-reveal-item]:nth-child(2) { transition-delay: 80ms; }
+[data-reveal] [data-reveal-item]:nth-child(3) { transition-delay: 160ms; }
+[data-reveal] [data-reveal-item]:nth-child(4) { transition-delay: 240ms; }
+
+/* The how-it-works route line: drawn left to right as its strip is revealed. */
+.steps-route {
+  transform-origin: left;
+  transition: transform var(--duration-draw) var(--ease-in-out-strong);
+}
+[data-reveal="pending"] .steps-route {
+  transform: scaleX(0);
+}
+
+/*
+ * Ledger (special offers, about values, contact details, legal sections): each entry opens with a hairline
+ * rule and a short heavier tab at its start, the way a printed rate sheet marks its entries. On arrival the
+ * first entries settle in turn and each tab draws in; later ones (below the fold) are simply there.
+ */
+.ledger > * {
+  position: relative;
+  border-top: 1px solid var(--color-border);
+  animation: result-in var(--duration-slow) var(--ease-out-strong) backwards;
+}
+.ledger > *::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: 2.5rem;
+  border-top: 2px solid var(--color-foreground);
+  transform-origin: left;
+  animation: ledger-tab var(--duration-draw) var(--ease-in-out-strong) backwards;
+}
+@keyframes ledger-tab {
+  from {
+    transform: scaleX(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ledger > *:nth-child(2),
+  .ledger > *:nth-child(2)::before { animation-delay: 80ms; }
+  .ledger > *:nth-child(3),
+  .ledger > *:nth-child(3)::before { animation-delay: 160ms; }
+  .ledger > *:nth-child(4),
+  .ledger > *:nth-child(4)::before { animation-delay: 240ms; }
+  .ledger > *:nth-child(n + 5),
+  .ledger > *:nth-child(n + 5)::before { animation-delay: 320ms; }
+}
+
+/* A ledger inside a scroll reveal draws its tabs when revealed, not on load (it may be far below the fold). */
+[data-reveal] .ledger > *,
+[data-reveal] .ledger > *::before {
+  animation: none;
+}
+[data-reveal] .ledger > *::before {
+  transition: transform var(--duration-draw) var(--ease-in-out-strong) 200ms;
+}
+[data-reveal="pending"] .ledger > *::before {
+  transform: scaleX(0);
+}
+
+/*
+ * Home backdrop (see <HeroBackdrop>): a photo behind the hero that starts under the header and fades into
+ * the page. Two washes keep text readable: one from the left, behind the headline, and a light one along
+ * the top, behind the header. The bottom 60% fades out by mask, ending where the vehicles band begins.
+ * On scroll (where supported), the photo eases away and drifts slightly slower than the page.
+ */
+.hero-backdrop {
+  top: calc(-1 * var(--spacing-header));
+  mask-image: linear-gradient(to bottom, black 0%, black 35%, transparent 100%);
+}
+.hero-backdrop-frame {
+  top: -11rem;
+}
+.hero-backdrop img {
+  opacity: var(--hero-image-opacity);
+  /* Text spans the width above the booking bar, so the photo's subject (the road over the sea) is framed
+     to run just under the subtitle and into the bar's top edge; only dark hillside sits behind the text. */
+  object-position: 70% 46%;
+}
+.hero-backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, color-mix(in oklch, var(--color-background) 45%, transparent), transparent 25%),
+    linear-gradient(
+      to right,
+      var(--color-background) 0%,
+      color-mix(in oklch, var(--color-background) 65%, transparent) 40%,
+      transparent 85%
+    );
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .hero-backdrop img {
+      animation: hero-backdrop-away linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 80vh;
+    }
+  }
+}
+/*
+ * The band under a hero backdrop: clear at its top edge, reaching its full tint where its first heading
+ * sits, so the photo, the page and the band read as one surface rather than three stacked strips.
+ */
+.band-continuous {
+  background: linear-gradient(to bottom, transparent, var(--color-surface) 16rem);
+}
+
+@keyframes hero-backdrop-away {
+  to {
+    opacity: 0;
+    translate: 0 12%;
+  }
+}
+
+/* Vehicle results settle in when filters change: a short fade and lift, staggered by position. */
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.375rem);
+  }
+}
+
+.results-stagger > li {
+  animation: result-in var(--duration-modal) var(--ease-out-strong) both;
+}
+.results-stagger > li:nth-child(2) { animation-delay: 40ms; }
+.results-stagger > li:nth-child(3) { animation-delay: 80ms; }
+.results-stagger > li:nth-child(4) { animation-delay: 120ms; }
+.results-stagger > li:nth-child(5) { animation-delay: 160ms; }
+.results-stagger > li:nth-child(n + 6) { animation-delay: 200ms; }
+
+/*
+ * Shared enter/exit keyframes for Radix UI overlays (Dialog, DropdownMenu, Popover, Toast).
+ * Radix keeps the element mounted until a CSS animation on it finishes, so exits need a real
+ * @keyframes animation (not just a transition) tied to the [data-state] it sets. Durations and
+ * curves come from tokens.css (--duration-*, --ease-*-strong); nothing here is a one-off value.
+ * The reduced-motion rule above already shortens every one of these to ~0 when requested.
+ */
+@keyframes overlay-in {
+  from { opacity: 0; }
+}
+@keyframes overlay-out {
+  to { opacity: 0; }
+}
+@keyframes content-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes content-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+/*
+ * Menus and pickers drop a few pixels out of their trigger (and rise back into it on close), on top of
+ * the scale from the trigger's corner. Radix sets data-side, so a menu that flips above its trigger
+ * moves the other way.
+ */
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--popover-shift, 0)) scale(0.97);
+  }
+}
+@keyframes popover-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--popover-shift, 0)) scale(0.97);
+  }
+}
+[data-side="bottom"] { --popover-shift: -0.375rem; }
+[data-side="top"] { --popover-shift: 0.375rem; }
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
   }
 }

@@ -1,5 +1,5 @@
 import { images } from "@/assets/config";
-import { Badge, Button, Card, Media } from "@/components/ui";
+import { Badge, Button, Card, Media, Price } from "@/components/ui";
 import { content } from "@/content";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/currency";
@@ -22,10 +22,17 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
     <Card
       as="article"
       variant="outline"
-      className={cn("gap-4 p-4 md:flex-row", selected && "border-2 border-primary")}
+      className={cn(
+        "gap-4 p-3 transition-[border-color,box-shadow] duration-(--duration-fast) md:flex-row md:p-4",
+        selected && "border-primary ring-1 ring-primary",
+      )}
     >
       <div className="md:w-56 md:shrink-0">
-        <Media asset={vehicle.images[0] ?? images.vehicle} sizes="(min-width: 48rem) 14rem, 100vw" />
+        <Media
+          asset={vehicle.images[0] ?? images.vehicle}
+          sizes="(min-width: 48rem) 14rem, 100vw"
+          className="aspect-video"
+        />
       </div>
       <div className="flex flex-1 flex-col justify-between gap-3">
         <div className="flex flex-col gap-1">
@@ -34,10 +41,7 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
             {vehicle.examples}
             {vehicle.seats !== undefined && ` · ${content.vehicleCard.seats(vehicle.seats)}`}
           </p>
-          <p>
-            <span className="text-xl font-semibold text-price">{formatCurrency(vehicle.pricePerDay)}</span>{" "}
-            <span className="text-sm text-muted">{content.vehicleCard.perDay}</span>
-          </p>
+          <Price amount={vehicle.pricePerDay} unit={content.vehicleCard.perDay} usd="inline" className="mt-1" />
           <p className="text-sm text-muted">
             {content.vehicleCard.totalFor(days)}: {formatCurrency(calcRentalTotal(vehicle.pricePerDay, days))}
           </p>

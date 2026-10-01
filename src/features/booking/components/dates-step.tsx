@@ -125,7 +125,7 @@ function DatesForm({ initial, vehicleFromUrl }: { initial: DatesFormValues; vehi
       </div>
 
       <StepActions>
-        <Button type="submit" size="lg">
+        <Button type="submit" size="lg" variant="accent" arrow>
           {content.booking.common.continue}
         </Button>
       </StepActions>

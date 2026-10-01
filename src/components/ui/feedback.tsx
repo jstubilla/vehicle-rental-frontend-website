@@ -14,7 +14,9 @@ export function Spinner({ label, className }: { label?: string; className?: stri
 
 /** Gray block that stands in for content that is still loading. */
 export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div aria-hidden="true" className={cn("h-4 w-full rounded-md bg-placeholder", className)} {...props} />;
+  return (
+    <div aria-hidden="true" className={cn("h-4 w-full animate-pulse rounded-md bg-placeholder", className)} {...props} />
+  );
 }
 
 interface StateBoxProps {
@@ -100,7 +102,12 @@ export function Alert({ variant = "info", title, className, children, ...props }
     <div
       role={variant === "danger" ? "alert" : "status"}
       data-surface="card"
-      className={cn("rounded-md border bg-card p-4 text-foreground", alertVariants[variant], className)}
+      className={cn(
+        // Settles in when it appears (a sent form, a failed payment) rather than popping into place.
+        "rounded-md border bg-card p-4 text-foreground transition-[opacity,transform] duration-(--duration-base) ease-out-strong starting:-translate-y-1 starting:opacity-0",
+        alertVariants[variant],
+        className,
+      )}
       {...props}
     >
       <p className="font-semibold">

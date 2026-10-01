@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { Badge, Button, Card, CardContent, EmptyState, ErrorState, Skeleton } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { content } from "@/content";
 import { useBookingDetails } from "../hooks/use-booking-details";
 import { useBookingFlow } from "../hooks/use-booking-flow";
@@ -50,39 +50,46 @@ export function Confirmation({ reference }: { reference: string }) {
   const confirmed = booking.status !== "pending";
 
   return (
-    <div className="flex max-w-narrow flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1>{confirmed ? t.titleConfirmed : t.titlePending}</h1>
+    <div className="flex max-w-narrow flex-col gap-8 transition-[opacity,transform] duration-(--duration-modal) ease-out-strong starting:translate-y-1.5 starting:opacity-0">
+      <div className="flex flex-col gap-3">
+        <h1 className="text-4xl font-extrabold tracking-display md:text-5xl">
+          {confirmed ? t.titleConfirmed : t.titlePending}
+        </h1>
         <p className="text-lg text-muted">{confirmed ? t.subtitleConfirmed : t.subtitlePending}</p>
       </div>
 
-      <Card variant="outline">
-        <CardContent className="flex flex-col gap-2 pt-4 md:pt-6">
-          <p className="text-sm text-muted">{t.reference}</p>
-          <p className="font-mono text-3xl font-bold tracking-wider">
-            {booking.reference}
-          </p>
-          <p className="text-sm text-muted">{t.referenceHint}</p>
-          <p>
-            <span className="text-sm text-muted">{t.statusLabel}: </span>
-            <Badge variant={confirmed ? "success" : "warning"}>{content.enums.bookingStatus[booking.status]}</Badge>
-          </p>
-        </CardContent>
+      {/* The reference is what people keep from this page, so it is the raised object on it. */}
+      <Card variant="raised" className="gap-2 p-5 md:p-6">
+        <p className="text-sm text-muted">{t.reference}</p>
+        <p className="font-mono text-3xl font-bold tracking-wider md:text-4xl">{booking.reference}</p>
+        <p className="text-sm text-muted">{t.referenceHint}</p>
+        <p className="mt-2 border-t border-border pt-4">
+          <span className="text-sm text-muted">{t.statusLabel}: </span>
+          <Badge variant={confirmed ? "success" : "warning"}>{content.enums.bookingStatus[booking.status]}</Badge>
+        </p>
       </Card>
 
       <BookingSummary data={summaryFromBooking(query.data)} />
 
-      <section aria-labelledby="next-heading" className="flex flex-col gap-3">
+      <section aria-labelledby="next-heading" className="flex flex-col gap-4">
         <h2 id="next-heading">{t.nextTitle}</h2>
-        <ol className="flex list-decimal flex-col gap-2 pl-5 text-muted">
-          {t.nextSteps.map((step) => (
-            <li key={step}>{step}</li>
+        <ol className="ledger">
+          {t.nextSteps.map((step, index) => (
+            <li key={step} className="flex items-baseline gap-4 py-4">
+              <span
+                aria-hidden="true"
+                className="w-6 shrink-0 font-heading text-2xl leading-none font-extrabold tracking-display text-foreground/20 tabular-nums"
+              >
+                {index + 1}
+              </span>
+              <span className="text-muted">{step}</span>
+            </li>
           ))}
         </ol>
       </section>
 
       <div className="flex flex-wrap gap-2">
-        <Button asChild size="lg">
+        <Button asChild size="lg" variant="outline">
           <Link href="/">{t.toHome}</Link>
         </Button>
         <Button asChild variant="outline" size="lg">

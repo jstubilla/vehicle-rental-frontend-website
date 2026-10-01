@@ -14,7 +14,13 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
 
   return (
     <div className="flex flex-col gap-3" role="group" aria-label={content.vehicleDetail.galleryLabel}>
-      <Media asset={current} priority sizes="(min-width: 64rem) 66vw, 100vw" />
+      <Media
+        key={selected}
+        asset={current}
+        priority
+        sizes="(min-width: 64rem) 58vw, 100vw"
+        className="aspect-video transition-opacity duration-(--duration-fast) ease-out starting:opacity-0"
+      />
       {images.length > 1 && (
         <ul className="grid grid-cols-4 gap-2">
           {images.map((image, index) => (
@@ -25,11 +31,11 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
                 aria-pressed={index === selected}
                 onClick={() => setSelected(index)}
                 className={cn(
-                  "block w-full rounded-lg border-2 border-transparent transition-colors duration-150",
+                  "block w-full overflow-hidden rounded-lg border-2 border-transparent transition-colors duration-(--duration-fast)",
                   index === selected ? "border-primary" : "hover:border-border-strong",
                 )}
               >
-                <Media asset={{ ...image, label: `${index + 1}` }} sizes="20vw" className="border-0" />
+                <Media asset={{ ...image, label: `${index + 1}` }} sizes="20vw" className="aspect-video rounded-md border-0" />
               </button>
             </li>
           ))}
