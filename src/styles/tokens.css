@@ -24,21 +24,25 @@
  * CONTRAST NOTES (measured, WCAG AA = 4.5:1 text, 3:1 borders/rings)
  *  - Light theme: brand blue #006efd is 4.3:1 as text, so --link is a darker shade (#0057c4).
  *    Brand orange #fd802b takes navy text (6.3:1); white on it is 2.5:1, so it is never used.
- *  - Dark theme: redesigned for more depth between surfaces (bg-main through field now span a
- *    wider lightness range) while keeping the same two brand hues, retuned. Blue --primary
- *    (#428bff) is 17.6:1 as text on the page background and 13.7:1 on cards, so --link can use
- *    the same family at a slightly lighter tint (#6fa8ff, 6.2-8.0:1 across all surfaces). As a
- *    BUTTON FILL, white text on #428bff is only 3.30:1 (fails), so --primary-foreground is a
- *    near-black navy (#06111f, 5.75:1), not white.
- *  - Orange --accent/--price (#ff9a4a, warmed and softened from the previous #ff812c to read
- *    less like a hazard color against navy) passes as text directly (7.1-9.1:1 across surfaces)
- *    and takes the same near-black navy foreground as buttons (8.76:1); white on it is 2.11:1
- *    and is never used, same as the light theme.
- *  - --border is a soft divider (~1.8:1 on the page background) and is decorative only;
- *    --border-strong (#688ca6) is a lighter blue chosen to clear 3:1 against every surface real
- *    form controls sit on (4.2:1 on cards, 3.8:1 on fields, 4.6-4.9:1 on page/muted backgrounds).
- *  - Status colors (success/warning/danger/info) all use the same near-black navy foreground as
- *    the brand buttons (6.2-9.4:1 depending on color) rather than white, for the same reason.
+ *  - Dark theme: the five surfaces (bg-main through field) are built in OKLCH at equal-feeling
+ *    lightness steps (L = .14/.20/.26/.30/.335), not hand-picked hex, so each layer reads as a
+ *    distinct step rather than a slightly-different shade of the one below it. Same two brand
+ *    hues as before, each pushed to ~90-95% of its maximum in-gamut sRGB chroma at its lightness
+ *    (vivid, not pastel, without clipping). Blue --primary (#3e8af6) is 18.1:1 as text on the
+ *    page background and 12.4:1 on cards, so --link can use the same family at a slightly
+ *    lighter tint (#81aced, 5.2-8.6:1 across every surface). As a BUTTON FILL, white text on
+ *    #3e8af6 is only 3.40:1 (fails), so --primary-foreground is a near-black navy (#080d16,
+ *    5.72:1), not white.
+ *  - Orange --accent/--price (#fb7b29, a vivid near-gamut-edge orange, hue tuned warmer than a
+ *    traffic-cone orange) passes as text directly (4.56-7.56:1 across every surface, including
+ *    the lightest, --field) and takes the same near-black navy foreground as buttons (7.38:1);
+ *    white on it is 2.64:1 and is never used, same as the light theme.
+ *  - --border is a soft divider (~1.7:1 on the page background) and is decorative only;
+ *    --border-strong (#879ab5) clears 3:1 against every surface real form controls sit on
+ *    (4.19:1 on fields, 4.77:1 on cards, 5.44-6.32:1 on page/muted backgrounds).
+ *  - Status colors (success/warning/danger/info) are built the same way (OKLCH, ~90% of max
+ *    chroma at a lightness tuned per hue) and all use the same near-black navy foreground as the
+ *    brand buttons (4.97-9.62:1 depending on color) rather than white, for the same reason.
  *  - Not in the client's named brand hues, added to fill gaps: status colors, hover shades,
  *    --bg-muted, and the darker/lighter link, border and hover shades above.
  *
@@ -107,16 +111,16 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg-main: #060f1c; /* page background */
-  --bg-surface: #0b1a2c; /* nav bar, footer, section bands, admin chrome */
-  --bg-muted: #0f2135; /* hover, table header, striped rows */
-  --card: #122840; /* cards, popovers, modals, the search panel */
-  --field: #16304c; /* text inputs */
-  --text-primary: #f2f5fa;
-  --text-secondary: #9fb3cc;
-  --border: #263f58; /* card and section outlines (decorative, not a control boundary) */
-  --border-strong: #688ca6; /* form control borders (needs 3:1, see contrast notes) */
-  --overlay: rgb(6 15 28 / 0.7);
+  --bg-main: #030915; /* page background */
+  --bg-surface: #0e1623; /* nav bar, footer, section bands, admin chrome */
+  --bg-muted: #1a2434; /* hover, table header, striped rows */
+  --card: #232e3f; /* cards, popovers, modals, the search panel */
+  --field: #2b3749; /* text inputs */
+  --text-primary: #eff4fc;
+  --text-secondary: #a4b2c8;
+  --border: #2e3948; /* card and section outlines (decorative, not a control boundary) */
+  --border-strong: #879ab5; /* form control borders (needs 3:1, see contrast notes) */
+  --overlay: rgb(3 9 21 / 0.7);
   /* Dark surfaces need darker, more opaque shadows to read against navy; same neutral tint, no new hue. */
   --shadow-color-sm: 2 7 14;
   --shadow-color-lg: 2 7 14;
@@ -127,31 +131,31 @@
   --shadow-lg-value:
     0 24px 48px -12px rgb(var(--shadow-color-lg) / 0.65), 0 8px 16px -8px rgb(var(--shadow-color-sm) / 0.4);
 
-  --link: #6fa8ff; /* lighter tint of --primary: see contrast notes */
-  --price: #ff9a4a;
-  --primary: #428bff; /* icons, selected/active states, buttons, focus */
-  --primary-hover: #659dff;
-  --primary-foreground: #06111f; /* navy: white fails on this blue, see contrast notes */
-  --accent: #ff9a4a; /* booking CTAs and prices */
-  --accent-hover: #ffb06f;
-  --accent-foreground: #1c1206;
-  --secondary: #1a3450;
-  --secondary-hover: #223f60;
-  --secondary-foreground: #f2f5fa;
-  --ring: #428bff;
+  --link: #81aced; /* lighter tint of --primary: see contrast notes */
+  --price: #fb7b29;
+  --primary: #3e8af6; /* icons, selected/active states, buttons, focus */
+  --primary-hover: #72a6f2;
+  --primary-foreground: #080d16; /* navy: white fails on this blue, see contrast notes */
+  --accent: #fb7b29; /* booking CTAs and prices */
+  --accent-hover: #f99e6e;
+  --accent-foreground: #080d16;
+  --secondary: #2b3647;
+  --secondary-hover: #394658;
+  --secondary-foreground: #eff4fc;
+  --ring: #3e8af6;
 
-  --success: #38c983;
-  --success-foreground: #06111f;
-  --warning: #e8ad2e;
-  --warning-foreground: #06111f;
-  --danger: #f0685f;
-  --danger-hover: #f58f88;
-  --danger-foreground: #06111f;
-  --info: #4bb8e0;
-  --info-foreground: #06111f;
+  --success: #35c26c;
+  --success-foreground: #080d16;
+  --warning: #e1af34;
+  --warning-foreground: #080d16;
+  --danger: #f53039;
+  --danger-hover: #f76c66;
+  --danger-foreground: #080d16;
+  --info: #33b3e5;
+  --info-foreground: #080d16;
 
-  --placeholder: #0f2135;
-  --placeholder-foreground: #9fb3cc;
+  --placeholder: #1a2434;
+  --placeholder-foreground: #a4b2c8;
 }
 
 /* ---------- Tailwind names: point at the theme values above ---------- */
