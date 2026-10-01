@@ -24,6 +24,20 @@
  * CONTRAST NOTES (measured, WCAG AA = 4.5:1 text, 3:1 borders/rings)
  *  - Light theme: brand blue #006efd is 4.3:1 as text, so --link is a darker shade (#0057c4).
  *    Brand orange #fd802b takes navy text (6.3:1); white on it is 2.5:1, so it is never used.
+ *  - The five light surfaces (bg-muted through field) are built in OKLCH at distinct, equal-
+ *    feeling lightness steps (L = .955/.975/.985/.992/1.0), fixing --card previously being an
+ *    exact duplicate of --bg-surface (#fafcfe) with zero visual separation. Dark text on near-
+ *    white keeps a huge margin regardless (13.9-15.9:1 for --text-primary, 6.2-7.0:1 for
+ *    --text-secondary, across every surface), so this was a layering fix, not a contrast fix.
+ *  - --info (#1c5c66, a teal-leaning blue) was retuned away from #0369a1, which sat too close in
+ *    hue to --primary and read as "the same blue" rather than a distinct status color; 6.7-7.6:1
+ *    as text and 7.58:1 with white on it as a fill.
+ *  - --warning (#944813, hue shifted warmer toward amber than the previous olive-leaning
+ *    #a16207) clears 5.8-6.6:1 as text across every surface and 6.57:1 with white on it as a
+ *    fill. A brighter "vivid gold" was tried first but fails badly as text on light backgrounds
+ *    (2.1-2.4:1) and fails as a fill with white text too; dark, saturated warm hues read as
+ *    brown/olive in sRGB by nature, so this is the available improvement within the existing
+ *    "same token for fill and text, with white foreground" pattern, not a full fix for that.
  *  - Dark theme: the five surfaces (bg-main through field) are built in OKLCH at equal-feeling
  *    lightness steps (L = .14/.20/.26/.30/.335), not hand-picked hex, so each layer reads as a
  *    distinct step rather than a slightly-different shade of the one below it. Same two brand
@@ -42,7 +56,12 @@
  *    (4.19:1 on fields, 4.77:1 on cards, 5.44-6.32:1 on page/muted backgrounds).
  *  - Status colors (success/warning/danger/info) are built the same way (OKLCH, ~90% of max
  *    chroma at a lightness tuned per hue) and all use the same near-black navy foreground as the
- *    brand buttons (4.97-9.62:1 depending on color) rather than white, for the same reason.
+ *    brand buttons (7.60-9.62:1 depending on color) rather than white, for the same reason. These
+ *    colors are also used directly AS TEXT (inline form errors, badges), which needs its own
+ *    check: --danger sat lower than the others (L .63) and only cleared 3.07-5.09:1 as text,
+ *    failing AA at 4.5:1 on --card/--field where inline errors actually render; it is lightened
+ *    to L .73 (#f77e77, 4.70-7.79:1 across every surface) to fix that while keeping the fill
+ *    contrast strong. success/warning/info did not have this problem (5.0-9.85:1 as text already).
  *  - Not in the client's named brand hues, added to fill gaps: status colors, hover shades,
  *    --bg-muted, and the darker/lighter link, border and hover shades above.
  *
@@ -59,10 +78,10 @@
 
 /* ---------- Theme values: LIGHT (base) ---------- */
 :root {
-  --bg-main: #f7fafd; /* page background */
-  --bg-surface: #fafcfe; /* nav bar, footer, section bands, admin chrome */
-  --bg-muted: #eef3f8; /* hover, table header, striped rows */
-  --card: #fafcfe; /* cards, popovers, modals */
+  --bg-main: #f3f7fe; /* page background */
+  --bg-surface: #fbfdff; /* nav bar, footer, section bands, admin chrome */
+  --bg-muted: #eaf1fa; /* hover, table header, striped rows */
+  --card: #f7faff; /* cards, popovers, modals */
   --field: #ffffff; /* text inputs */
   --text-primary: #0c233d; /* body text, headings */
   --text-secondary: #445a7a; /* labels, captions, hints */
@@ -95,12 +114,12 @@
 
   --success: #15803d;
   --success-foreground: #ffffff;
-  --warning: #a16207;
+  --warning: #944813;
   --warning-foreground: #ffffff;
   --danger: #b91c1c; /* also used as error TEXT (6.3:1 on --card) */
   --danger-hover: #991b1b;
   --danger-foreground: #ffffff;
-  --info: #0369a1;
+  --info: #1c5c66;
   --info-foreground: #ffffff;
 
   --placeholder: #e3e8ee;
@@ -148,8 +167,8 @@
   --success-foreground: #080d16;
   --warning: #e1af34;
   --warning-foreground: #080d16;
-  --danger: #f53039;
-  --danger-hover: #f76c66;
+  --danger: #f77e77;
+  --danger-hover: #f89f98;
   --danger-foreground: #080d16;
   --info: #33b3e5;
   --info-foreground: #080d16;

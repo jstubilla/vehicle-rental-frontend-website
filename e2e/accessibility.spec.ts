@@ -296,10 +296,10 @@ test.describe("dark mode", () => {
         price: getComputedStyle(price).color,
       };
     });
-    expect(colors.page).toBe("rgb(11, 31, 54)"); // #0b1f36
-    expect(colors.card).toBe("rgb(16, 41, 69)"); // #102945
-    expect(colors.text).toBe("rgb(248, 250, 255)"); // #f8faff
-    expect(colors.price).toBe("rgb(255, 129, 44)"); // #ff812c
+    expect(colors.page).toBe("rgb(3, 9, 21)"); // #030915
+    expect(colors.card).toBe("rgb(35, 46, 63)"); // #232e3f
+    expect(colors.text).toBe("rgb(239, 244, 252)"); // #eff4fc
+    expect(colors.price).toBe("rgb(251, 123, 41)"); // #fb7b29
   });
 
   const PUBLIC: PageCase[] = [
