@@ -119,15 +119,16 @@ test("a pipeline card can be moved to the next stage using only the keyboard", a
 
 test("the theme toggle works from the keyboard and its choice survives a reload", async ({ page }) => {
   await visit(page, "/");
-  const toDark = page.getByRole("button", { name: content.ui.theme.toggleToDark });
-  await toDark.focus();
-  await page.keyboard.press("Enter");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
+  // Dark is the site's default, so a fresh visit (no saved choice) starts in dark mode.
   const toLight = page.getByRole("button", { name: content.ui.theme.toggleToLight });
-  await expect(toLight).toBeFocused();
+  await toLight.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  const toDark = page.getByRole("button", { name: content.ui.theme.toggleToDark });
+  await expect(toDark).toBeFocused();
 
   await page.reload();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.getByRole("button", { name: content.ui.theme.toggleToLight })).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.getByRole("button", { name: content.ui.theme.toggleToDark })).toBeVisible();
 });

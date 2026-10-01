@@ -7,20 +7,17 @@
 export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "car-rental-theme";
+const DEFAULT_THEME: Theme = "dark";
 
-function systemTheme(): Theme {
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-/** Saved choice if there is one, otherwise the device's own light/dark setting. */
+/** Saved choice if there is one, otherwise dark (the site's default). */
 function resolveInitialTheme(): Theme {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark") return saved;
   } catch {
-    // Blocked storage: fall back to the system preference below.
+    // Blocked storage: fall back to the default below.
   }
-  return systemTheme();
+  return DEFAULT_THEME;
 }
 
 function applyTheme(next: Theme): void {
@@ -40,13 +37,13 @@ function load(): Theme {
 }
 
 export function getTheme(): Theme {
-  if (typeof window === "undefined") return "light";
+  if (typeof window === "undefined") return DEFAULT_THEME;
   return load();
 }
 
 /** Used while the server renders: the inline script corrects this in the browser before paint. */
 export function getServerTheme(): Theme {
-  return "light";
+  return DEFAULT_THEME;
 }
 
 export function setTheme(next: Theme): void {
@@ -69,7 +66,7 @@ if (typeof window !== "undefined") {
   // Keep every open tab in sync when the theme changes in another one.
   window.addEventListener("storage", (event) => {
     if (event.key !== STORAGE_KEY) return;
-    const next = event.newValue === "dark" ? "dark" : "light";
+    const next = event.newValue === "light" ? "light" : DEFAULT_THEME;
     theme = next;
     applyTheme(next);
     listeners.forEach((listener) => listener());
@@ -78,7 +75,7 @@ if (typeof window !== "undefined") {
 
 /**
  * Source for the inline script in src/app/layout.tsx. Kept here as one string so the
- * rule it implements — saved choice, else system preference — has a single home, even
- * though the script itself has to run standalone before any module loads.
+ * rule it implements — saved choice, else dark — has a single home, even though the
+ * script itself has to run standalone before any module loads.
  */
-export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();`;
+export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem("${STORAGE_KEY}");if(t!=="light"&&t!=="dark"){t="${DEFAULT_THEME}"}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();`;

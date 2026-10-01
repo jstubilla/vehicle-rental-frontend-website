@@ -44,7 +44,6 @@ export const content = {
 
   socials: [
     { label: "Facebook", href: "https://facebook.com" },
-    { label: "Instagram", href: "https://instagram.com" },
     { label: "TikTok", href: "https://tiktok.com" },
   ],
 

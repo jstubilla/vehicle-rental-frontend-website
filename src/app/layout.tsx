@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Sets the saved (or system) theme before paint, so there is no flash of the wrong one. */}
+        {/* Sets the saved (or dark, the default) theme before paint, so there is no flash of the wrong one. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className={fontClassNames}>

@@ -7,10 +7,14 @@ import { expectNoA11yViolations, visit } from "./helpers";
 const LOADING_SELECTOR = `[role="status"][aria-label="${content.loadingScreen.label}"]:not([data-splash])`;
 const loading = (page: Page) => page.locator(LOADING_SELECTOR);
 const splash = (page: Page) => page.locator("[data-splash]");
-/** The animated logo. Only visible when the visitor has not asked for reduced motion. */
-const animation = (scope: ReturnType<typeof loading>) => scope.locator('img[src="/images/loading.gif"]');
+/** The animated logo. Only visible when the visitor has not asked for reduced motion. Matches
+ *  whichever theme's pair is showing (light or dark is the site's default), since these tests
+ *  aren't about theming. */
+const animation = (scope: ReturnType<typeof loading>) =>
+  scope.locator('img[src="/images/loading.gif"]:visible, img[src="/images/loading-dark.gif"]:visible');
 /** The still frame shown instead when the visitor has asked for reduced motion. */
-const stillFrame = (scope: ReturnType<typeof loading>) => scope.locator('img[src="/images/loading-static.png"]');
+const stillFrame = (scope: ReturnType<typeof loading>) =>
+  scope.locator('img[src="/images/loading-static.png"]:visible, img[src="/images/loading-dark-static.png"]:visible');
 
 /**
  * The loading screen used inside the page (while moving between pages) is shown on the developer-only
