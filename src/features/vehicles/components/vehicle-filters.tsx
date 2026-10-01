@@ -79,9 +79,12 @@ export function VehicleFiltersPanel({ filters, onChange, onReset, activeCount }:
         </Select>
       </FormField>
 
-      <Button variant="outline" onClick={onReset} disabled={activeCount === 0}>
-        {content.vehicles.clearFilters}
-      </Button>
+      {/* Only once there is something to clear: a disabled button here read as a broken control. */}
+      {activeCount > 0 && (
+        <Button variant="outline" onClick={onReset}>
+          {content.vehicles.clearFilters}
+        </Button>
+      )}
     </form>
   );
 }

@@ -26,7 +26,7 @@ export default async function VehiclesPage({
   return (
     <>
       <Section className="pb-6 md:pb-6">
-        <PageHeader title={t.title} description={t.description} />
+        <PageHeader title={t.title} description={t.description} display />
       </Section>
       <Suspense
         fallback={

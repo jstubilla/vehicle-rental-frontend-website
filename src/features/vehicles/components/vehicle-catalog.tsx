@@ -65,7 +65,10 @@ export function VehicleCatalog({ initial }: VehicleCatalogProps) {
                   !filtersOpen && "opacity-0",
                 )}
               >
-                <h2 className="mb-4 hidden text-base lg:block">{t.filtersTitle}</h2>
+                {/* Ruled like the results bar opposite, so both columns open on one line, as on the other pages' ledgers. */}
+                <div className="ledger mb-4 hidden lg:block">
+                  <h2 className="box-content flex min-h-control items-center pt-3 text-base">{t.filtersTitle}</h2>
+                </div>
                 <VehicleFiltersPanel
                   filters={filters}
                   onChange={search.setFilters}
@@ -77,25 +80,27 @@ export function VehicleCatalog({ initial }: VehicleCatalogProps) {
           </div>
 
           <div id="vehicle-results" className="flex min-w-0 scroll-mt-24 flex-col gap-4">
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border pb-3">
-              <p role="status" aria-live="polite" className="font-medium">
-                {result ? t.resultCount(result.total) : " "}
-              </p>
-              <FormField
-                label={t.sortLabel}
-                className="flex-row items-center gap-2 [&_label]:whitespace-nowrap [&_label]:font-normal [&_label]:text-muted"
-              >
-                <Select
-                  value={filters.sort}
-                  onChange={(e) => search.setFilters({ sort: e.target.value as VehicleFilters["sort"] })}
+            <div className="ledger">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-3">
+                <p role="status" aria-live="polite" className="font-medium">
+                  {result ? t.resultCount(result.total) : " "}
+                </p>
+                <FormField
+                  label={t.sortLabel}
+                  className="flex-row items-center gap-2 [&_label]:whitespace-nowrap [&_label]:font-normal [&_label]:text-muted"
                 >
-                  {VEHICLE_SORTS.map((sort) => (
-                    <option key={sort} value={sort}>
-                      {t.sorts[sort]}
-                    </option>
-                  ))}
-                </Select>
-              </FormField>
+                  <Select
+                    value={filters.sort}
+                    onChange={(e) => search.setFilters({ sort: e.target.value as VehicleFilters["sort"] })}
+                  >
+                    {VEHICLE_SORTS.map((sort) => (
+                      <option key={sort} value={sort}>
+                        {t.sorts[sort]}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+              </div>
             </div>
 
             {search.isError && !result ? (

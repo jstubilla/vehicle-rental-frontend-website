@@ -69,7 +69,12 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
           </h3>
           <p className="text-sm text-muted">
             {vehicle.examples}
-            {vehicle.seats !== undefined && ` · ${t.seats(vehicle.seats)}`}
+            {vehicle.seats !== undefined && (
+              <>
+                {" · "}
+                <span className="whitespace-nowrap">{t.seats(vehicle.seats)}</span>
+              </>
+            )}
           </p>
         </div>
 
@@ -92,16 +97,15 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
             )}
           </div>
 
-          {!isRow &&
-            (available ? (
-              <Button asChild size="sm" variant="outline" className="relative z-10">
-                <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
-              </Button>
-            ) : (
-              <Button size="sm" variant="outline" disabled className="relative z-10">
-                {t.bookNow}
-              </Button>
-            ))}
+          {available ? (
+            <Button asChild size="sm" variant="outline" className="relative z-10">
+              <Link href={bookHref(vehicle.slug, rental)}>{t.bookNow}</Link>
+            </Button>
+          ) : (
+            <Button size="sm" variant="outline" disabled className="relative z-10">
+              {t.bookNow}
+            </Button>
+          )}
         </div>
       </div>
     </Card>

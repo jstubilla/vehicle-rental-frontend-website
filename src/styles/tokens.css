@@ -165,7 +165,7 @@
   --primary-hover: #72a6f2;
   --primary-foreground: #080d16; /* navy: white fails on this blue, see contrast notes */
   --accent: #fb7b29; /* booking CTAs and prices */
-  --accent-hover: #f99e6e;
+  --accent-hover: #ff9346; /* lighter but keeps its chroma (OKLCH C .158); #f99e6e dropped to .126 and read as salmon */
   --accent-foreground: #080d16;
   --secondary: #2b3647;
   --secondary-hover: #394658;
