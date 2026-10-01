@@ -26,7 +26,7 @@ const vehicles: Seed[] = [
   { id: "veh-05", slug: "van", name: "Van", category: "van", examples: "Toyota HiAce or similar", seats: 15, pricePerDay: 4800, status: "available", featured: true },
   { id: "veh-06", slug: "pickup", name: "Pick-up truck", category: "pickup", examples: "Toyota Hilux or similar", seats: 5, pricePerDay: 3500, status: "available", featured: false },
   { id: "veh-07", slug: "125cc", name: "125cc motorcycle", category: "125cc", examples: "Honda Click 125i or similar", pricePerDay: 450, status: "available", featured: false },
-  { id: "veh-08", slug: "155cc", name: "155cc motorcycle", category: "155cc", examples: "Yamaha Aerox 155 or similar", pricePerDay: 600, status: "available", featured: false },
+  { id: "veh-08", slug: "150cc", name: "150cc motorcycle", category: "150cc", examples: "Yamaha Aerox 155 or similar", pricePerDay: 600, status: "available", featured: false },
 ];
 
 export const seedVehicles: Vehicle[] = vehicles.map((v) => ({ ...v, images: photos(v.name) }));

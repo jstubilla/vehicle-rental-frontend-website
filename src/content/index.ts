@@ -150,7 +150,7 @@ export const content = {
       van: "Van",
       pickup: "Pick-up truck",
       "125cc": "125cc",
-      "155cc": "155cc",
+      "150cc": "150cc",
     },
     vehicleStatus: { available: "Available", maintenance: "In maintenance", inactive: "Inactive" },
     leadStage: { new: "New", contacted: "Contacted", qualified: "Qualified", won: "Won", lost: "Lost" },

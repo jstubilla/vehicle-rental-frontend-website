@@ -263,8 +263,8 @@ Decisions made where the brief did not say. Each is easy to change; please check
   "unavailable for these dates" state. The only thing that stops a vehicle being booked is its own status
   (a vehicle marked "in maintenance" or "inactive" cannot be selected).
 - **Vehicles are types, not particular cars.** The types are SUV, Multi-purpose vehicle (MPV, 7-8
-  seaters), Sedan, Hatchback, Van, Pick-up truck, 125cc and 155cc. Each has an example shown as "Toyota
-  Vios or similar", the most it seats, and a daily price. There are no plate numbers or model years. **Motorcycles (125cc/155cc) don't carry a seat count** — `seats` is optional on the
+  seaters), Sedan, Hatchback, Van, Pick-up truck, 125cc and 150cc. Each has an example shown as "Toyota
+  Vios or similar", the most it seats, and a daily price. There are no plate numbers or model years. **Motorcycles (125cc/150cc) don't carry a seat count** — `seats` is optional on the
   `Vehicle` type, and every screen that shows seats just leaves that part out for them. There is no
   transmission, fuel type, year, description or feature list. The vehicle detail
   page shows the photos, those specs, and the price — no other text.

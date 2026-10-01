@@ -56,9 +56,9 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
 
             <section aria-labelledby="specs-heading" className="flex flex-col gap-2">
               <h2 id="specs-heading">{t.specsTitle}</h2>
-              <dl className="grid gap-x-6 sm:grid-cols-2">
+              <dl className="max-w-sm divide-y divide-border">
                 {specs.map(([label, value]) => (
-                  <div key={label} className="flex justify-between gap-4 border-b border-border py-2">
+                  <div key={label} className="flex items-center justify-between gap-4 py-3">
                     <dt className="text-muted">{label}</dt>
                     <dd className="font-medium">{value}</dd>
                   </div>
@@ -67,7 +67,7 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
             </section>
           </div>
 
-          <aside aria-label={vehicle.name} className="lg:col-span-1">
+          <aside aria-label={vehicle.name} className="order-first lg:order-none lg:col-span-1">
             <Card className="lg:sticky lg:top-24">
               <CardHeader>
                 <h1 className="text-2xl md:text-3xl">{vehicle.name}</h1>

@@ -7,7 +7,7 @@ export const BUSINESS_TIME_ZONE = "Asia/Manila";
 /** Manila is UTC+8 all year (no daylight saving). */
 export const BUSINESS_UTC_OFFSET = "+08:00";
 
-export const VEHICLE_CATEGORIES = ["suv", "mpv", "sedan", "hatchback", "van", "pickup", "125cc", "155cc"] as const;
+export const VEHICLE_CATEGORIES = ["suv", "mpv", "sedan", "hatchback", "van", "pickup", "125cc", "150cc"] as const;
 export type VehicleCategory = (typeof VEHICLE_CATEGORIES)[number];
 
 export const VEHICLE_STATUSES = ["available", "maintenance", "inactive"] as const;
