@@ -126,7 +126,7 @@
   --placeholder: #e3e8ee;
   --placeholder-foreground: #445a7a;
   --placeholder-line: rgb(12 35 61 / 0.06); /* the fine hatching in an empty image slot */
-  --hero-image-opacity: 0.32; /* the home backdrop photo: a wash on the light page, so navy text stays crisp */
+  --hero-image-opacity: 0.95; /* the home backdrop photo on the light page: near full strength; a mist of page colour over the text zone keeps it readable (see .hero-backdrop) */
 
   /* Buttons with a fill: a 1px top highlight and a tight drop, so they read as pressable objects. */
   --shadow-button-value: inset 0 1px 0 0 rgb(255 255 255 / 0.28), 0 1px 2px 0 rgb(12 35 61 / 0.18);

@@ -205,9 +205,15 @@
 
 /*
  * Home backdrop (see <HeroBackdrop>): a photo behind the hero that starts under the header and fades into
- * the page. Two washes keep text readable: one from the left, behind the headline, and a light one along
- * the top, behind the header. The bottom 60% fades out by mask, ending where the vehicles band begins.
- * On scroll (where supported), the photo eases away and drifts slightly slower than the page.
+ * the page; the bottom 65% fades out by mask, ending inside the vehicles band's clear top. On scroll
+ * (where supported), the photo eases away and drifts slightly slower than the page.
+ *
+ * The two themes need different treatments, not one with different numbers. On the dark page a
+ * see-through photo just deepens into shadow. On the light page a see-through photo turns to grey fog,
+ * so light mode keeps the photo near full strength (a touch more contrast and colour) and instead lays
+ * a mist of the page colour over the text zone: heavy along the top and left behind the header,
+ * headline and subtitle, thinning out just under the subtitle, so the road, sea and hills show at full
+ * depth between the subtitle and the booking bar, rising out of the mist like the photo's own fog.
  */
 .hero-backdrop {
   top: calc(-1 * var(--spacing-header));
@@ -219,20 +225,40 @@
 .hero-backdrop img {
   opacity: var(--hero-image-opacity);
   /* Text spans the width above the booking bar, so the photo's subject (the road over the sea) is framed
-     to run just under the subtitle and into the bar's top edge; only dark hillside sits behind the text. */
+     to run just under the subtitle and into the bar's top edge; only hillside sits behind the text. */
   object-position: 70% 46%;
+  filter: contrast(1.1) saturate(1.1);
 }
 .hero-backdrop::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--color-background) 88%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 72%, transparent) 38%,
+      color-mix(in oklch, var(--color-background) 30%, transparent) 50%,
+      transparent 62%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklch, var(--color-background) 80%, transparent) 0%,
+      color-mix(in oklch, var(--color-background) 35%, transparent) 45%,
+      transparent 75%
+    );
+}
+[data-theme="dark"] .hero-backdrop img {
+  filter: none;
+}
+[data-theme="dark"] .hero-backdrop::after {
+  background:
     linear-gradient(to bottom, color-mix(in oklch, var(--color-background) 45%, transparent), transparent 25%),
     linear-gradient(
       to right,
       var(--color-background) 0%,
       color-mix(in oklch, var(--color-background) 65%, transparent) 40%,
-      transparent 85%
+      color-mix(in oklch, var(--color-background) 35%, transparent) 100%
     );
 }
 @media (prefers-reduced-motion: no-preference) {

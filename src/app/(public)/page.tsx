@@ -63,7 +63,7 @@ export default async function HomePage() {
             <div className="ledger lg:col-span-5 lg:justify-self-end lg:w-full lg:max-w-sm">
               <p className="pt-4 text-lg lg:pt-5 lg:text-xl">
                 <span className="block font-heading font-semibold tracking-tight text-foreground">{t.hero.subtitle.lead}</span>
-                <span className="block text-muted">{t.hero.subtitle.rest}</span>
+                <span className="block text-foreground/85 dark:text-muted">{t.hero.subtitle.rest}</span>
               </p>
             </div>
           </div>
