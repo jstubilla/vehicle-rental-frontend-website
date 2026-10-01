@@ -24,16 +24,17 @@ export default async function ContactPage({
     <Section>
       <div className="grid gap-12 lg:grid-cols-12 lg:gap-12">
         {/* Phones: the photo drops below the form, so the form follows straight after the details. */}
-        <div className="contents lg:col-span-5 lg:flex lg:flex-col lg:gap-10">
-          <PageHeader title={t.title} description={t.subtitle} />
+        <div className="contents lg:col-span-5 lg:flex lg:flex-col lg:gap-8">
+          <PageHeader display title={t.title} description={t.subtitle} />
 
-          <section aria-labelledby="details-heading" className="flex flex-col gap-8">
+          {/* One rhythm down the column: each detail opens on a rule, phone and hours large, email and address small. */}
+          <section aria-labelledby="details-heading" className="flex flex-col">
             <h2 id="details-heading" className="sr-only">
               {t.details.title}
             </h2>
             {/* Phone and hours lead: most people call. Email and address follow, smaller. */}
             <dl className="ledger">
-              <div className="flex flex-col gap-1 py-5">
+              <div className="flex flex-col gap-1 py-4">
                 <dt className="text-sm text-muted">{t.details.phone}</dt>
                 <dd>
                   <a
@@ -44,12 +45,12 @@ export default async function ContactPage({
                   </a>
                 </dd>
               </div>
-              <div className="flex flex-col gap-1 py-5">
+              <div className="flex flex-col gap-1 py-4">
                 <dt className="text-sm text-muted">{t.details.hours}</dt>
                 <dd className="font-heading text-xl font-bold tracking-tight">{t.details.hoursValue}</dd>
               </div>
             </dl>
-            <dl className="grid gap-6 border-t border-border pt-6 sm:grid-cols-2 lg:grid-cols-1">
+            <dl className="grid gap-4 border-t border-border pt-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-1 lg:gap-4">
               <div className="flex flex-col gap-1">
                 <dt className="text-sm text-muted">{t.details.email}</dt>
                 <dd className="font-medium">
@@ -70,7 +71,7 @@ export default async function ContactPage({
           as="section"
           variant="raised"
           aria-labelledby="form-heading"
-          className="gap-6 self-start p-5 sm:p-6 md:p-8 lg:col-span-7"
+          className="gap-6 p-5 sm:p-6 md:p-8 lg:col-span-7"
         >
           <h2 id="form-heading" className="text-2xl font-extrabold tracking-display">
             {t.form.title}

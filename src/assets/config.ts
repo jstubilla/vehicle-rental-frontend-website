@@ -45,8 +45,8 @@ export const images = {
     ratio: "wide",
   },
   about: { src: null, alt: "About us image", label: "About us image", ratio: "photo" },
-  team: { src: null, alt: "Our team", label: "Team photo", ratio: "photo" },
-  contact: { src: null, alt: "Map or office photo", label: "Map / office photo", ratio: "photo" },
+  team: { src: null, alt: "Our team", label: "Team photo", ratio: "square" },
+  contact: { src: null, alt: "Map or office photo", label: "Map / office photo", ratio: "video" },
   vehicle: { src: null, alt: "Vehicle photo", label: "Vehicle photo", ratio: "photo" },
   avatar: { src: null, alt: "Person photo", label: "Photo", ratio: "square" },
 } satisfies Record<string, ImageAsset>;

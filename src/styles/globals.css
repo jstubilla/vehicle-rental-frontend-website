@@ -132,14 +132,28 @@
 [data-reveal] [data-reveal-item]:nth-child(3) { transition-delay: 160ms; }
 [data-reveal] [data-reveal-item]:nth-child(4) { transition-delay: 240ms; }
 
-/* The how-it-works route line: drawn left to right as its strip is revealed. */
-.steps-route {
-  transform-origin: left;
-  transition: transform var(--duration-draw) var(--ease-in-out-strong);
+/*
+ * How it works: each leg of the route (numeral to numeral) draws once its step has settled, one after
+ * another, so the route reads as travelled. Down on phones, across from the lg breakpoint.
+ */
+.steps-leg {
+  transform-origin: top;
+  transition: scale var(--duration-draw) var(--ease-in-out-strong);
 }
-[data-reveal="pending"] .steps-route {
-  transform: scaleX(0);
+[data-reveal="pending"] .steps-leg {
+  scale: 1 0;
 }
+@media (width >= 64rem) {
+  .steps-leg {
+    transform-origin: left;
+  }
+  [data-reveal="pending"] .steps-leg {
+    scale: 0 1;
+  }
+}
+[data-reveal] [data-reveal-item]:nth-child(1) .steps-leg { transition-delay: 250ms; }
+[data-reveal] [data-reveal-item]:nth-child(2) .steps-leg { transition-delay: 500ms; }
+[data-reveal] [data-reveal-item]:nth-child(3) .steps-leg { transition-delay: 750ms; }
 
 /*
  * Ledger (special offers, about values, contact details, legal sections): each entry opens with a hairline

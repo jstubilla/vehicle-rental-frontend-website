@@ -79,7 +79,6 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
               amount={vehicle.pricePerDay}
               unit={t.perDay}
               size={layout === "feature" ? "xl" : "md"}
-              usd={isRow ? "none" : "below"}
             />
             {days && (
               <p className="text-sm text-muted">

@@ -29,25 +29,26 @@ export function ContactForm({ defaultVehicleId }: { defaultVehicleId?: string })
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
       {isError && (
         <Alert variant="danger" title={t.errorTitle}>
           {t.errorBody}
         </Alert>
       )}
 
-      <FormField label={t.name} required error={errors.name?.message}>
-        <Input {...register("name")} autoComplete="name" />
-      </FormField>
-
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Name and email pair up; the mobile number gets the full width so its hint stays on one line. */}
+      <div className="grid gap-5 md:grid-cols-2 md:gap-4">
+        <FormField label={t.name} required error={errors.name?.message}>
+          <Input {...register("name")} autoComplete="name" />
+        </FormField>
         <FormField label={t.email} required error={errors.email?.message}>
           <Input {...register("email")} type="email" autoComplete="email" />
         </FormField>
-        <FormField label={t.phone} required hint={t.phoneHint} error={errors.phone?.message}>
-          <Input {...register("phone")} type="tel" autoComplete="tel" />
-        </FormField>
       </div>
+
+      <FormField label={t.phone} required hint={t.phoneHint} error={errors.phone?.message}>
+        <Input {...register("phone")} type="tel" autoComplete="tel" />
+      </FormField>
 
       <FormField label={t.vehicle}>
         {/* Controlled, because the options arrive after the form starts and must not lose the preselected value. */}
@@ -78,18 +79,25 @@ export function ContactForm({ defaultVehicleId }: { defaultVehicleId?: string })
         <Textarea {...register("message")} />
       </FormField>
 
-      <div className="flex flex-col gap-1">
+      {/* Consent and the privacy note read as one group; the send button closes the form. */}
+      <div className="flex flex-col gap-2">
         <Checkbox {...register("consent")} label={t.consent} aria-invalid={errors.consent ? true : undefined} />
         {errors.consent && (
           <p role="alert" className="text-sm font-medium text-danger">
             {errors.consent.message}
           </p>
         )}
+        {/* Indented to start under the checkbox's label text, not its box. */}
+        <PrivacyNote className="pl-8 text-sm text-muted" />
       </div>
 
-      <PrivacyNote />
-
-      <Button type="submit" size="lg" variant="accent" loading={isSubmitting} className="self-start">
+      <Button
+        type="submit"
+        size="lg"
+        variant="accent"
+        loading={isSubmitting}
+        className="mt-1 w-full sm:w-auto sm:self-start"
+      >
         {isSubmitting ? t.sending : t.submit}
       </Button>
     </form>

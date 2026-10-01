@@ -71,7 +71,7 @@ export function BookingSummary({
           >
             {hasTotal && (
               <span id={totalId} key={data.total} className={totalChange}>
-                <Price amount={data.total!} size="sm" usd="none" exact />
+                <Price amount={data.total!} size="sm" usd="inline" exact />
               </span>
             )}
             <ChevronDownIcon

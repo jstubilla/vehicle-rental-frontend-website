@@ -15,8 +15,8 @@ export interface PriceProps {
   size?: PriceSize;
   /** Words after the amount, e.g. "per day". */
   unit?: string;
-  /** Put the USD equivalent on its own line under the PHP amount (default), inline after it, or leave it out. */
-  usd?: "below" | "inline" | "none";
+  /** Put the USD equivalent on its own line under the PHP amount (default) or inline after it. Every price shows it. */
+  usd?: "below" | "inline";
   /** Keep the centavos ("₱5,400.00"): for totals. Daily rates leave it off ("₱1,800"). */
   exact?: boolean;
   /** Orange price color (default) or the plain text color. */
@@ -48,14 +48,10 @@ export function Price({ amount, size = "md", unit, usd = "below", exact = false,
       >
         {formatPhp(amount, { exact })}
       </span>
-      {usd !== "none" && (
-        <>
-          {" "}
-          <span className={cn("text-xs text-muted tabular-nums", below && "col-span-2 row-start-2")}>
-            {formatUsd(amount)}
-          </span>
-        </>
-      )}
+      {" "}
+      <span className={cn("text-xs text-muted tabular-nums", below && "col-span-2 row-start-2")}>
+        {formatUsd(amount)}
+      </span>
       {unit && (
         <>
           {" "}

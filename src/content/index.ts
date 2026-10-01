@@ -424,7 +424,6 @@ export const content = {
       description: "Learn about our company, our values and our team.",
     },
     title: "About us",
-    subtitle: "A local car rental team serving customers across the Philippines.",
     story: {
       title: "Our story",
       body: [
