@@ -16,6 +16,8 @@ export interface ImageAsset {
   /** Label shown inside the placeholder box. */
   label: string;
   ratio: ImageRatio;
+  /** Who took the photo, for photos used under a licence that requires credit (shown beside the photo). */
+  credit?: { author: string; license: string; href: string };
 }
 
 export const logo = {

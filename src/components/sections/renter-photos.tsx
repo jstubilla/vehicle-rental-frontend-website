@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { renterPhotos } from "@/assets/config";
-import { Button, ChevronLeftIcon, ChevronRightIcon, Media, PauseIcon, PlayIcon } from "@/components/ui";
+import { Button, ChevronLeftIcon, ChevronRightIcon, Media } from "@/components/ui";
 import { content } from "@/content";
 
 const t = content.home.reviews.photos;
@@ -15,14 +15,13 @@ const AUTO_SLIDE_MS = 4000;
  * A small carousel of real renters with their van, closing the column of shorter reviews. One photo at a
  * time in a scroll-snap row with the next one peeking in. It moves on every few seconds until the visitor
  * takes over (swipes, scrolls it, uses the arrow keys or the previous/next buttons); it holds still while
- * hovered or focused, off screen, in a hidden tab, or when reduced motion is on, and Pause stops it.
+ * hovered or focused, off screen, in a hidden tab, or when reduced motion is on.
  * Phones run it edge to edge so faces stay large enough to read. The photo the visitor moves to is
  * announced to screen readers (not the automatic ones, which would keep interrupting).
  */
 export function RenterPhotos() {
   const regionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLUListElement>(null);
-  const toggleRef = useRef<HTMLButtonElement>(null);
   const [index, setIndex] = useState(0);
   // Where the row is heading. Quick repeated presses build on it rather than on the row's position,
   // which lags behind during the smooth scroll; it resyncs once any scroll (a swipe too) comes to rest.
@@ -131,8 +130,7 @@ export function RenterPhotos() {
       className="-mx-gutter flex flex-col gap-1 md:mx-0"
       onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(true)}
       onPointerLeave={() => setHovered(false)}
-      // Focus pauses it, except on the pause/play button itself, so pressing Play there starts it.
-      onFocus={(e) => setFocused((e.target as Element) !== toggleRef.current)}
+      onFocus={() => setFocused(true)}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocused(false);
       }}
@@ -159,17 +157,6 @@ export function RenterPhotos() {
       <div className="flex items-center justify-between gap-3 px-gutter text-sm md:px-0">
         <p className="min-w-0 text-muted">{t.caption}</p>
         <div className="-mr-2 flex shrink-0 items-center">
-          {/* Nothing to pause when reduced motion is on: it never auto-slides then. */}
-          <Button
-            ref={toggleRef}
-            size="icon"
-            variant="ghost"
-            aria-label={playing ? t.pause : t.play}
-            className="text-muted hover:text-foreground motion-reduce:hidden"
-            onClick={() => setPlaying((p) => !p)}
-          >
-            {playing ? <PauseIcon className="size-4" /> : <PlayIcon className="size-4" />}
-          </Button>
           <Button size="icon" variant="ghost" aria-label={t.previous} onClick={() => go(-1)}>
             <ChevronLeftIcon aria-hidden="true" className="size-5" />
           </Button>
@@ -181,7 +168,7 @@ export function RenterPhotos() {
           </Button>
         </div>
       </div>
-      {/* Announces only while paused, so the automatic slides never interrupt a screen reader. */}
+      {/* Announces only while it holds still, so the automatic slides never interrupt a screen reader. */}
       <p aria-live={active ? "off" : "polite"} className="sr-only">
         {t.slide(index + 1, total)}
       </p>

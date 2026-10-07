@@ -20,6 +20,8 @@ export interface MediaProps {
   sizes?: string;
   /** Ease the picture in a little while a surrounding `group` is hovered. */
   zoom?: boolean;
+  /** "contain" shows the whole picture when the frame's shape differs from the photo's (set a matching background). */
+  fit?: "cover" | "contain";
 }
 
 /**
@@ -27,7 +29,7 @@ export interface MediaProps {
  * (fine hatching, a frame icon and the slot's label). Swapping assets never touches the calling code.
  * `zoom`: the picture eases in slightly while a surrounding `group` (e.g. a vehicle card) is hovered.
  */
-export function Media({ asset, className, priority, sizes = "100vw", zoom = false }: MediaProps) {
+export function Media({ asset, className, priority, sizes = "100vw", zoom = false, fit = "cover" }: MediaProps) {
   const resolved = typeof asset === "string" ? images[asset] : asset;
   const layer = cn(
     zoom &&
@@ -51,7 +53,7 @@ export function Media({ asset, className, priority, sizes = "100vw", zoom = fals
           fill
           sizes={sizes}
           priority={priority}
-          className={cn("object-cover", layer)}
+          className={cn(fit === "contain" ? "object-contain" : "object-cover", layer)}
         />
       ) : (
         <div

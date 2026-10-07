@@ -223,8 +223,6 @@ export const content = {
         caption: "Real renters, with one of our vans",
         previous: "Previous photo",
         next: "Next photo",
-        pause: "Pause photos",
-        play: "Play photos",
         slide: (n: number, total: number) => `${n} of ${total}`,
         counter: (n: number, total: number) => `${n} / ${total}`,
       },
@@ -543,6 +541,8 @@ export const content = {
 
   vehicleDetail: {
     back: "All vehicles",
+    /** Under a licensed photo: "Photo: Ethan Llamas, CC BY-SA 4.0 (edited)". */
+    photoCredit: (author: string, license: string) => `Photo: ${author}, ${license} (edited)`,
     perDay: "per day",
     specsTitle: "Specifications",
     specs: {

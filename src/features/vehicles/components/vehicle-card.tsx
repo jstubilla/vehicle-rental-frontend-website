@@ -41,8 +41,13 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
         isRow && "flex-row",
       )}
     >
+      {/*
+        Row cards stretch taller than their photo, so they show the whole photo on the photos' own backdrop
+        colour (#edeef2) rather than cropping the vehicle.
+      */}
       <Media
         zoom
+        fit={isRow ? "contain" : "cover"}
         asset={vehicle.images[0] ?? images.vehicle}
         sizes={
           layout === "feature"
@@ -53,7 +58,7 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
         }
         className={cn(
           "rounded-none border-0",
-          isRow ? "aspect-square w-28 shrink-0 border-r sm:w-40 sm:aspect-photo" : "aspect-video border-b",
+          isRow ? "aspect-square w-28 shrink-0 border-r bg-[#edeef2]! sm:w-40 sm:aspect-photo" : "aspect-video border-b",
         )}
       />
 

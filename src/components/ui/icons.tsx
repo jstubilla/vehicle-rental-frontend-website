@@ -40,12 +40,6 @@ export const ChevronLeftIcon = (p: SVGProps<SVGSVGElement>) => (
 export const ChevronRightIcon = (p: SVGProps<SVGSVGElement>) => (
   <Icon {...p}><path d="m9 18 6-6-6-6" /></Icon>
 );
-export const PauseIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}><path d="M9 5v14M15 5v14" /></Icon>
-);
-export const PlayIcon = (p: SVGProps<SVGSVGElement>) => (
-  <Icon {...p}><path d="M7 5v14l11-7z" /></Icon>
-);
 /** A sortable-column indicator: one chevron dimmed, the other in the active sort direction. */
 export const SortIcon = ({ direction, ...p }: SVGProps<SVGSVGElement> & { direction: "asc" | "desc" | "none" }) => (
   <Icon {...p}>

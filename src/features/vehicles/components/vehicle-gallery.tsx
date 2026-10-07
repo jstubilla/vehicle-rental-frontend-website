@@ -21,6 +21,13 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
         sizes="(min-width: 64rem) 58vw, 100vw"
         className="aspect-video transition-opacity duration-(--duration-fast) ease-out starting:opacity-0"
       />
+      {current.credit && (
+        <p className="text-xs text-muted">
+          <a href={current.credit.href} target="_blank" rel="noopener noreferrer" className="text-muted">
+            {content.vehicleDetail.photoCredit(current.credit.author, current.credit.license)}
+          </a>
+        </p>
+      )}
       {images.length > 1 && (
         <ul className="grid grid-cols-4 gap-2">
           {images.map((image, index) => (

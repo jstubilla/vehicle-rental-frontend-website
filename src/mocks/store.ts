@@ -16,7 +16,7 @@ import { seedVehicles } from "./vehicles";
  * - On the server it is just the seed data (the server has no localStorage).
  * - Bump SEED_VERSION whenever seed data changes, so old saved data is discarded.
  */
-const SEED_VERSION = 16;
+const SEED_VERSION = 21;
 const STORAGE_PREFIX = "car-rental-mock-db-v";
 const STORAGE_KEY = `${STORAGE_PREFIX}${SEED_VERSION}`;
 
