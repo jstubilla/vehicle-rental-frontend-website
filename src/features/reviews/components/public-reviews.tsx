@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLink, EmptyState, ErrorState, Reveal, Section, Skeleton, StarRating } from "@/components/ui";
+import { RenterPhotos } from "@/components/sections/renter-photos";
 import { content } from "@/content";
 import { formatDate } from "@/lib/dates";
 import type { PublicReview } from "@/types";
@@ -24,8 +25,9 @@ function Attribution({ review, lead = false }: { review: PublicReview; lead?: bo
 /**
  * Home page section: only the reviews staff chose to show. The newest is set large under an oversized
  * opening quote mark; the rest run beside it as a ledger (rule and tab per review, like the rest of the
- * site), starting level with the heading so the two columns balance however many reviews there are.
- * "Write a review" closes the lead column on wide screens and the whole section on phones.
+ * site), closed by a small carousel of real renters, starting level with the heading so the two columns
+ * balance however many reviews there are.
+ * "Write a review" follows the lead quote on wide screens and closes the whole section on phones.
  */
 export function PublicReviews() {
   const { data, isError, refetch } = usePublishedReviews();
@@ -96,23 +98,27 @@ export function PublicReviews() {
             <Attribution review={lead} lead />
           </figure>
 
-          <div className="order-last lg:order-none lg:mt-auto">{writeLink}</div>
+          <div className="order-last lg:order-none">{writeLink}</div>
         </div>
 
-        {rest.length > 0 && (
-          <ul data-reveal-item="" className="ledger self-start border-b border-border lg:col-span-5">
-            {rest.map((review) => (
-              <li key={review.id} className="py-6">
-                <figure className="flex flex-col gap-3">
-                  <blockquote>
-                    <p className="text-lg text-foreground">{review.comment}</p>
-                  </blockquote>
-                  <Attribution review={review} />
-                </figure>
-              </li>
-            ))}
-          </ul>
-        )}
+        {/* The shorter reviews, closed by the renter photos: together they balance the lead quote. */}
+        <div data-reveal-item="" className="flex flex-col gap-8 self-start lg:col-span-5">
+          {rest.length > 0 && (
+            <ul className="ledger border-b border-border">
+              {rest.map((review) => (
+                <li key={review.id} className="py-6">
+                  <figure className="flex flex-col gap-3">
+                    <blockquote>
+                      <p className="text-lg text-foreground">{review.comment}</p>
+                    </blockquote>
+                    <Attribution review={review} />
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          )}
+          <RenterPhotos />
+        </div>
       </Reveal>
     </Section>
   );

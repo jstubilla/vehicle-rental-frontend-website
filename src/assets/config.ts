@@ -52,3 +52,14 @@ export const images = {
 } satisfies Record<string, ImageAsset>;
 
 export type ImageKey = keyof typeof images;
+
+/**
+ * Home page renter photos, in display order (the reviews carousel), each one with its van. Each is cropped
+ * from a "Thank you renters" post with the overlays removed, so they are only sharp enough for small sizes.
+ */
+export const renterPhotos: ImageAsset[] = [
+  { src: "/images/renters/family-silver-van.jpg", alt: "A family in sun hats beside a silver van on a city street" },
+  { src: "/images/renters/family-van-door.jpg", alt: "A large family with children in front of a white van with its door open" },
+  { src: "/images/renters/friends-hiace.jpg", alt: "Five friends posing around the front of a white Toyota Hiace" },
+  { src: "/images/renters/students-campus.jpg", alt: "A group of students with their van on a university campus" },
+].map((photo) => ({ ...photo, label: photo.alt, ratio: "wide" as const }));

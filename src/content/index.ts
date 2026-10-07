@@ -217,6 +217,17 @@ export const content = {
     reviews: {
       title: "What customers say",
       description: "Reviews from people who have rented with us.",
+      /** The small renter photo carousel under the shorter reviews. Photo files and alt text: assets/config.ts. */
+      photos: {
+        label: "Photos of our renters",
+        caption: "Real renters, with one of our vans",
+        previous: "Previous photo",
+        next: "Next photo",
+        pause: "Pause photos",
+        play: "Play photos",
+        slide: (n: number, total: number) => `${n} of ${total}`,
+        counter: (n: number, total: number) => `${n} / ${total}`,
+      },
       emptyTitle: "No reviews to show yet",
       emptyDescription: "Be the first to tell us how we did.",
       errorTitle: "We could not load the reviews",
