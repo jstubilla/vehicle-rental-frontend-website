@@ -46,7 +46,6 @@ export const images = {
     label: "Home backdrop",
     ratio: "wide",
   },
-  about: { src: null, alt: "About us image", label: "About us image", ratio: "photo" },
   team: { src: null, alt: "Our team", label: "Team photo", ratio: "square" },
   contact: { src: null, alt: "Map or office photo", label: "Map / office photo", ratio: "video" },
   vehicle: { src: null, alt: "Vehicle photo", label: "Vehicle photo", ratio: "photo" },
@@ -65,3 +64,17 @@ export const renterPhotos: ImageAsset[] = [
   { src: "/images/renters/friends-hiace.jpg", alt: "Five friends posing around the front of a white Toyota Hiace" },
   { src: "/images/renters/students-campus.jpg", alt: "A group of students with their van on a university campus" },
 ].map((photo) => ({ ...photo, label: photo.alt, ratio: "wide" as const }));
+
+/**
+ * About page team photos, in the same order as content.about.team.members. Each is the person's own
+ * outdoor photo, cropped to the same head-and-shoulders square with the eyes at the same height.
+ * A missing entry falls back to the plain `team` placeholder.
+ */
+const TEAM_PHOTO_FILES = ["/images/team/peter.jpg", "/images/team/erika.jpg", "/images/team/cynde.jpg"];
+
+export const teamPhotos: ImageAsset[] = content.about.team.members.map((member, index) => ({
+  src: TEAM_PHOTO_FILES[index] ?? null,
+  alt: `${member.name}, ${member.role}`,
+  label: member.name,
+  ratio: "square",
+}));

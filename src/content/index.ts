@@ -436,7 +436,12 @@ export const content = {
     story: {
       title: "Our story",
       body: [
-        "Placeholder: tell the story of the company here. Who started it, when, and why.",
+        "From a car key proposal to building a business and a life together.",
+        "We're Peter and Erika. We met in January 2026 and started ELA's Car Rental a month later, in February 2026.",
+        "While we were dating, Peter proposed to Erika with something unexpected: a car key and a brand-new car instead of a traditional ring. It stood for the life and the business we were building together.",
+        "Today we're husband and wife, and we've both left our jobs to focus fully on ELA's. What started with one car is now a fleet of cars and motorcycles, backed by partners and suppliers we trust.",
+        "We want to give locals and tourists across Region VI (Western Visayas) quality vehicles and reliable transportation: self-drive rentals, tours and point-to-point services.",
+        "ELA's is now one of the top-rated and fastest-growing local car rental companies in Iloilo, growing alongside established companies with years of industry experience, including brands with an international presence.",
         "We keep our fleet well maintained and our prices clear, so there are no surprises when you book. Many customers come back because the process is simple and the service is dependable.",
       ],
     },
@@ -451,7 +456,7 @@ export const content = {
     team: {
       title: "Meet the team",
       members: [
-        { name: "Peter Agravidor", role: "Owner" },
+        { name: "Peter Agraviador", role: "Owner" },
         { name: "Erika Lasac", role: "Co-owner" },
         { name: "Cynde Agraviador", role: "Admin" },
       ],
