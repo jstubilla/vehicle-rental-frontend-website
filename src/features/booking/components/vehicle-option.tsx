@@ -1,8 +1,9 @@
 import { images } from "@/assets/config";
-import { Badge, Button, Card, Media, Price } from "@/components/ui";
+import { Badge, Button, Card, FieldGroup, Media, Price, RadioGroup } from "@/components/ui";
 import { content } from "@/content";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/currency";
+import { DRIVER_DAILY_RATE, offersDriver } from "@/lib/pricing";
 import { calcRentalTotal } from "@/lib/rental";
 import type { Vehicle } from "@/types";
 
@@ -14,10 +15,27 @@ interface VehicleOptionProps {
   days: number;
   selected: boolean;
   onSelect: () => void;
+  /** "With a driver" chosen. Only asked on the selected car or van. */
+  withDriver: boolean;
+  onWithDriverChange: (withDriver: boolean) => void;
 }
 
-/** One vehicle in the booking flow, with a Select button. */
-export function VehicleOption({ vehicle, available, days, selected, onSelect }: VehicleOptionProps) {
+/**
+ * One vehicle in the booking flow, with a Select button. Once a car or van is selected, it also asks
+ * "Vehicle only" or "With a driver" right there, where the decision is being made.
+ */
+export function VehicleOption({
+  vehicle,
+  available,
+  days,
+  selected,
+  onSelect,
+  withDriver,
+  onWithDriverChange,
+}: VehicleOptionProps) {
+  const d = content.booking.driverOption;
+  const askDriver = selected && available && offersDriver(vehicle.category);
+
   return (
     <Card
       as="article"
@@ -58,6 +76,25 @@ export function VehicleOption({ vehicle, available, days, selected, onSelect }: 
           </Button>
           {!available && <Badge variant="warning">{t.notAvailable}</Badge>}
         </div>
+        {askDriver && (
+          <FieldGroup label={d.legend} className="border-t border-border pt-3">
+            <RadioGroup
+              name={`driver-${vehicle.slug}`}
+              variant="cards"
+              value={withDriver ? "driver" : "vehicle"}
+              onValueChange={(value) => onWithDriverChange(value === "driver")}
+              options={[
+                { value: "vehicle", label: d.vehicleOnly, description: d.vehicleOnlyDescription },
+                {
+                  value: "driver",
+                  label: d.withDriver,
+                  description: d.withDriverDescription,
+                  end: <Price amount={DRIVER_DAILY_RATE} size="sm" unit={d.perDay} />,
+                },
+              ]}
+            />
+          </FieldGroup>
+        )}
       </div>
     </Card>
   );

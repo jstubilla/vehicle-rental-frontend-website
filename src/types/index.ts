@@ -88,7 +88,7 @@ export interface Customer {
 }
 
 /**
- * A booking keeps its own copy of the price it was made at (dailyRate and the
+ * A booking keeps its own copy of the price it was made at (dailyRate, driverRate and the
  * totals). If the owner changes a vehicle's rate later, existing bookings
  * keep their original price and only new bookings use the new rate.
  */
@@ -109,6 +109,11 @@ export interface Booking {
   days: number;
   dailyRate: number;
   vehicleTotal: number;
+  /** "With a driver" (true) or "Vehicle only" (false). */
+  withDriver: boolean;
+  /** The driver's daily rate at booking time (0 for "Vehicle only"), kept like dailyRate. */
+  driverRate: number;
+  driverTotal: number;
   total: number;
   status: BookingStatus;
   paymentId: string | null;

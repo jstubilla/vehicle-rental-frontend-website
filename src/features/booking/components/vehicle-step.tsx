@@ -54,7 +54,10 @@ export function VehicleStep() {
                     available={option.status === "available"}
                     days={days}
                     selected={option.slug === state.vehicleSlug}
-                    onSelect={() => update({ vehicleSlug: option.slug })}
+                    // Each vehicle starts at the default, "Vehicle only".
+                    onSelect={() => option.slug !== state.vehicleSlug && update({ vehicleSlug: option.slug, withDriver: false })}
+                    withDriver={state.withDriver}
+                    onWithDriverChange={(withDriver) => update({ withDriver })}
                   />
                 </li>
               ))}

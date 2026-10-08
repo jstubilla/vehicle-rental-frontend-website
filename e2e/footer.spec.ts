@@ -56,7 +56,7 @@ test("the About page introduces the owner, co-owner and admin", async ({ page })
   await visit(page, "/about");
   const team = page.getByRole("region", { name: content.about.team.title });
   for (const [name, role] of [
-    ["Peter Agravidor", "Owner"],
+    ["Peter Agraviador", "Owner"],
     ["Erika Lasac", "Co-owner"],
     ["Cynde Agraviador", "Admin"],
   ]) {

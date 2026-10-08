@@ -67,7 +67,7 @@ The demo accounts and the payment "demo controls" only show while `NEXT_PUBLIC_S
 
 ## 2. What is in it
 
-**Public site:** home page with quick search, vehicle catalog and detail pages, a special offers page,
+**Public site:** home page with quick search, vehicle catalog and detail pages, a Tours & Transfers page (at /special-offers),
 about page, contact form, and a six-step booking flow (dates and place, vehicle, driver details, check,
 payment, confirmation) with a **mock payment** that can succeed or be declined. The last step pays and
 confirms the booking in one action. Booking is open — every vehicle can be booked for any dates.
@@ -257,14 +257,17 @@ Decisions made where the brief did not say. Each is easy to change; please check
 - **A rental day is a 24-hour block, rounded up.** Two days and one hour is three days. The minimum is one day.
 - **Prices are a flat daily rate**, with no seasonal or weekend pricing. Staff can change a vehicle type's rate
   on the Pricing screen. **New bookings use the new rate; existing bookings keep the price they were made at.**
-- There are no add-ons (no child seats, GPS and the like). A booking's price is just the vehicle's daily
-  rate times the number of days.
+- The one add-on is **"With a driver"** (cars and vans only; motorcycles are always "Vehicle only"): a licensed driver
+  comes with the vehicle at a flat daily rate (`DRIVER_DAILY_RATE` in `src/lib/pricing.ts`, the only place it is set),
+  charged for every rental day, so the total is (vehicle daily rate + driver rate) × days. The booking keeps the
+  driver rate it was made at, like the vehicle rate. There are no other add-ons (no child seats, GPS and the like).
+  Without a driver, a booking's price is just the vehicle's daily rate times the number of days.
 - **Booking is open:** any vehicle can be booked for any dates. There is no double-booking check and no
   "unavailable for these dates" state. The only thing that stops a vehicle being booked is its own status
   (a vehicle marked "in maintenance" or "inactive" cannot be selected).
 - **Vehicles are types, not particular cars.** The types are SUV, Multi-purpose vehicle (MPV, 7-8
-  seaters), Sedan, Hatchback, Van, Pick-up truck, 125cc and 150cc. Each has an example shown as "Toyota
-  Vios or similar", the most it seats, and a daily price. There are no plate numbers or model years. **Motorcycles (125cc/150cc) don't carry a seat count** — `seats` is optional on the
+  seaters), Sedan, Hatchback, Van, Pick-up truck, 125cc and below, and 150cc–160cc motorcycles. Each has an example shown as "Toyota
+  Vios or similar", the most it seats, and a daily price. There are no plate numbers or model years. **Motorcycles (125cc and below, 150cc–160cc) don't carry a seat count** — `seats` is optional on the
   `Vehicle` type, and every screen that shows seats just leaves that part out for them. There is no
   transmission, fuel type, year, description or feature list. The vehicle detail
   page shows the photos, those specs, and the price — no other text.

@@ -1,12 +1,14 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 export interface RadioOption {
   value: string;
   label: string;
   description?: string;
+  /** Shown at the far end of the option, e.g. its price. */
+  end?: ReactNode;
   disabled?: boolean;
 }
 
@@ -62,6 +64,7 @@ export function RadioGroup({
                 <span className="text-sm text-muted">{option.description}</span>
               )}
             </span>
+            {option.end && <span className="ml-auto shrink-0 pl-2 text-right">{option.end}</span>}
           </label>
         );
       })}

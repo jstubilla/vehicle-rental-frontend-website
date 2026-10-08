@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  Badge,
   Button,
   EmptyState,
   ErrorState,
@@ -110,7 +111,15 @@ export function BookingList() {
                       <Link href={`/admin/bookings/${booking.id}`}>{booking.reference}</Link>
                     </TableCell>
                     <TableCell>{booking.customerName}</TableCell>
-                    <TableCell>{booking.vehicleName}</TableCell>
+                    <TableCell>
+                      {booking.vehicleName}
+                      {booking.withDriver && (
+                        <>
+                          {" "}
+                          <Badge variant="info">{content.booking.driverOption.withDriver}</Badge>
+                        </>
+                      )}
+                    </TableCell>
                     <TableCell className="whitespace-nowrap">{formatDate(`${booking.pickupDate}T00:00:00+08:00`)}</TableCell>
                     <TableCell className="whitespace-nowrap">{formatDate(`${booking.returnDate}T00:00:00+08:00`)}</TableCell>
                     <TableCell className="whitespace-nowrap">{formatCurrency(booking.total)}</TableCell>

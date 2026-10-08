@@ -85,8 +85,8 @@ const badgeVariants: BadgeVariant[] = ["neutral", "outline", "solid", "success",
 
 const rows = [
   { name: "Toyota Vios", category: "Sedan", rate: 1800 },
-  { name: "Toyota Fortuner", category: "SUV", rate: 4200 },
-  { name: "Toyota HiAce", category: "Van", rate: 4800 },
+  { name: "Toyota Fortuner", category: "SUV", rate: 4000 },
+  { name: "Toyota HiAce", category: "Van", rate: 4500 },
 ];
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {

@@ -22,11 +22,13 @@ export interface FlowCustomer {
 
 export interface FlowState {
   vehicleSlug: string | null;
+  /** "With a driver" (true) or "Vehicle only" (false, the default). Only cars and vans offer a driver. */
+  withDriver: boolean;
   rental: FlowRental | null;
   customer: FlowCustomer | null;
 }
 
-const EMPTY: FlowState = { vehicleSlug: null, rental: null, customer: null };
+const EMPTY: FlowState = { vehicleSlug: null, withDriver: false, rental: null, customer: null };
 const STORAGE_KEY = "car-rental-booking-flow";
 
 let state: FlowState = EMPTY;

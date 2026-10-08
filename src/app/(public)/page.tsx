@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { ArrowLink, Band, Container, HeroBackdrop, Section } from "@/components/ui";
 import { content } from "@/content";
 import { PublicReviews } from "@/features/reviews/components/public-reviews";
+import { ToursCarousel } from "@/features/tours/components/tours-carousel";
 import { FeaturedVehicles } from "@/features/vehicles/components/featured-vehicles";
 import { QuickSearch } from "@/features/search/quick-search";
 import { businessSchema } from "@/lib/structured-data";
@@ -56,15 +57,14 @@ export default async function HomePage() {
               {t.hero.title}
             </h1>
             {/*
-              Wide screens: the subtitle's last line sits exactly on the headline's last baseline (grid
-              last-baseline alignment), under a ledger rule that runs out to the booking bar's right edge.
-              The price promise is set in full text color; how you book follows, muted.
+              Opposite the headline: a teaser of the transfers and tours, set as type under a ledger rule that
+              runs out to the booking bar's right edge. Wide screens sit its last line on the headline's last
+              baseline (grid last-baseline alignment). min-w-0 keeps the slide row from widening the grid.
             */}
-            <div className="ledger lg:col-span-5 lg:justify-self-end lg:w-full lg:max-w-sm">
-              <p className="pt-4 text-lg lg:pt-5 lg:text-xl">
-                <span className="block font-heading font-semibold tracking-tight text-foreground">{t.hero.subtitle.lead}</span>
-                <span className="block text-foreground/85 dark:text-muted">{t.hero.subtitle.rest}</span>
-              </p>
+            <div className="ledger min-w-0 lg:col-span-5 lg:justify-self-end lg:w-full lg:max-w-sm">
+              <div className="pt-4 lg:pt-5">
+                <ToursCarousel />
+              </div>
             </div>
           </div>
           <div className="relative z-10 mt-8 -mb-16 md:mt-10 md:-mb-20 lg:mt-14">

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { content } from "../src/content";
 import { formatCurrency } from "../src/lib/currency";
+import { DRIVER_DAILY_RATE } from "../src/lib/pricing";
 import { dateFromToday, pageAlerts, visit } from "./helpers";
 
 const b = content.booking;
@@ -23,7 +24,7 @@ async function fillDetails(page: Page) {
 }
 
 /** Jumps into the flow with the dates and vehicle in the link, then goes through steps 1 to 3. */
-async function reachPayment(page: Page, slug: string, startInDays: number, nights: number) {
+async function reachPayment(page: Page, slug: string, startInDays: number, nights: number, withDriver = false) {
   const query = new URLSearchParams({
     pickupLocation: "NAIA Terminal 3, Pasay",
     pickupDate: dateFromToday(startInDays),
@@ -35,6 +36,7 @@ async function reachPayment(page: Page, slug: string, startInDays: number, night
   await visit(page, `/book/dates?${query}`);
   await page.getByRole("button", { name: b.common.continue }).click();
   await expect(page).toHaveURL(/\/book\/vehicle/);
+  if (withDriver) await page.getByRole("radio", { name: new RegExp(b.driverOption.withDriver) }).check();
   await page.getByRole("link", { name: b.common.continue }).click();
   await expect(page).toHaveURL(/\/book\/details/);
   await fillDetails(page);
@@ -76,10 +78,13 @@ test("a visitor completes all six steps, including a declined payment", async ({
       "aria-pressed",
       "true",
     );
-    // There are no add-ons to choose, only the vehicle.
+    // The one choice besides the vehicle is the driver, and "Vehicle only" is the default.
     await expect(page.getByRole("checkbox")).toHaveCount(0);
+    await expect(vios.getByRole("radio", { name: new RegExp(b.driverOption.vehicleOnly) })).toBeChecked();
     // 3 days x 1,800 = 5,400.
-    await expect(page.getByRole("region", { name: b.summary.title })).toContainText(formatCurrency(5400));
+    const summary = page.getByRole("region", { name: b.summary.title });
+    await expect(summary).toContainText(formatCurrency(5400));
+    await expect(summary).toContainText(b.driverOption.vehicleOnly);
     await page.getByRole("link", { name: b.common.continue }).click();
   });
 
@@ -191,7 +196,7 @@ test("a price change before paying charges nothing and asks the visitor to check
   await reachPayment(page, "hatchback", 40, 2);
   await page.getByLabel(b.payment.terms).check();
 
-  // The owner raises the hatchback's daily rate from 1,400 to 1,700 while the visitor is on this page.
+  // The owner raises the hatchback's daily rate from 1,600 to 1,700 while the visitor is on this page.
   await page.evaluate(() => {
     const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
     const db = JSON.parse(localStorage.getItem(key)!);
@@ -199,7 +204,7 @@ test("a price change before paying charges nothing and asks the visitor to check
     localStorage.setItem(key, JSON.stringify(db));
   });
 
-  await page.getByRole("button", { name: b.payment.pay(formatCurrency(2800)) }).click();
+  await page.getByRole("button", { name: b.payment.pay(formatCurrency(3200)) }).click();
   await expect(pageAlerts(page).filter({ hasText: b.payment.errors.price_changed.title })).toContainText(
     b.payment.errors.price_changed.body,
   );
@@ -217,4 +222,40 @@ test("a price change before paying charges nothing and asks the visitor to check
   await page.getByRole("button", { name: b.payment.pay(formatCurrency(3400)) }).click();
   await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
   expect(await savedCounts(page)).toEqual({ bookings: 16, payments: 16 });
+});
+
+test("a visitor books a car With a driver, charged for every rental day", async ({ page }) => {
+  // Sedan, 3 days: 5,400 for the vehicle + 1,000 x 3 for the driver = 8,400.
+  const driverTotal = DRIVER_DAILY_RATE * 3;
+  await reachPayment(page, "sedan", 20, 3, true);
+
+  const summary = page.getByRole("region", { name: b.summary.title });
+  await expect(summary).toContainText(b.driverOption.withDriver);
+  await expect(summary).toContainText(b.summary.driverLine);
+  await expect(summary).toContainText(b.summary.rate(formatCurrency(DRIVER_DAILY_RATE), 3));
+  await expect(summary).toContainText(formatCurrency(driverTotal));
+
+  await page.getByLabel(b.payment.terms).check();
+  await page.getByRole("button", { name: b.payment.pay(formatCurrency(5400 + driverTotal)) }).click();
+
+  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
+  const confirmed = page.getByRole("region", { name: b.summary.title });
+  await expect(confirmed).toContainText(b.driverOption.withDriver);
+  await expect(confirmed).toContainText(formatCurrency(5400 + driverTotal));
+});
+
+test("motorcycles do not offer a driver", async ({ page }) => {
+  const query = new URLSearchParams({
+    pickupLocation: "NAIA Terminal 3, Pasay",
+    pickupDate: dateFromToday(10),
+    pickupTime: "10:00",
+    returnDate: dateFromToday(12),
+    returnTime: "10:00",
+    vehicle: "125cc",
+  });
+  await visit(page, `/book/dates?${query}`);
+  await page.getByRole("button", { name: b.common.continue }).click();
+  await expect(page).toHaveURL(/\/book\/vehicle/);
+  await expect(page.getByRole("radio", { name: new RegExp(b.driverOption.withDriver) })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: b.summary.title })).toContainText(b.driverOption.vehicleOnly);
 });

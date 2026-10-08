@@ -1,7 +1,7 @@
 "use client";
 
 import { useVehicle } from "@/features/vehicles/hooks/use-vehicles";
-import { buildQuote } from "@/lib/pricing";
+import { buildQuote, offersDriver } from "@/lib/pricing";
 import { countRentalDays } from "@/lib/rental";
 import { useBookingFlow } from "./use-booking-flow";
 
@@ -12,7 +12,9 @@ export function useBookingQuote() {
 
   const vehicle = vehicleQuery.data ?? null;
   const days = state.rental ? countRentalDays(state.rental) : null;
-  const quote = vehicle && days ? buildQuote({ dailyRate: vehicle.pricePerDay, days }) : null;
+  // A driver only counts for a vehicle that offers one (never a motorcycle).
+  const withDriver = vehicle !== null && state.withDriver && offersDriver(vehicle.category);
+  const quote = vehicle && days ? buildQuote({ dailyRate: vehicle.pricePerDay, days, withDriver }) : null;
 
   return {
     vehicle,

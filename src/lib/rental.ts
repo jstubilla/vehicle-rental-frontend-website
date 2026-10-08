@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { content } from "@/content";
 import { addDaysISO, todayISO, toTimestamp } from "./dates";
+import { buildQuote } from "./pricing";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -75,7 +76,7 @@ export function countRentalDays(search: Pick<RentalSearch, "pickupDate" | "picku
   return Math.max(1, Math.ceil(ms / MS_PER_DAY));
 }
 
-/** Flat daily rate times number of days. */
-export function calcRentalTotal(pricePerDay: number, days: number): number {
-  return pricePerDay * days;
+/** The trip total: the flat daily rate (plus the driver's, for "With a driver") times the number of days. */
+export function calcRentalTotal(pricePerDay: number, days: number, withDriver = false): number {
+  return buildQuote({ dailyRate: pricePerDay, days, withDriver }).total;
 }

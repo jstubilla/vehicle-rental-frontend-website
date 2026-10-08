@@ -29,8 +29,8 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
 });
 
 /**
- * The PHP amount on its own. Short by default ("₱4,200"), for daily rates on the public site;
- * `exact` keeps the centavos ("₱4,200.00"), for totals and anything money is paid against.
+ * The PHP amount on its own. Short by default ("₱4,000"), for daily rates on the public site;
+ * `exact` keeps the centavos ("₱4,000.00"), for totals and anything money is paid against.
  */
 export function formatPhp(amount: number, { exact = false }: { exact?: boolean } = {}): string {
   return (exact ? phpFormatter : phpShortFormatter).format(amount);
@@ -42,7 +42,7 @@ export function formatUsd(amount: number): string {
 }
 
 /**
- * Money as one exact plain string, e.g. "₱4,200.00 (~$72)": totals, payments, the admin, and any place
+ * Money as one exact plain string, e.g. "₱4,000.00 (~$72)": totals, payments, the admin, and any place
  * that needs text (button labels, page descriptions). On the page itself, the <Price> component shows
  * a price with the USD amount de-emphasized.
  */

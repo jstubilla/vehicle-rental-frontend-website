@@ -3,6 +3,8 @@
  * hardcoding text, so wording can be changed (or translated later) in one place.
  * As pages are added, add their sections below.
  */
+import { DRIVER_DAILY_RATE } from "../lib/pricing";
+
 /** The terms checkbox is a sentence with a link in it, so the sentence is kept in two parts. */
 const TERMS_LEAD = "I agree to the ";
 const TERMS_LINK = "rental terms and conditions";
@@ -26,7 +28,7 @@ export const content = {
     public: [
       { label: "Home", href: "/" },
       { label: "Vehicles", href: "/vehicles" },
-      { label: "Special Offers", href: "/special-offers" },
+      { label: "Tours & Transfers", href: "/special-offers" },
       { label: "About", href: "/about" },
       { label: "Contact", href: "/contact" },
     ],
@@ -53,7 +55,7 @@ export const content = {
         title: "Explore",
         links: [
           { label: "Vehicles", href: "/vehicles" },
-          { label: "Special offers", href: "/special-offers" },
+          { label: "Tours & transfers", href: "/special-offers" },
           { label: "Book now", href: "/book/dates" },
           { label: "About us", href: "/about" },
         ],
@@ -148,8 +150,8 @@ export const content = {
       hatchback: "Hatchback",
       van: "Van",
       pickup: "Pick-up truck",
-      "125cc": "125cc",
-      "150cc": "150cc",
+      "125cc": "125cc and below",
+      "150cc": "150cc–160cc",
     },
     vehicleStatus: { available: "Available", maintenance: "In maintenance", inactive: "Inactive" },
     leadStage: { new: "New", contacted: "Contacted", qualified: "Qualified", won: "Won", lost: "Lost" },
@@ -197,13 +199,18 @@ export const content = {
     },
     hero: {
       title: "Rent a car in the Philippines",
-      /** Two sentences: the price promise leads (set in full text color), how you book follows. */
-      subtitle: { lead: "Clear daily prices in pesos.", rest: "Booked online in minutes." },
     },
     featured: {
       title: "Featured vehicles",
       description: "A few of our most popular cars.",
       viewAll: "View all vehicles",
+    },
+    /** The transfer and tour teaser beside the hero headline. Names and prices come from specialOffers.priceLists. */
+    toursTransfers: {
+      title: "Tours & transfers",
+      viewAll: "See all tours & transfers",
+      slide: (n: number, total: number) => `${n} of ${total}`,
+      counter: (n: number, total: number) => `${n} / ${total}`,
     },
     howItWorks: {
       title: "How it works",
@@ -466,11 +473,41 @@ export const content = {
 
   specialOffers: {
     meta: {
-      title: "Special offers",
-      description: "Weekly and monthly rates, a driver, tours and point-to-point trips.",
+      title: "Tours & Transfers",
+      description:
+        "Point-to-point van transfers and tour packages around Iloilo, plus weekly and monthly rates and a driver. Prices in PHP.",
     },
-    title: "Special offers",
-    subtitle: "Ways to save, or to get more out of your rental.",
+    title: "Tours & Transfers",
+    subtitle: "Van transfers, day tours, and ways to save on a longer rental.",
+    /**
+     * Fixed prices in PHP. THE single source for these: the Tours & Transfers page lists them and the
+     * home page's row of cards reads them from here, so a price is only ever typed once.
+     */
+    priceLists: [
+      {
+        id: "transfers",
+        title: "Point-to-point transfers",
+        capacity: "Van, up to 15 passengers",
+        items: [
+          { name: "Airport to Hotel (City Area)", price: 2000 },
+          { name: "Iloilo City to Caticlan", price: 9000 },
+          { name: "Caticlan to Iloilo City", price: 9000 },
+          { name: "Iloilo City to Concepcion", price: 7000 },
+        ],
+      },
+      {
+        id: "tours",
+        title: "Tour packages",
+        capacity: "8 to 15 passengers",
+        items: [
+          { name: "City Tour", price: 9000 },
+          { name: "City Tour + Garin Farm", price: 10000 },
+          { name: "Guimaras Tour", price: 11500 },
+          { name: "Gigantes Day Tour", price: 11000 },
+        ],
+      },
+    ],
+    /** Not shown on the page for now (taken off at the owner's request); kept here to bring back later. */
     offers: [
       {
         title: "Weekly and monthly rates",
@@ -478,15 +515,9 @@ export const content = {
       },
       {
         title: "With a driver",
-        body: "Add a licensed driver to your booking for an extra charge, and let us do the driving.",
-      },
-      {
-        title: "Tours package",
-        body: "A vehicle, a driver and a planned route for day trips and sightseeing.",
-      },
-      {
-        title: "Point-to-point pick-up and drop-off",
-        body: "Start in one city or province and end in another, instead of returning to where you started.",
+        body: "Choose “With a driver” when you book a car or van, and a licensed driver comes with the vehicle.",
+        /** Shown in the site's price style under the text. The rate itself lives in lib/pricing. */
+        price: { amount: DRIVER_DAILY_RATE, unit: "per day" },
       },
     ],
     cta: { title: "Ask about any of these", button: "Contact us" },
@@ -561,6 +592,8 @@ export const content = {
     unavailableNow: "Not available right now",
     bookNow: "Book now",
     askAbout: "Ask about this vehicle",
+    /** A small pointer under the Van's booking block. */
+    vanTeaser: { lead: "Need a transfer or a day tour?", link: "See tours & transfers" },
     galleryLabel: "Vehicle photos",
     viewPhoto: (n: number) => `View photo ${n}`,
     metaFallbackTitle: "Vehicle",
@@ -611,6 +644,15 @@ export const content = {
       selectedUnavailable: "Your selected vehicle is not available right now. Please choose another one.",
       loadError: "We could not load the vehicles.",
       vehiclesLabel: "Available vehicles",
+    },
+    /** The choice on the selected car or van. Motorcycles don't offer it (they are always "Vehicle only"). */
+    driverOption: {
+      legend: "Who drives?",
+      vehicleOnly: "Vehicle only",
+      vehicleOnlyDescription: "You drive the vehicle yourself.",
+      withDriver: "With a driver",
+      withDriverDescription: "A licensed driver comes with the vehicle.",
+      perDay: "per day",
     },
     details: {
       title: "Your details",
@@ -707,8 +749,10 @@ export const content = {
       days: (n: number) => `${n} ${n === 1 ? "day" : "days"}`,
       rate: (rate: string, days: number) => `${rate} × ${days} ${days === 1 ? "day" : "days"}`,
       vehicleLine: "Vehicle rental",
+      driverLine: "Driver",
+      option: "Rental option",
       total: "Total",
-      driver: "Driver",
+      renter: "Booked by",
       payment: "Payment",
       pricesNote: "All prices are in PHP and include VAT.",
     },

@@ -26,7 +26,7 @@ export interface PriceProps {
 
 /**
  * A price: the PHP amount as the main figure, the rough USD equivalent smaller and quieter.
- * The amount and the USD text sit next to each other in the markup ("₱4,200 (~$72) per day"),
+ * The amount and the USD text sit next to each other in the markup ("₱4,000 (~$69) per day"),
  * so the price copies and searches as one piece; the grid only moves them visually.
  */
 export function Price({ amount, size = "md", unit, usd = "below", exact = false, tone = "price", className }: PriceProps) {

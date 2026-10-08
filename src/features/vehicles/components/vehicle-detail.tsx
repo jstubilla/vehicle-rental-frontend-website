@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Button, ButtonArrow, ChevronLeftIcon, Price, Section } from "@/components/ui";
+import { ArrowLink, Button, ButtonArrow, ChevronLeftIcon, Price, Section } from "@/components/ui";
 import { content } from "@/content";
 import { cn } from "@/lib/cn";
 import { parseRentalSearch } from "@/lib/rental";
@@ -93,6 +93,16 @@ export function VehicleDetail({ slug, initialVehicle }: VehicleDetailProps) {
                   </Button>
                 </div>
               </div>
+
+              {/* Van only: a quiet pointer to the transfer and tour prices, below the booking block so it never competes with it. */}
+              {vehicle.category === "van" && (
+                <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted">
+                  {t.vanTeaser.lead}
+                  <ArrowLink href="/special-offers" className="text-sm">
+                    {t.vanTeaser.link}
+                  </ArrowLink>
+                </p>
+              )}
             </div>
           </aside>
         </div>

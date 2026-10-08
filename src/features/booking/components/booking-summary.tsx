@@ -122,12 +122,13 @@ export function BookingSummary({
                   </Row>
                 )}
                 {data.days !== null && <Row label={t.duration}>{t.days(data.days)}</Row>}
-                {data.driver && (
-                  <Row label={t.driver}>
-                    {data.driver.name}
+                {data.option && <Row label={t.option}>{data.option}</Row>}
+                {data.renter && (
+                  <Row label={t.renter}>
+                    {data.renter.name}
                     <br />
                     <span className="text-sm font-normal text-muted">
-                      {data.driver.email} · {data.driver.phone}
+                      {data.renter.email} · {data.renter.phone}
                     </span>
                   </Row>
                 )}
@@ -143,6 +144,15 @@ export function BookingSummary({
                     </div>
                     <p className="font-medium">{formatCurrency(data.vehicleTotal!)}</p>
                   </div>
+                  {data.driverRate !== null && data.driverTotal !== null && (
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p>{t.driverLine}</p>
+                        <p className="text-sm text-muted">{t.rate(formatCurrency(data.driverRate), data.days!)}</p>
+                      </div>
+                      <p className="font-medium">{formatCurrency(data.driverTotal)}</p>
+                    </div>
+                  )}
                   <div className="flex items-start justify-between gap-4 border-t border-border pt-3">
                     <p className="text-lg font-semibold">{t.total}</p>
                     <Price

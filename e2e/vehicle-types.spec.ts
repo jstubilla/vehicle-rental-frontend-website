@@ -31,7 +31,7 @@ test("the type filter offers every type, and picking one narrows the list", asyn
 test("a type's page shows its example and the most it seats", async ({ page }) => {
   await visit(page, "/vehicles/mpv");
   await expect(page.getByRole("heading", { level: 1, name: "Multi-purpose vehicle (MPV)" })).toBeVisible();
-  await expect(page.getByText("Mitsubishi Xpander or similar")).toBeVisible();
+  await expect(page.getByText("Toyota Avanza, Mitsubishi Xpander, Hyundai Stargazer, Toyota Innova or similar")).toBeVisible();
   await expect(page.getByText(content.vehicleDetail.upTo(8))).toBeVisible();
   await expectNoA11yViolations(page);
 });

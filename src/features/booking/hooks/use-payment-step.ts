@@ -68,6 +68,7 @@ export function usePaymentStep() {
         pickupTime: rental.pickupTime,
         returnDate: rental.returnDate,
         returnTime: rental.returnTime,
+        withDriver: quote.withDriver,
         customer,
         payment: { method, mockOutcome },
         expectedTotal: quote.total,

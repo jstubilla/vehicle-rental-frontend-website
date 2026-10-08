@@ -1,4 +1,4 @@
-import { buildQuote } from "@/lib/pricing";
+import { buildQuote, offersDriver } from "@/lib/pricing";
 import { countRentalDays } from "@/lib/rental";
 import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity, Booking, Customer, Payment, Vehicle } from "@/types";
@@ -15,6 +15,8 @@ export interface CreateBookingInput {
   pickupTime: string;
   returnDate: string;
   returnTime: string;
+  /** "With a driver". Ignored for a vehicle that does not offer one (motorcycles). */
+  withDriver: boolean;
   customer: { name: string; email: string; phone: string; licenseNumber: string; notes: string };
   /** How the visitor chose to pay. The charge happens inside createBooking, see /src/api/payments.ts. */
   payment: Pick<PaymentRequest, "method" | "mockOutcome">;
@@ -57,9 +59,11 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   if (!vehicle) throw new ApiError("Vehicle not found", 404, "not_found");
 
   const days = countRentalDays(input);
-  const quote = buildQuote({ dailyRate: vehicle.pricePerDay, days });
+  const withDriver = input.withDriver && offersDriver(vehicle.category);
+  const quote = buildQuote({ dailyRate: vehicle.pricePerDay, days, withDriver });
 
-  // The visitor agreed to a specific total. If the rate changed since, ask them to check again, before charging anything.
+  // The visitor agreed to a specific total. If the vehicle's rate or the driver's rate changed since (both are
+  // in the total), ask them to check again, before charging anything.
   if (input.expectedTotal !== quote.total) {
     throw new ApiError("The price has changed", 409, "price_changed");
   }
@@ -120,6 +124,9 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     days: quote.days,
     dailyRate: quote.dailyRate,
     vehicleTotal: quote.vehicleTotal,
+    withDriver: quote.withDriver,
+    driverRate: quote.driverRate,
+    driverTotal: quote.driverTotal,
     total: quote.total,
     // Paid online = confirmed. Pay at pick-up waits for staff to confirm.
     status: payment.status === "paid" ? "confirmed" : "pending",
