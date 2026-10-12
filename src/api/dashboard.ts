@@ -1,4 +1,5 @@
 import { LEAD_STAGES, type LeadStage } from "@/lib/constants";
+import { isWaitingForDocumentCheck } from "@/lib/booking-status";
 import { todayISO } from "@/lib/dates";
 import { readTable } from "@/mocks/store";
 import { assertAdmin } from "./auth";
@@ -8,7 +9,8 @@ import { simulateNetwork } from "./client";
 export interface DashboardSummary {
   leads: { open: number; new: number; byStage: Record<LeadStage, number> };
   customers: { total: number; newThisMonth: number };
-  bookings: { active: number; pending: number };
+  /** documentsToCheck: requests whose photos are waiting for staff to approve or reject. */
+  bookings: { active: number; pending: number; documentsToCheck: number };
   tasks: { open: number; overdue: number };
 }
 
@@ -35,6 +37,7 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
     bookings: {
       active: bookingRows.filter((b) => b.status === "active").length,
       pending: bookingRows.filter((b) => b.status === "pending").length,
+      documentsToCheck: bookingRows.filter(isWaitingForDocumentCheck).length,
     },
     tasks: { open: openTasks.length, overdue: openTasks.filter((t) => t.dueDate < todayISO()).length },
   };

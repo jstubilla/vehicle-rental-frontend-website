@@ -55,9 +55,9 @@ export async function changeBookingStatus(id: string, status: BookingStatus): Pr
   if (!canTransition(existing.status, status)) {
     throw new ApiError("That status change is not allowed", 409, "invalid_transition");
   }
-  // A booking with documents is confirmed only once staff have verified them.
-  if (status === "confirmed" && existing.documents && existing.documentsStatus !== "verified") {
-    throw new ApiError("The customer's documents are not verified yet", 409, "documents_unverified");
+  // A booking with documents is confirmed only by the customer paying, after staff approve them.
+  if (status === "confirmed" && existing.documents) {
+    throw new ApiError("This booking is confirmed when the customer pays", 409, "invalid_transition");
   }
 
   const updated: Booking = { ...existing, status, updatedAt: new Date().toISOString() };
@@ -79,29 +79,43 @@ export async function changeBookingStatus(id: string, status: BookingStatus): Pr
 }
 
 /**
- * Records the staff decision on the customer's documents. Verifying them also confirms a
- * pending booking; rejecting them leaves it pending so staff can ask for new photos or cancel.
+ * Records the staff decision on the customer's documents. Approving them moves the booking to
+ * "approved", and the customer is sent a link to pay. Rejecting them (with a reason the customer
+ * sees) leaves it pending until the customer sends new photos.
  */
-export async function reviewBookingDocuments(id: string, decision: "verified" | "rejected"): Promise<Booking> {
+export async function reviewBookingDocuments(
+  id: string,
+  decision: "verified" | "rejected",
+  reason = "",
+): Promise<Booking> {
   const session = assertAdmin();
   await simulateNetwork();
 
   const bookings = readTable("bookings");
   const existing = bookings.find((b) => b.id === id);
   if (!existing || !existing.documents) throw new ApiError("Booking not found", 404, "not_found");
+  if (existing.status !== "pending" || existing.documentsStatus !== "pending") {
+    throw new ApiError("These documents have already been checked", 409, "invalid_transition");
+  }
 
-  const confirm = decision === "verified" && existing.status === "pending";
+  const now = new Date().toISOString();
   const updated: Booking = {
     ...existing,
     documentsStatus: decision,
-    status: confirm ? "confirmed" : existing.status,
-    updatedAt: new Date().toISOString(),
+    status: decision === "verified" ? "approved" : "pending",
+    approvedAt: decision === "verified" ? now : null,
+    rejectionReason: decision === "rejected" ? reason.trim() : null,
+    updatedAt: now,
   };
   writeTable("bookings", bookings.map((b) => (b.id === id ? updated : b)));
   writeTable("activities", [
     customerNote(existing.customerId, "note", content.admin.bookings.documentsNote(existing.reference, decision), session.userId),
     ...readTable("activities"),
   ]);
+  // EMAIL TRIGGER GOES HERE: approved = send documentsApprovedEmail (the link to pay); rejected =
+  // send documentsRejectedEmail (the reason and the link to send new photos). Templates: /src/emails.
+  // A scheduled job on the backend should also send paymentReminderEmail a few hours before the
+  // payment deadline, and cancel bookings still unpaid after it.
   return updated;
 }
 

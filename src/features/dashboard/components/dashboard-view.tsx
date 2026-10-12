@@ -84,6 +84,12 @@ export function DashboardView() {
                   hint={t.cardHints.pendingBookings}
                   href="/admin/bookings?status=pending"
                 />
+                <StatCard
+                  label={t.cards.documentsToCheck}
+                  value={summary.data.bookings.documentsToCheck}
+                  hint={t.cardHints.documentsToCheck(summary.data.bookings.documentsToCheck)}
+                  href="/admin/bookings?docs=to_check"
+                />
               </>
           </div>
         )}

@@ -7,7 +7,7 @@ import { useAccount, useLogout } from "../hooks/use-account";
 
 const t = content.nav.account;
 
-/** Header: "Log in" when signed out, or the customer's first name and "Log out" when signed in. */
+/** Header: "Log in" when signed out, or the customer's first name, "My bookings" and "Log out" when signed in. */
 export function AccountMenu() {
   const { data: account, isSuccess } = useAccount();
   const logout = useLogout();
@@ -17,7 +17,11 @@ export function AccountMenu() {
 
   return account ? (
     <div className="flex items-center gap-2">
-      <span className="max-w-36 truncate text-sm font-medium">{t.hello(account.name.split(" ")[0])}</span>
+      {/* Hidden at laptop width, where the header is tightest; shown on wide screens and in the phone menu. */}
+      <span className="max-w-36 truncate text-sm font-medium lg:max-xl:hidden">{t.hello(account.name.split(" ")[0])}</span>
+      <Button asChild variant="ghost" size="sm">
+        <Link href="/my-bookings">{t.myBookings}</Link>
+      </Button>
       <Button variant="outline" size="sm" onClick={() => logout.mutate()}>
         {t.logout}
       </Button>

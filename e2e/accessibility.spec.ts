@@ -1,7 +1,16 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { content } from "../src/content";
 import { seedBookings } from "../src/mocks/bookings";
-import { dateFromToday, expectNoA11yViolations, loginAs, pageAlerts, SAMPLE_DOCUMENTS, visit } from "./helpers";
+import {
+  addApprovedBooking,
+  dateFromToday,
+  expectNoA11yViolations,
+  loginAs,
+  openOwnBooking,
+  pageAlerts,
+  SAMPLE_DOCUMENTS,
+  visit,
+} from "./helpers";
 
 /**
  * Accessibility scans (axe: WCAG 2.0, 2.1 and 2.2 levels A and AA, plus best practices).
@@ -106,9 +115,19 @@ test.describe("booking steps in progress", () => {
     await expectNoA11yViolations(page);
   });
 
-  test("step 5: payment, with the terms error and after a declined payment", async ({ page }) => {
+  test("step 5: send the request, with the terms error", async ({ page }) => {
     await startWithBooking(page);
-    await visit(page, "/book/payment");
+    await visit(page, "/book/submit");
+    await expect(h1(page, content.booking.submit.title)).toBeVisible();
+    await expectNoA11yViolations(page);
+    await page.getByRole("button", { name: content.booking.submit.send }).click();
+    await expect(pageAlerts(page).filter({ hasText: content.booking.payment.termsError })).toBeVisible();
+    await expectNoA11yViolations(page);
+  });
+
+  test("pay page, with the terms error and after a declined payment", async ({ page }) => {
+    const { reference, email } = await addApprovedBooking(page);
+    await openOwnBooking(page, `/book/pay/${reference}`, email);
     await expect(h1(page, content.booking.payment.title)).toBeVisible();
     await expectNoA11yViolations(page);
 
@@ -320,15 +339,15 @@ test.describe("dark mode", () => {
     });
   }
 
-  test("booking steps 4 and 5 (summary card, payment cards, orange button)", async ({ page }) => {
+  test("booking steps 4 and 5 (summary card, orange button)", async ({ page }) => {
     await startWithBooking(page);
     await visit(page, "/book/check");
     await expect(h1(page, content.booking.check.title)).toBeVisible();
     await expectNoA11yViolations(page);
-    await visit(page, "/book/payment");
-    await expect(h1(page, content.booking.payment.title)).toBeVisible();
+    await visit(page, "/book/submit");
+    await expect(h1(page, content.booking.submit.title)).toBeVisible();
     await expectNoA11yViolations(page);
-    await page.getByRole("button", { name: /^Pay / }).click();
+    await page.getByRole("button", { name: content.booking.submit.send }).click();
     await expect(pageAlerts(page).first()).toBeVisible();
     await expectNoA11yViolations(page);
   });

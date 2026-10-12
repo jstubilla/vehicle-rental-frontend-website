@@ -3,6 +3,8 @@ import { expect, type Page } from "@playwright/test";
 import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
 import { addDaysISO, todayISO } from "../src/lib/dates";
+import { seedBookings } from "../src/mocks/bookings";
+import { seedCustomers } from "../src/mocks/customers";
 
 /** A 1×1 PNG, standing in for a phone photo of an ID. */
 const SAMPLE_PHOTO_BASE64 =
@@ -23,6 +25,43 @@ export async function uploadDocuments(page: Page): Promise<void> {
     });
     await expect(page.getByText(`${kind}.png`)).toBeVisible();
   }
+}
+
+/**
+ * Adds a booking whose documents staff have just approved, so it is waiting for payment, and
+ * returns what the customer needs to open the pay page.
+ */
+export async function addApprovedBooking(
+  page: Page,
+  { customerId }: { customerId?: string } = {},
+): Promise<{ reference: string; email: string; total: number }> {
+  const confirmed = seedBookings.find((booking) => booking.status === "confirmed")!;
+  const source = { ...confirmed, customerId: customerId ?? confirmed.customerId };
+  const email = seedCustomers.find((customer) => customer.id === source.customerId)!.email;
+  const booking = {
+    ...source,
+    id: "bkg-e2e-approved",
+    reference: "RC-PAYM3E",
+    status: "approved",
+    documentsStatus: "verified",
+    approvedAt: new Date().toISOString(),
+    paymentId: null,
+  };
+  await visit(page, "/");
+  await page.evaluate((row) => {
+    const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
+    const db = JSON.parse(localStorage.getItem(key)!);
+    db.bookings.unshift(row);
+    localStorage.setItem(key, JSON.stringify(db));
+  }, booking);
+  return { reference: booking.reference, email, total: booking.total };
+}
+
+/** Opens the emailed pay (or new-photos) link and gets past the email check. */
+export async function openOwnBooking(page: Page, path: string, email: string): Promise<void> {
+  await visit(page, path);
+  await page.getByLabel(content.booking.access.email).fill(email);
+  await page.getByRole("button", { name: content.booking.access.continue }).click();
 }
 
 /** An ISO date N days from today in Manila time, the same clock the site uses. */

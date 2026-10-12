@@ -76,8 +76,15 @@ export function summaryFromFlow({
   };
 }
 
-/** Summary of a saved booking. It shows the prices the booking was made at. */
-export function summaryFromBooking({ booking, vehicle, customer, payment }: BookingDetails): SummaryData {
+/**
+ * Summary of a saved booking. It shows the prices the booking was made at. `payAtPickup` is for
+ * the pay page while "Pay at pick-up" is chosen (before anything is paid).
+ */
+export function summaryFromBooking(
+  { booking, vehicle, customer, payment }: BookingDetails,
+  { payAtPickup = false }: { payAtPickup?: boolean } = {},
+): SummaryData {
+  const split = payAtPickup && !payment ? splitDownPayment(booking.total) : null;
   return {
     vehicle: { name: vehicle.name, meta: vehicleMeta(vehicle) },
     pickup: { location: booking.pickupLocation, date: booking.pickupDate, time: booking.pickupTime },
@@ -95,7 +102,9 @@ export function summaryFromBooking({ booking, vehicle, customer, payment }: Book
           balance: booking.total - payment.downPayment.amount,
           paidWith: content.enums.paymentMethod[payment.downPayment.method],
         }
-      : null,
+      : split
+        ? { amount: split.downPayment, balance: split.balance, paidWith: null }
+        : null,
     renter: { name: customer.name, email: customer.email, phone: customer.phone },
     payment: payment ? content.enums.paymentMethod[payment.method] : null,
   };

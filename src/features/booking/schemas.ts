@@ -30,13 +30,20 @@ const uploadedDocument = z
   .nullable()
   .refine((value) => value !== null, content.booking.documents.required);
 
-/** Step 3 as a whole: the details above plus the three document photos. */
-export const detailsStepSchema = detailsFormSchema.extend({
+const documentsFields = {
   documents: z.object({
     validId: uploadedDocument,
     proofOfBilling: uploadedDocument,
     driversLicense: uploadedDocument,
   }),
-});
+};
+
+/** Step 3 as a whole: the details above plus the three document photos. */
+export const detailsStepSchema = detailsFormSchema.extend(documentsFields);
 
 export type DetailsStepValues = z.input<typeof detailsStepSchema>;
+
+/** Sending new photos after staff rejected the first ones. */
+export const documentsFormSchema = z.object(documentsFields);
+
+export type DocumentsFormValues = z.input<typeof documentsFormSchema>;

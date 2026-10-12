@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCurrentAccount, logout } from "@/api/account";
 
 export const accountKey = ["account"] as const;
+/** The signed-in customer's bookings (My bookings). */
+export const ownBookingsKey = ["own-bookings"] as const;
 
 /** The signed-in customer, or null. `isSuccess` is false until the browser has checked. */
 export function useAccount() {

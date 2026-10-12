@@ -31,7 +31,11 @@ export type LeadSource = (typeof LEAD_SOURCES)[number];
 export const ACTIVITY_TYPES = ["note", "call", "status_change"] as const;
 export type ActivityType = (typeof ACTIVITY_TYPES)[number];
 
-export const BOOKING_STATUSES = ["pending", "confirmed", "active", "completed", "cancelled"] as const;
+/**
+ * pending = documents waiting for staff to check; approved = documents verified, waiting for the
+ * customer to pay; confirmed = paid.
+ */
+export const BOOKING_STATUSES = ["pending", "approved", "confirmed", "active", "completed", "cancelled"] as const;
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
 export const PAYMENT_METHODS = ["card", "gcash", "maya", "paypal", "wise", "pay_at_pickup"] as const;

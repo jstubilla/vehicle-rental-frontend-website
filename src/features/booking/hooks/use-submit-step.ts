@@ -1,37 +1,29 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { createBooking } from "@/api/bookings";
 import { ApiError } from "@/api/client";
-import type { PaymentFailureCode } from "@/api/payments";
-import { accountKey } from "@/features/account/hooks/use-account";
+import { accountKey, ownBookingsKey } from "@/features/account/hooks/use-account";
 import { vehicleKeys } from "@/features/vehicles/hooks/use-vehicles";
-import type { OnlinePaymentMethod, PaymentMethod } from "@/lib/constants";
 import { confirmationPath } from "../steps";
 import { useBookingFlow } from "./use-booking-flow";
 import { useBookingQuote } from "./use-booking-quote";
 
-/** The last step: choose how to pay, then pay and confirm the booking in one action. */
-export function usePaymentStep() {
+/** The last step: send the booking request with the documents. Nothing is charged here. */
+export function useSubmitStep() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { state } = useBookingFlow();
   const { vehicle, quote } = useBookingQuote();
 
-  const [method, setMethod] = useState<PaymentMethod>("card");
-  /** "Pay at pick-up" only: how the down payment is paid now. */
-  const [downPaymentMethod, setDownPaymentMethod] = useState<OnlinePaymentMethod>("card");
-  const [mockOutcome, setMockOutcome] = useState<"success" | "decline">("success");
-
   const mutation = useMutation({
     mutationFn: createBooking,
-    onSuccess: (result) => {
-      if (result.status !== "confirmed") return;
+    onSuccess: (booking) => {
       // A signed-in customer's phone and license were just saved to their account.
       queryClient.invalidateQueries({ queryKey: accountKey });
-      router.push(confirmationPath(result.booking.reference));
+      queryClient.invalidateQueries({ queryKey: ownBookingsKey });
+      router.push(confirmationPath(booking.reference));
     },
     onError: (error) => {
       // Reload the vehicle so the price shown is the current one.
@@ -41,30 +33,14 @@ export function usePaymentStep() {
     },
   });
 
-  const failure: PaymentFailureCode | null = mutation.data?.status === "payment_failed" ? mutation.data.failureCode : null;
   const error = mutation.error ? (mutation.error instanceof ApiError ? mutation.error : new ApiError("Unknown")) : null;
 
   return {
-    method,
-    /** Picking another method clears a failed attempt so the visitor can try again. */
-    selectMethod: (next: PaymentMethod) => {
-      setMethod(next);
-      mutation.reset();
-    },
-    downPaymentMethod,
-    selectDownPaymentMethod: (next: OnlinePaymentMethod) => {
-      setDownPaymentMethod(next);
-      mutation.reset();
-    },
-    mockOutcome,
-    setMockOutcome,
     /** Stays true after success, while the page moves on to the confirmation. */
-    isBusy: mutation.isPending || mutation.data?.status === "confirmed",
-    /** Why the payment did not go through (nothing was booked), or null. */
-    failure,
-    /** Why the booking could not be made (nothing was charged), or null. */
+    isBusy: mutation.isPending || mutation.isSuccess,
+    /** Why the request could not be sent, or null. */
     error,
-    pay: () => {
+    submit: () => {
       const { rental, customer, documents } = state;
       if (!rental || !vehicle || !customer || !documents || !quote) return;
       mutation.mutate({
@@ -78,7 +54,6 @@ export function usePaymentStep() {
         withDriver: quote.withDriver,
         customer,
         documents,
-        payment: { method, downPaymentMethod, mockOutcome },
         expectedTotal: quote.total,
       });
     },

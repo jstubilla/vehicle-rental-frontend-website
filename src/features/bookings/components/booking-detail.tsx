@@ -13,13 +13,16 @@ import {
   ConfirmModal,
   EmptyState,
   ErrorState,
+  FormField,
+  Modal,
   Skeleton,
+  Textarea,
 } from "@/components/ui";
 import { content } from "@/content";
 import { BookingSummary } from "@/features/booking/components/booking-summary";
 import { DocumentGallery } from "@/features/booking/components/document-gallery";
 import { summaryFromBooking } from "@/features/booking/summary";
-import { BOOKING_TRANSITIONS } from "@/lib/booking-status";
+import { BOOKING_TRANSITIONS, isPaymentOverdue, paymentDeadline } from "@/lib/booking-status";
 import type { BookingStatus } from "@/lib/constants";
 import { formatCurrency } from "@/lib/currency";
 import { formatDateTime } from "@/lib/dates";
@@ -35,6 +38,9 @@ export function BookingDetail({ id }: { id: string }) {
   const query = useBooking(id);
   const { changeStatus, markPaid, reviewDocuments } = useBookingMutations();
   const [confirmingCancel, setConfirmingCancel] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
+  const [showReasonError, setShowReasonError] = useState(false);
 
   if (query.isError) return <ErrorState headingAs="h1" onRetry={() => query.refetch()} />;
   if (query.isPending) {
@@ -63,11 +69,28 @@ export function BookingDetail({ id }: { id: string }) {
   const details = query.data;
   const { booking, customer, payment } = details;
   const documentsStatus = booking.documentsStatus ?? "pending";
-  // A booking with documents is confirmed from the Documents card, once they are approved.
-  const awaitingDocuments = Boolean(booking.documents) && documentsStatus !== "verified";
+  // A booking with documents is confirmed only when the customer pays, never with the status buttons.
   const nextStatuses = BOOKING_TRANSITIONS[booking.status].filter(
-    (status) => !(awaitingDocuments && status === "confirmed"),
+    (status) => !(booking.documents && status === "confirmed"),
   );
+  const deadline = paymentDeadline(booking);
+  const canReview = booking.status === "pending" && documentsStatus === "pending";
+
+  function reject() {
+    if (!reason.trim()) {
+      setShowReasonError(true);
+      return;
+    }
+    reviewDocuments.mutate(
+      { id: booking.id, decision: "rejected", reason },
+      {
+        onSuccess: () => {
+          setRejecting(false);
+          setReason("");
+        },
+      },
+    );
+  }
 
   function move(status: BookingStatus) {
     if (status === "cancelled") setConfirmingCancel(true);
@@ -106,26 +129,25 @@ export function BookingDetail({ id }: { id: string }) {
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <DocumentGallery documents={booking.documents} />
-                {documentsStatus === "rejected" && <p className="text-sm text-muted">{t.documents.rejectedHint}</p>}
-                {documentsStatus !== "verified" && booking.status !== "cancelled" && (
+                {documentsStatus === "rejected" && (
+                  <div className="flex flex-col gap-1 rounded-md bg-surface-muted p-4 text-sm">
+                    <p className="font-medium">{t.documents.rejectedReason}</p>
+                    <p className="whitespace-pre-wrap">{booking.rejectionReason}</p>
+                    <p className="text-muted">{t.documents.waitingForPhotos}</p>
+                  </div>
+                )}
+                {canReview && (
                   <div className="flex flex-wrap gap-2">
                     <Button
                       loading={reviewDocuments.isPending && reviewDocuments.variables?.decision === "verified"}
                       disabled={reviewDocuments.isPending}
                       onClick={() => reviewDocuments.mutate({ id: booking.id, decision: "verified" })}
                     >
-                      {booking.status === "pending" ? t.documents.approve : t.documents.approveOnly}
+                      {t.documents.approve}
                     </Button>
-                    {documentsStatus === "pending" && (
-                      <Button
-                        variant="outline"
-                        loading={reviewDocuments.isPending && reviewDocuments.variables?.decision === "rejected"}
-                        disabled={reviewDocuments.isPending}
-                        onClick={() => reviewDocuments.mutate({ id: booking.id, decision: "rejected" })}
-                      >
-                        {t.documents.reject}
-                      </Button>
-                    )}
+                    <Button variant="outline" disabled={reviewDocuments.isPending} onClick={() => setRejecting(true)}>
+                      {t.documents.reject}
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -156,8 +178,33 @@ export function BookingDetail({ id }: { id: string }) {
               <p>
                 <BookingStatusBadge status={booking.status} />
               </p>
-              {awaitingDocuments && booking.status === "pending" && (
+              {booking.documents && booking.status === "pending" && (
                 <p className="text-sm text-muted">{t.documents.checkFirst}</p>
+              )}
+              {booking.status === "approved" && (
+                <div className="flex flex-col gap-2 text-sm">
+                  <p className="text-muted">{t.documents.awaitingPayment}</p>
+                  {deadline && <p className="font-medium">{t.documents.payBy(formatDateTime(deadline))}</p>}
+                  {isPaymentOverdue(booking) && (
+                    <p className="font-medium text-danger">{t.documents.overdue}</p>
+                  )}
+                  <p className="min-w-0">
+                    <span className="block text-muted">{t.documents.payLink}</span>
+                    <Link href={`/book/pay/${booking.reference}`} className="font-mono wrap-anywhere text-link underline underline-offset-4">
+                      /book/pay/{booking.reference}
+                    </Link>
+                  </p>
+                </div>
+              )}
+              {booking.cancellation && (
+                <div className="flex flex-col gap-1 rounded-md bg-surface-muted p-3 text-sm">
+                  <p className="font-medium">{t.cancelledByCustomer}</p>
+                  <p className="text-muted">{formatDateTime(booking.cancellation.at)}</p>
+                  <p>
+                    <span className="text-muted">{t.cancellationReason}: </span>
+                    <span className="whitespace-pre-wrap">{booking.cancellation.reason}</span>
+                  </p>
+                </div>
               )}
               {nextStatuses.length === 0 ? (
                 <p className="text-sm text-muted">{t.finalStatus}</p>
@@ -247,6 +294,35 @@ export function BookingDetail({ id }: { id: string }) {
           </Card>
         </aside>
       </div>
+
+      <Modal
+        open={rejecting}
+        onOpenChange={(open) => {
+          setRejecting(open);
+          setShowReasonError(false);
+        }}
+        title={t.documents.rejectTitle}
+        description={t.documents.rejectDescription}
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setRejecting(false)}>
+              {t.documents.keep}
+            </Button>
+            <Button variant="danger" loading={reviewDocuments.isPending} onClick={reject}>
+              {t.documents.rejectConfirm}
+            </Button>
+          </>
+        }
+      >
+        <FormField
+          label={t.documents.reasonLabel}
+          required
+          hint={t.documents.reasonHint}
+          error={showReasonError && !reason.trim() ? t.documents.reasonRequired : undefined}
+        >
+          <Textarea value={reason} onChange={(e) => setReason(e.target.value)} />
+        </FormField>
+      </Modal>
 
       <ConfirmModal
         open={confirmingCancel}

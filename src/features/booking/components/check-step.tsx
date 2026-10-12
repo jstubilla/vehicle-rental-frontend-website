@@ -52,7 +52,7 @@ export function CheckStep() {
       <StepActions backHref={previousStepPath("check")}>
         <Button asChild size="lg" variant="accent">
           <Link href={nextStepPath("check")}>
-            {t.toPayment}
+            {t.toSubmit}
             <ButtonArrow />
           </Link>
         </Button>

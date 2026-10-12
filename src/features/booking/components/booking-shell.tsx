@@ -11,6 +11,8 @@ const CONFIRMATION_INDEX = BOOKING_STEPS.length;
 /** Frame around every booking step: just the progress indicator. */
 export function BookingShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  // The pay and new-photos pages are reached later, from an emailed link: no progress steps there.
+  const fromEmail = pathname.startsWith("/book/pay/") || pathname.startsWith("/book/documents/");
   const onConfirmation = pathname.startsWith("/book/confirmation");
   const currentIndex = onConfirmation
     ? CONFIRMATION_INDEX
@@ -29,7 +31,7 @@ export function BookingShell({ children }: { children: ReactNode }) {
   return (
     <Section>
       <div className="flex flex-col gap-8">
-        <Stepper steps={steps} currentIndex={currentIndex} />
+        {!fromEmail && <Stepper steps={steps} currentIndex={currentIndex} />}
         {/* Keyed by route, so each step settles in as you move through the booking instead of swapping in place. */}
         <div
           key={pathname}

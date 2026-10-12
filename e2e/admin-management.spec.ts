@@ -233,7 +233,7 @@ test.describe("users", () => {
     await page.getByRole("button", { name: t.login.submit }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole("navigation", { name: t.nav.label }).getByRole("link")).toHaveCount(10);
+    await expect(page.getByRole("navigation", { name: t.nav.label }).getByRole("link")).toHaveCount(11);
     await visit(page, "/admin/users");
     await expect(page.getByRole("heading", { level: 1, name: t.users.title })).toBeVisible();
   });
@@ -244,4 +244,25 @@ test.describe("users", () => {
     const me = page.getByRole("row", { name: /Ramon Villareal/ });
     await expect(me.getByRole("button", { name: new RegExp(`^${t.users.deactivate}`) })).toBeDisabled();
   });
+});
+
+test("staff can preview every booking email", async ({ page }) => {
+  await loginAs(page);
+  await visit(page, "/admin/emails");
+  await expect(page.getByRole("heading", { level: 1, name: t.emails.title })).toBeVisible();
+
+  const list = page.getByRole("navigation", { name: t.emails.listLabel });
+  await expect(list.getByRole("button")).toHaveCount(Object.keys(t.emails.templates).length);
+
+  await list.getByRole("button", { name: new RegExp(t.emails.templates.documentsApproved.name) }).click();
+  await expect(page.getByText(content.emails.documentsApproved.subject("RC-K7M2QA"))).toBeVisible();
+  const email = page.frameLocator("iframe");
+  await expect(email.getByRole("heading", { name: content.emails.documentsApproved.heading })).toBeVisible();
+  await expect(email.getByRole("link", { name: content.emails.documentsApproved.button })).toHaveAttribute(
+    "href",
+    /\/book\/pay\/RC-K7M2QA$/,
+  );
+
+  await page.getByRole("button", { name: t.emails.text }).click();
+  await expect(page.getByText(/Pay now: http.*\/book\/pay\/RC-K7M2QA/)).toBeVisible();
 });

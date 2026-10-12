@@ -35,16 +35,14 @@ export function useBookingMutations() {
           title:
             error instanceof ApiError && error.code === "invalid_transition"
               ? t.detail.invalidMove
-              : error instanceof ApiError && error.code === "documents_unverified"
-                ? t.detail.documents.checkFirst
-                : content.admin.common.saveError,
+              : content.admin.common.saveError,
           variant: "danger",
         });
       },
     }),
     reviewDocuments: useMutation({
-      mutationFn: ({ id, decision }: { id: string; decision: "verified" | "rejected" }) =>
-        reviewBookingDocuments(id, decision),
+      mutationFn: ({ id, decision, reason }: { id: string; decision: "verified" | "rejected"; reason?: string }) =>
+        reviewBookingDocuments(id, decision, reason),
       onSuccess: (_, { decision }) => {
         refresh();
         toast({ title: t.detail.documents.saved[decision], variant: decision === "verified" ? "success" : "default" });

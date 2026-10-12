@@ -64,11 +64,11 @@ test.describe("the two legal pages", () => {
   });
 });
 
-test.describe("the terms link on the payment step", () => {
+test.describe("the terms link on the send-request step", () => {
   test("opens the terms in a new tab, keeps the booking, and the checkbox works as before", async ({ page, context }) => {
     await startWithBooking(page, true);
-    await visit(page, "/book/payment");
-    await expect(h1(page, b.payment.title)).toBeVisible();
+    await visit(page, "/book/submit");
+    await expect(h1(page, b.submit.title)).toBeVisible();
 
     const link = page.getByRole("link", { name: new RegExp(b.payment.termsLink) });
     await expect(link).toHaveAttribute("href", "/terms");
@@ -81,13 +81,13 @@ test.describe("the terms link on the payment step", () => {
     await popup.close();
 
     // The booking is still here, and clicking the link did not tick the box.
-    await expect(page).toHaveURL(/\/book\/payment$/);
+    await expect(page).toHaveURL(/\/book\/submit$/);
     await expect(page.getByRole("region", { name: b.summary.title })).toContainText("Sedan");
     const checkbox = page.getByLabel(b.payment.terms);
     await expect(checkbox).not.toBeChecked();
 
-    // Same behavior as before: paying without agreeing shows the error; ticking removes it.
-    await page.getByRole("button", { name: /and confirm booking$/ }).click();
+    // Sending without agreeing shows the error; ticking removes it.
+    await page.getByRole("button", { name: b.submit.send }).click();
     await expect(pageAlerts(page).filter({ hasText: b.payment.termsError })).toBeVisible();
     await checkbox.check();
     await expect(pageAlerts(page).filter({ hasText: b.payment.termsError })).toHaveCount(0);
@@ -148,13 +148,13 @@ for (const theme of ["light", "dark"] as const) {
       });
     }
 
-    test("the payment step, with the terms link and its error, has no accessibility problems", async ({ page }) => {
+    test("the send-request step, with the terms link and its error, has no accessibility problems", async ({ page }) => {
       await startWithBooking(page, true);
-      await visit(page, "/book/payment");
+      await visit(page, "/book/submit");
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      await expect(h1(page, b.payment.title)).toBeVisible();
+      await expect(h1(page, b.submit.title)).toBeVisible();
       await expectNoA11yViolations(page);
-      await page.getByRole("button", { name: /and confirm booking$/ }).click();
+      await page.getByRole("button", { name: b.submit.send }).click();
       await expect(pageAlerts(page).filter({ hasText: b.payment.termsError })).toBeVisible();
       await expectNoA11yViolations(page);
     });

@@ -133,6 +133,12 @@ export interface Booking {
    */
   documents?: BookingDocuments | null;
   documentsStatus?: DocumentStatus | null;
+  /** Why staff rejected the documents, shown to the customer so they can send new photos. */
+  rejectionReason?: string | null;
+  /** When staff approved the documents. The customer must pay within PAYMENT_DEADLINE_HOURS of this. */
+  approvedAt?: string | null;
+  /** Set when the customer cancelled the booking themselves (only possible before paying). */
+  cancellation?: { by: "customer"; reason: string; at: string } | null;
   paymentId: string | null;
   notes: string;
   createdAt: string;

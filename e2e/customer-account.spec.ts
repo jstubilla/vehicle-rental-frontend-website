@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { content } from "../src/content";
-import { dateFromToday, expectNoA11yViolations, pageAlerts, visit } from "./helpers";
+import { seedBookings } from "../src/mocks/bookings";
+import { seedCustomers } from "../src/mocks/customers";
+import { addApprovedBooking, dateFromToday, expectNoA11yViolations, pageAlerts, uploadDocuments, visit } from "./helpers";
 
 const t = content.account.login;
 const s = content.account.signup;
@@ -165,6 +167,7 @@ test.describe("saved details in the booking", () => {
     await expect(page.getByLabel(d.license)).toHaveValue("N01-23-456789");
 
     await page.getByLabel(d.phone).fill("0918 555 0111");
+    await uploadDocuments(page);
     await page.getByRole("button", { name: content.booking.common.continue }).click();
     await expect(page).toHaveURL(/\/book\/check/);
   });
@@ -194,10 +197,11 @@ test.describe("saved details in the booking", () => {
     await expect(page.getByLabel(d.phone)).toHaveValue("");
     await page.getByLabel(d.phone).fill("0917 555 0177");
     await page.getByLabel(d.license).fill("N05-11-223344");
+    await uploadDocuments(page);
     await page.getByRole("button", { name: content.booking.common.continue }).click();
-    await page.getByRole("link", { name: content.booking.check.toPayment }).click();
+    await page.getByRole("link", { name: content.booking.check.toSubmit }).click();
     await page.getByRole("checkbox", { name: /rental terms/ }).check();
-    await page.getByRole("button", { name: /and confirm booking$/ }).click();
+    await page.getByRole("button", { name: content.booking.submit.send }).click();
     await expect(page).toHaveURL(/\/book\/confirmation\//);
 
     await page.getByRole("banner").getByRole("link", { name: content.nav.bookCta.label }).click();
@@ -205,6 +209,43 @@ test.describe("saved details in the booking", () => {
     await page.getByRole("button", { name: d.savedDetails.yes }).click();
     await expect(page.getByLabel(d.phone)).toHaveValue("0917 555 0177");
     await expect(page.getByLabel(d.license)).toHaveValue("N05-11-223344");
+  });
+});
+
+test.describe("my bookings", () => {
+  const mb = content.account.bookings;
+
+  test("signed out, it asks the visitor to log in", async ({ page }) => {
+    await visit(page, "/my-bookings");
+    await expect(page.getByRole("heading", { level: 1, name: mb.signedOutTitle })).toBeVisible();
+    await expect(page.getByRole("main").getByRole("link", { name: mb.login })).toHaveAttribute("href", "/login?next=/my-bookings");
+  });
+
+  test("a signed-in customer sees their bookings and can pay one that is approved", async ({ page }) => {
+    const maria = seedCustomers.find((customer) => customer.email === t.demo.email)!;
+    const { reference } = await addApprovedBooking(page, { customerId: maria.id });
+    await loginAsDemoCustomer(page);
+
+    await page.getByRole("banner").getByRole("link", { name: content.nav.account.myBookings }).click();
+    await expect(page).toHaveURL(/\/my-bookings$/);
+    await expect(page.getByRole("heading", { level: 1, name: mb.title })).toBeVisible();
+
+    // Every booking made with her email is listed, and only those.
+    for (const booking of seedBookings.filter((b) => b.customerId === maria.id)) {
+      await expect(page.getByRole("heading", { name: booking.reference })).toBeVisible();
+    }
+    const other = seedBookings.find((b) => b.customerId !== maria.id)!;
+    await expect(page.getByRole("heading", { name: other.reference })).toHaveCount(0);
+
+    // The approved one waits on her, so it comes first with Pay now.
+    const needsAction = page.getByRole("region", { name: mb.needsAction });
+    await expect(needsAction.getByRole("heading", { name: reference })).toBeVisible();
+    await needsAction.getByRole("link", { name: mb.payNow }).click();
+
+    // Her email is already filled in on the pay page.
+    await expect(page.getByLabel(content.booking.access.email)).toHaveValue(t.demo.email);
+    await page.getByRole("button", { name: content.booking.access.continue }).click();
+    await expect(page.getByRole("heading", { level: 1, name: content.booking.payment.title })).toBeVisible();
   });
 });
 

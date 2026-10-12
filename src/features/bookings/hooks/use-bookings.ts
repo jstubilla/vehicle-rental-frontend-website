@@ -28,9 +28,10 @@ export function useBookingList() {
     refetch: query.refetch,
     search: (q: string) => update({ q, page: 1 }),
     setStatus: (status: typeof params.status) => update({ status, page: 1 }),
+    setDocs: (docs: typeof params.docs) => update({ docs, page: 1 }),
     sortBy: (key: typeof params.sort) => update({ ...nextSort(params, key, BOOKING_NATURAL_DIRECTION), page: 1 }),
     setPage: (page: number) => update({ page }),
-    clear: () => update({ q: "", status: undefined, page: 1 }),
+    clear: () => update({ q: "", status: undefined, docs: undefined, page: 1 }),
   };
 }
 

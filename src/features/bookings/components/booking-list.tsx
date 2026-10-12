@@ -32,7 +32,7 @@ export function BookingList() {
   const list = useBookingList();
   const { params, result } = list;
   const sortState = (key: BookingListParams["sort"]) => (params.sort === key ? params.dir : "none");
-  const filtered = params.q !== "" || params.status !== undefined;
+  const filtered = params.q !== "" || params.status !== undefined || params.docs !== undefined;
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,6 +56,17 @@ export function BookingList() {
                 {content.enums.bookingStatus[status]}
               </option>
             ))}
+          </Select>
+        </FormField>
+        <FormField label={t.filters.documents} hideLabel>
+          <Select
+            value={params.docs ?? ""}
+            onChange={(e) => list.setDocs((e.target.value || undefined) as BookingListParams["docs"])}
+          >
+            <option value="">
+              {t.filters.documents}: {content.admin.common.any}
+            </option>
+            <option value="to_check">{t.filters.documentsToCheck}</option>
           </Select>
         </FormField>
       </div>
