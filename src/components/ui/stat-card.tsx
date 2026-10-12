@@ -1,9 +1,10 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "./card";
 
 export interface StatCardProps {
   label: string;
-  value: string | number;
+  value: ReactNode;
   hint?: string;
   /** Makes the label a link to the related list. */
   href?: string;

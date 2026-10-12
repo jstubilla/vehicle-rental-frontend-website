@@ -3,7 +3,7 @@
  * hardcoding text, so wording can be changed (or translated later) in one place.
  * As pages are added, add their sections below.
  */
-import { DRIVER_DAILY_RATE } from "../lib/pricing";
+import { DOWN_PAYMENT_RATE, DRIVER_DAILY_RATE } from "../lib/pricing";
 
 /** The terms checkbox is a sentence with a link in it, so the sentence is kept in two parts. */
 const TERMS_LEAD = "I agree to the ";
@@ -12,15 +12,15 @@ const TERMS_LINK = "rental terms and conditions";
 export const content = {
   site: {
     name: "Ela's Car Rental",
-    tagline: "Simple car rentals across the Philippines",
-    description: "Rent a car in the Philippines with simple online booking and clear daily rates in PHP.",
+    tagline: "Simple Car rentals across the Philippines",
+    description: "Rent a Car in the Philippines with simple online booking and clear daily rates in PHP.",
     contactPhone: "0954 326 7335",
     contactEmail: "hello@example.com",
   },
 
   seo: {
     titleTemplate: "%s | Ela's Car Rental",
-    defaultTitle: "Ela's Car Rental | Rent a car in the Philippines",
+    defaultTitle: "Ela's Car Rental | Rent a Car in the Philippines",
     locale: "en_PH",
   },
 
@@ -45,8 +45,11 @@ export const content = {
   },
 
   socials: [
-    { label: "Facebook", href: "https://facebook.com" },
-    { label: "TikTok", href: "https://tiktok.com" },
+    { label: "Facebook", href: "https://www.facebook.com/elascarrental/" },
+    { label: "TikTok", href: "https://www.tiktok.com/@elas_car_rental" },
+    // 0954 326 7335, in international format (+63, without the leading 0).
+    { label: "Viber", href: "viber://chat?number=%2B639543267335" },
+    { label: "WhatsApp", href: "https://wa.me/639543267335" },
   ],
 
   footer: {
@@ -72,7 +75,7 @@ export const content = {
     ],
     phoneLabel: "Call us",
     staffLogin: { label: "Staff login", href: "/admin/login" },
-    socialsTitle: "Follow us",
+    socialsTitle: "Follow or Message us",
     legal: "© 2026 Ela's Car Rental. All rights reserved.",
     credit: "Powered by VAIANI",
   },
@@ -145,7 +148,7 @@ export const content = {
   enums: {
     vehicleCategory: {
       suv: "SUV",
-      mpv: "Multi-purpose vehicle (MPV)",
+      mpv: "Multi-purpose Vehicle (MPV)",
       sedan: "Sedan",
       hatchback: "Hatchback",
       van: "Van",
@@ -182,7 +185,7 @@ export const content = {
   },
 
   quickSearch: {
-    title: "Find your car",
+    title: "Find your Car",
     pickupLocation: "Pick-up location",
     locationPlaceholder: "Paste a Google Maps link, or type an address",
     locationHint: "For example a hotel, airport terminal or barangay.",
@@ -190,20 +193,20 @@ export const content = {
     pickupTime: "Pick-up time",
     returnDate: "Return date",
     returnTime: "Return time",
-    submit: "Search vehicles",
+    submit: "Search Vehicles",
   },
 
   home: {
     meta: {
-      description: "Browse our cars, pick your dates and book online in minutes. Prices in PHP.",
+      description: "Browse our Cars, pick your dates and book online in minutes. Prices in PHP.",
     },
     hero: {
-      title: "Rent a car in the Philippines",
+      title: "Rent a Car in the Philippines",
     },
     featured: {
-      title: "Featured vehicles",
-      description: "A few of our most popular cars.",
-      viewAll: "View all vehicles",
+      title: "Featured Vehicles",
+      description: "A few of our most popular Cars.",
+      viewAll: "View all Vehicles",
     },
     /** The transfer and tour teaser beside the hero headline. Names and prices come from specialOffers.priceLists. */
     toursTransfers: {
@@ -215,8 +218,8 @@ export const content = {
     howItWorks: {
       title: "How it works",
       steps: [
-        { title: "Choose dates and place", body: "Tell us when and where you need the car." },
-        { title: "Pick your vehicle", body: "Compare the cars available for your dates." },
+        { title: "Choose dates and place", body: "Tell us when and where you need the Car." },
+        { title: "Pick your Vehicle", body: "Compare the Cars available for your dates." },
         { title: "Book and pay", body: "Confirm your details and pay online or at pick-up." },
         { title: "Pick up and go", body: "Show your booking reference and drive away." },
       ],
@@ -239,7 +242,7 @@ export const content = {
       write: "Write a review",
     },
     /** Closes the home page under the reviews; the button reuses nav.bookCta. */
-    cta: { title: "Ready to book your car?" },
+    cta: { title: "Ready to book your Car?" },
   },
 
   reviews: {
@@ -385,7 +388,7 @@ export const content = {
     terms: {
       meta: {
         title: "Rental Terms and Conditions",
-        description: "Placeholder: the terms that apply when you rent a vehicle from us.",
+        description: "Placeholder: the terms that apply when you rent a Vehicle from us.",
       },
       title: "Rental Terms and Conditions",
       subtitle: "Placeholder: the terms that apply to every rental.",
@@ -443,19 +446,19 @@ export const content = {
     story: {
       title: "Our story",
       body: [
-        "From a car key proposal to building a business and a life together.",
+        "From a Car key proposal to building a business and a life together.",
         "We're Peter and Erika. We met in January 2026 and started ELA's Car Rental a month later, in February 2026.",
-        "While we were dating, Peter proposed to Erika with something unexpected: a car key and a brand-new car instead of a traditional ring. It stood for the life and the business we were building together.",
-        "Today we're husband and wife, and we've both left our jobs to focus fully on ELA's. What started with one car is now a fleet of cars and motorcycles, backed by partners and suppliers we trust.",
-        "We want to give locals and tourists across Region VI (Western Visayas) quality vehicles and reliable transportation: self-drive rentals, tours and point-to-point services.",
-        "ELA's is now one of the top-rated and fastest-growing local car rental companies in Iloilo, growing alongside established companies with years of industry experience, including brands with an international presence.",
+        "While we were dating, Peter proposed to Erika with something unexpected: a Car key and a brand-new Car instead of a traditional ring. It stood for the life and the business we were building together.",
+        "Today we're husband and wife, and we've both left our jobs to focus fully on ELA's. What started with one Car is now a fleet of Cars and motorcycles, backed by partners and suppliers we trust.",
+        "We want to give locals and tourists across Region VI (Western Visayas) quality Vehicles and reliable transportation: self-drive rentals, tours and point-to-point services.",
+        "ELA's is now one of the top-rated and fastest-growing local Car rental companies in Iloilo, growing alongside established companies with years of industry experience, including brands with an international presence.",
         "We keep our fleet well maintained and our prices clear, so there are no surprises when you book. Many customers come back because the process is simple and the service is dependable.",
       ],
     },
     values: {
       title: "What we stand for",
       items: [
-        { title: "Reliable vehicles", body: "Every vehicle is checked and serviced regularly, so it's ready when you are." },
+        { title: "Reliable Vehicles", body: "Every Vehicle is checked and serviced regularly, so it's ready when you are." },
         { title: "Clear pricing", body: "Daily rates in PHP, shown upfront with no hidden fees." },
         { title: "Friendly service", body: "Our team is on hand to help with your booking and answer any questions along the way." },
       ],
@@ -515,7 +518,7 @@ export const content = {
       },
       {
         title: "With a driver",
-        body: "Choose “With a driver” when you book a car or van, and a licensed driver comes with the vehicle.",
+        body: "Choose “With a driver” when you book a Car or van, and a licensed driver comes with the Vehicle.",
         /** Shown in the site's price style under the text. The rate itself lives in lib/pricing. */
         price: { amount: DRIVER_DAILY_RATE, unit: "per day" },
       },
@@ -525,11 +528,11 @@ export const content = {
 
   vehicles: {
     meta: {
-      title: "Our vehicles",
+      title: "Our Vehicles",
       description:
         "Compare SUVs, MPVs, sedans, hatchbacks, vans, pick-up trucks and motorcycles with clear daily rates in PHP.",
     },
-    title: "Our vehicles",
+    title: "Our Vehicles",
     description: "Filter by type, price and seats. Share the page to share your search.",
     filtersTitle: "Filters",
     showFilters: "Show filters",
@@ -551,9 +554,9 @@ export const content = {
       "name-asc": "Name: A to Z",
       "seats-desc": "Seats: most first",
     },
-    resultCount: (n: number) => `${n} ${n === 1 ? "vehicle" : "vehicles"} found`,
+    resultCount: (n: number) => `${n} ${n === 1 ? "Vehicle" : "Vehicles"} found`,
     clearFilters: "Clear filters",
-    emptyTitle: "No vehicles match your filters",
+    emptyTitle: "No Vehicles match your filters",
     emptyDescription: "Try removing a filter or choosing a different price range.",
     trip: {
       title: "Your trip",
@@ -576,7 +579,7 @@ export const content = {
   },
 
   vehicleDetail: {
-    back: "All vehicles",
+    back: "All Vehicles",
     /** Under a licensed photo: "Photo: Ethan Llamas, CC BY-SA 4.0 (edited)". */
     photoCredit: (author: string, license: string) => `Photo: ${author}, ${license} (edited)`,
     perDay: "per day",
@@ -591,7 +594,7 @@ export const content = {
     availableNow: "Available to book",
     unavailableNow: "Not available right now",
     bookNow: "Book now",
-    askAbout: "Ask about this vehicle",
+    askAbout: "Ask about this Vehicle",
     /** A small pointer under the Van's booking block. */
     vanTeaser: { lead: "Need a transfer or a day tour?", link: "See tours & transfers" },
     galleryLabel: "Vehicle photos",
@@ -603,8 +606,8 @@ export const content = {
 
   booking: {
     meta: {
-      title: "Book your car",
-      description: "Book your rental car online in a few simple steps.",
+      title: "Book your Car",
+      description: "Book your rental Car online in a few simple steps.",
     },
     steps: {
       dates: "Dates and location",
@@ -623,7 +626,7 @@ export const content = {
     },
     dates: {
       title: "Choose your dates and location",
-      description: "Tell us where and when you need the car.",
+      description: "Tell us where and when you need the Car.",
       pickupLocation: "Pick-up location",
       locationPlaceholder: "Paste a Google Maps link, or type an address",
       locationHint: "For example a hotel, airport terminal or barangay.",
@@ -635,23 +638,23 @@ export const content = {
       returnTime: "Return time",
     },
     vehicle: {
-      title: "Choose your vehicle",
-      description: "Booking is open: choose any vehicle. Prices shown are per day for your dates.",
+      title: "Choose your Vehicle",
+      description: "Booking is open: choose any Vehicle. Prices shown are per day for your dates.",
       select: "Select",
       selected: "Selected",
       notAvailable: "Not available right now",
-      selectPrompt: "Select a vehicle to continue.",
-      selectedUnavailable: "Your selected vehicle is not available right now. Please choose another one.",
-      loadError: "We could not load the vehicles.",
-      vehiclesLabel: "Available vehicles",
+      selectPrompt: "Select a Vehicle to continue.",
+      selectedUnavailable: "Your selected Vehicle is not available right now. Please choose another one.",
+      loadError: "We could not load the Vehicles.",
+      vehiclesLabel: "Available Vehicles",
     },
     /** The choice on the selected car or van. Motorcycles don't offer it (they are always "Vehicle only"). */
     driverOption: {
       legend: "Who drives?",
       vehicleOnly: "Vehicle only",
-      vehicleOnlyDescription: "You drive the vehicle yourself.",
+      vehicleOnlyDescription: "You drive the Vehicle yourself.",
       withDriver: "With a driver",
-      withDriverDescription: "A licensed driver comes with the vehicle.",
+      withDriverDescription: "A licensed driver comes with the Vehicle.",
       perDay: "per day",
     },
     details: {
@@ -675,6 +678,27 @@ export const content = {
       },
       notes: "Special requests (optional)",
     },
+    documents: {
+      title: "Your documents",
+      description:
+        "Upload a clear photo of each one. Our team checks them before confirming your booking, and only our staff can see them.",
+      kinds: {
+        validId: { label: "Valid ID", hint: "A government-issued ID, such as a passport, UMID or national ID." },
+        proofOfBilling: { label: "Proof of billing", hint: "A recent utility bill or bank statement with your name and address." },
+        driversLicense: { label: "Driver's license", hint: "The front of the license, with your name and photo clear." },
+      },
+      choose: "Choose a photo",
+      formats: "JPG or PNG photo",
+      replace: "Replace",
+      remove: "Remove",
+      processing: "Preparing photo…",
+      required: "Please upload this photo.",
+      notImage: "Please choose a photo (JPG or PNG).",
+      tooLarge: "That photo is too large. Please choose one under 15 MB.",
+      unreadable: "We could not read that photo. Please try another one.",
+      uploaded: "Uploaded",
+      view: (label: string) => `View ${label}`,
+    },
     payment: {
       title: "Payment",
       description: "Choose how you would like to pay. This is a demo, so no real payment is taken.",
@@ -687,17 +711,22 @@ export const content = {
         wise: { label: "Wise", description: "Pay with your Wise account." },
         pay_at_pickup: {
           label: "Pay at pick-up",
-          description: "Pay when you collect the vehicle.",
+          description: `Pay a ${DOWN_PAYMENT_RATE * 100}% down payment now and the rest when you collect the Vehicle.`,
         },
       },
       cardNotice:
         "Card details are entered on the payment provider's secure page, never on this website. In this demo no card details are asked for.",
       redirectNotice: (method: string) =>
         `You would be sent to ${method} to approve the payment. In this demo, this step is simulated.`,
-      pickupNotice:
-        "You pay when you collect the vehicle. Your booking stays pending until our team confirms it.",
+      downPayment: {
+        title: "Your down payment",
+        description: "The down payment secures your booking. You pay the balance when you collect the Vehicle.",
+        dueNow: `Pay now (${DOWN_PAYMENT_RATE * 100}% down payment)`,
+        dueAtPickup: "Pay at pick-up",
+        methodLabel: "Pay the down payment with",
+      },
       pay: (amount: string) => `Pay ${amount} and confirm booking`,
-      confirmPickup: "Confirm booking",
+      payDownPayment: (amount: string) => `Pay ${amount} down payment and confirm booking`,
       termsLead: TERMS_LEAD,
       termsLink: TERMS_LINK,
       terms: TERMS_LEAD + TERMS_LINK,
@@ -716,9 +745,9 @@ export const content = {
           action: "Check your booking",
         },
         not_found: {
-          title: "We could not find that vehicle",
-          body: "Please choose a vehicle again.",
-          action: "Choose a vehicle",
+          title: "We could not find that Vehicle",
+          body: "Please choose a Vehicle again.",
+          action: "Choose a Vehicle",
         },
         unknown: {
           title: "We could not confirm your booking",
@@ -742,7 +771,7 @@ export const content = {
     summary: {
       title: "Booking summary",
       vehicle: "Vehicle",
-      noVehicle: "No vehicle selected yet",
+      noVehicle: "No Vehicle selected yet",
       pickup: "Pick-up",
       return: "Return",
       duration: "Duration",
@@ -752,6 +781,9 @@ export const content = {
       driverLine: "Driver",
       option: "Rental option",
       total: "Total",
+      downPayment: `Down payment (${DOWN_PAYMENT_RATE * 100}%)`,
+      downPaymentPaid: (method: string) => `Down payment paid (${method})`,
+      balance: "Balance due at pick-up",
       renter: "Booked by",
       payment: "Payment",
       pricesNote: "All prices are in PHP and include VAT.",
@@ -760,18 +792,22 @@ export const content = {
       titleConfirmed: "Booking confirmed",
       titlePending: "Booking received",
       subtitleConfirmed: "Thank you. Your payment was received and your booking is confirmed.",
-      subtitlePending: "Thank you. Our team will confirm your booking shortly. You pay at pick-up.",
+      subtitleDownPayment: (balance: string) =>
+        `Thank you. Your down payment was received and your booking is confirmed. You pay the balance of ${balance} at pick-up.`,
+      subtitlePending: (balance: string | null) =>
+        "Thank you. Your payment was received. Our team is checking your documents and will email you once your booking is confirmed." +
+        (balance ? ` You pay the balance of ${balance} at pick-up.` : ""),
       reference: "Booking reference",
       referenceHint: "Keep this number. You will need it at pick-up.",
       statusLabel: "Status",
       nextTitle: "What happens next",
       nextSteps: [
-        "We email you a confirmation with all the details.",
+        "Our team checks your documents and emails you a confirmation with all the details.",
         "Bring your driver's license and this reference to the pick-up point.",
-        "Return the vehicle at the agreed time and place.",
+        "Return the Vehicle at the agreed time and place.",
       ],
       toHome: "Back to home",
-      browse: "Browse more vehicles",
+      browse: "Browse more Vehicles",
       notFoundTitle: "Booking not found",
       notFoundDescription: "We could not find a booking with that reference.",
     },
@@ -801,7 +837,7 @@ export const content = {
       phoneHint: "For example 0917 123 4567 or +63 917 123 4567",
       vehicle: "Vehicle you are interested in (optional)",
       vehicleNone: "No preference",
-      vehiclesLoading: "Loading vehicles…",
+      vehiclesLoading: "Loading Vehicles…",
       message: "Message",
       consent: "I agree to be contacted about my inquiry",
       submit: "Send message",
@@ -1021,9 +1057,9 @@ export const content = {
     },
     bookings: {
       title: "Bookings",
-      description: "Every rental, from a new booking to a returned car.",
+      description: "Every rental, from a new booking to a returned Car.",
       searchLabel: "Search bookings",
-      searchPlaceholder: "Search by reference, customer or vehicle",
+      searchPlaceholder: "Search by reference, customer or Vehicle",
       filters: { status: "Status" },
       columns: {
         reference: "Reference",
@@ -1046,6 +1082,8 @@ export const content = {
         payment: "Payment",
         method: "Method",
         amount: "Amount",
+        downPayment: (method: string) => `Down payment paid (${method})`,
+        balance: "Balance due at pick-up",
         status: "Status",
         providerRef: "Provider reference",
         notes: "Customer notes",
@@ -1058,25 +1096,38 @@ export const content = {
         finalStatus: "This booking is final. Its status cannot change.",
         actions: {
           confirmed: "Confirm booking",
-          active: "Start rental (car picked up)",
-          completed: "Complete rental (car returned)",
+          active: "Start rental (Car picked up)",
+          completed: "Complete rental (Car returned)",
           cancelled: "Cancel booking",
         },
         cancelTitle: "Cancel this booking?",
-        cancelDescription: "The vehicle becomes available again for these dates. This cannot be undone.",
+        cancelDescription: "The Vehicle becomes available again for these dates. This cannot be undone.",
         cancelConfirm: "Cancel booking",
         keep: "Keep booking",
         invalidMove: "That status change is not allowed.",
+        documents: {
+          title: "Customer documents",
+          description: "Check that the names match the booking and the photos are clear before confirming.",
+          status: { pending: "Waiting for check", verified: "Verified", rejected: "Rejected" },
+          approve: "Approve documents and confirm booking",
+          approveOnly: "Approve documents",
+          reject: "Reject documents",
+          rejectedHint: "Contact the customer for new photos, or cancel the booking.",
+          checkFirst: "Approve the customer's documents to confirm this booking.",
+          saved: { verified: "Documents approved", rejected: "Documents rejected" },
+        },
       },
       statusChangeNote: (reference: string, from: string, to: string) =>
         `Booking ${reference} changed from ${from} to ${to}.`,
+      documentsNote: (reference: string, decision: "verified" | "rejected") =>
+        `Documents for booking ${reference} ${decision === "verified" ? "approved" : "rejected"}.`,
       paymentNote: (reference: string, amount: string, method: string) =>
         `Payment of ${amount} (${method}) for booking ${reference} marked as received.`,
     },
     pricing: {
       title: "Vehicle prices",
       description:
-        "Change a vehicle's daily rate. New bookings use the new rate. Existing bookings keep the price they were made at.",
+        "Change a Vehicle's daily rate. New bookings use the new rate. Existing bookings keep the price they were made at.",
       columns: { vehicle: "Vehicle", category: "Category", rate: "Daily rate", status: "Status", actions: "Actions" },
       change: "Change price",
       modalTitle: (name: string) => `Change price: ${name}`,
@@ -1087,7 +1138,7 @@ export const content = {
       noChange: "The new rate is the same as the current one.",
       impact: "Existing bookings keep their price. Only new bookings use the new rate.",
       saved: "Price updated",
-      empty: "No vehicles found.",
+      empty: "No Vehicles found.",
     },
     reviews: {
       title: "Reviews",

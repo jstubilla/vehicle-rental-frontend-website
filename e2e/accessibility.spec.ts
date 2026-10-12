@@ -1,7 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { content } from "../src/content";
 import { seedBookings } from "../src/mocks/bookings";
-import { dateFromToday, expectNoA11yViolations, loginAs, pageAlerts, visit } from "./helpers";
+import { dateFromToday, expectNoA11yViolations, loginAs, pageAlerts, SAMPLE_DOCUMENTS, visit } from "./helpers";
 
 /**
  * Accessibility scans (axe: WCAG 2.0, 2.1 and 2.2 levels A and AA, plus best practices).
@@ -49,7 +49,7 @@ for (const { name, path, ready } of PUBLIC_PAGES) {
 /** A half-finished booking, saved in the browser the way the real flow saves it. */
 async function startWithBooking(page: Page) {
   await page.addInitScript(
-    ({ pickup, ret }) => {
+    ({ pickup, ret, documents }) => {
       sessionStorage.setItem(
         "car-rental-booking-flow",
         JSON.stringify({
@@ -69,10 +69,11 @@ async function startWithBooking(page: Page) {
             licenseNumber: "N21-25-778899",
             notes: "",
           },
+          documents,
         }),
       );
     },
-    { pickup: dateFromToday(60), ret: dateFromToday(63) },
+    { pickup: dateFromToday(60), ret: dateFromToday(63), documents: SAMPLE_DOCUMENTS },
   );
 }
 

@@ -67,8 +67,8 @@ export function Footer({
             {description && <p className="max-w-sm text-sm text-muted">{description}</p>}
           </div>
           {socials && (
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-              {socialsTitle && <h2 className="text-sm font-normal text-muted">{socialsTitle}</h2>}
+            <div className="flex flex-col gap-3 text-sm">
+              {socialsTitle && <h2 className="font-body text-sm font-semibold tracking-normal">{socialsTitle}</h2>}
               {socials}
             </div>
           )}
@@ -80,7 +80,7 @@ export function Footer({
             aria-label={column.title}
             className={cn("md:col-span-3 lg:col-span-2", index === 0 && "lg:col-start-9")}
           >
-            <h2 className="mb-3 text-sm font-semibold">{column.title}</h2>
+            <h2 className="mb-3 font-body text-sm font-semibold tracking-normal">{column.title}</h2>
             <ul className="flex flex-col gap-2">
               {column.links.map((link) => (
                 <li key={link.href}>

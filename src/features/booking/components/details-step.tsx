@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { Controller } from "react-hook-form";
 import { Button, Card, CardContent, FormField, Input, Textarea } from "@/components/ui";
 import { content } from "@/content";
 import { PrivacyNote } from "@/features/shared/privacy-note";
+import { DOCUMENT_KINDS } from "@/lib/constants";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { useDetailsStep } from "../hooks/use-details-step";
 import { useStepGuard } from "../hooks/use-step-guard";
 import type { FlowState } from "../flow-store";
-import type { DetailsFormValues } from "../schemas";
+import type { DetailsStepValues } from "../schemas";
 import { previousStepPath } from "../steps";
 import { summaryFromFlow } from "../summary";
 import { BookingSummary } from "./booking-summary";
+import { DocumentUpload } from "./document-upload";
 import { StepActions, StepHeading, StepSkeleton } from "./step-parts";
 
 const t = content.booking.details;
@@ -20,20 +23,17 @@ export function DetailsStep() {
   const { ready, state } = useStepGuard("details");
   if (!ready) return <StepSkeleton />;
 
-  const initial: DetailsFormValues = state.customer ?? {
-    name: "",
-    email: "",
-    phone: "",
-    licenseNumber: "",
-    notes: "",
+  const initial: DetailsStepValues = {
+    ...(state.customer ?? { name: "", email: "", phone: "", licenseNumber: "", notes: "" }),
+    documents: state.documents ?? { validId: null, proofOfBilling: null, driversLicense: null },
   };
   return <DetailsForm initial={initial} state={state} />;
 }
 
-function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: FlowState }) {
+function DetailsForm({ initial, state }: { initial: DetailsStepValues; state: FlowState }) {
   const { vehicle, quote } = useBookingQuote();
   const { form, onSubmit, savedDetails, answerSavedDetails } = useDetailsStep(initial, state.customer !== null);
-  const { register, formState } = form;
+  const { register, control, formState } = form;
   const { errors } = formState;
 
   return (
@@ -81,6 +81,31 @@ function DetailsForm({ initial, state }: { initial: DetailsFormValues; state: Fl
         <FormField label={t.license} required hint={t.licenseHint} error={errors.licenseNumber?.message}>
           <Input {...register("licenseNumber")} autoComplete="off" />
         </FormField>
+
+        <section aria-labelledby="documents-heading" className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="documents-heading" className="text-lg">
+              {content.booking.documents.title}
+            </h2>
+            <p className="text-sm text-muted">{content.booking.documents.description}</p>
+          </div>
+          {DOCUMENT_KINDS.map((kind) => (
+            <Controller
+              key={kind}
+              control={control}
+              name={`documents.${kind}`}
+              render={({ field, fieldState }) => (
+                <DocumentUpload
+                  label={content.booking.documents.kinds[kind].label}
+                  hint={content.booking.documents.kinds[kind].hint}
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={fieldState.error?.message}
+                />
+              )}
+            />
+          ))}
+        </section>
 
         <FormField label={t.notes}>
           <Textarea {...register("notes")} />

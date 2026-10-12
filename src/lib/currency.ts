@@ -22,6 +22,14 @@ const phpShortFormatter = new Intl.NumberFormat("en-PH", {
   maximumFractionDigits: 2,
 });
 
+/** Chart labels, where space is tight: "₱120.7K", "₱1.2M". */
+const phpCompactFormatter = new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: CURRENCY_CODE,
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -34,6 +42,11 @@ const usdFormatter = new Intl.NumberFormat("en-US", {
  */
 export function formatPhp(amount: number, { exact = false }: { exact?: boolean } = {}): string {
   return (exact ? phpFormatter : phpShortFormatter).format(amount);
+}
+
+/** The PHP amount abbreviated, e.g. "₱120.7K", for labels drawn inside a chart. Never for totals or payments. */
+export function formatPhpCompact(amount: number): string {
+  return phpCompactFormatter.format(amount);
 }
 
 /** The rough USD equivalent, e.g. "(~$72)". Shown smaller, as a secondary line, beside the PHP amount. */

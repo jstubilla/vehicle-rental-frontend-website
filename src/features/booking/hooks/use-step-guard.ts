@@ -13,7 +13,7 @@ function isStepDone(id: BookingStepId, state: FlowState): boolean {
     case "vehicle":
       return state.vehicleSlug !== null;
     case "details":
-      return state.customer !== null;
+      return state.customer !== null && state.documents !== null;
     default:
       return true;
   }

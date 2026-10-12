@@ -1,3 +1,5 @@
+import type { BookingDocuments } from "@/types";
+
 /**
  * What the visitor has filled in so far. It lives outside React so every step page
  * shares it, and it is saved in sessionStorage so a refresh or the Back button
@@ -26,9 +28,11 @@ export interface FlowState {
   withDriver: boolean;
   rental: FlowRental | null;
   customer: FlowCustomer | null;
+  /** Photos of the valid ID, proof of billing and driver's license, sent with the booking. */
+  documents: BookingDocuments | null;
 }
 
-const EMPTY: FlowState = { vehicleSlug: null, withDriver: false, rental: null, customer: null };
+const EMPTY: FlowState = { vehicleSlug: null, withDriver: false, rental: null, customer: null, documents: null };
 const STORAGE_KEY = "car-rental-booking-flow";
 
 let state: FlowState = EMPTY;

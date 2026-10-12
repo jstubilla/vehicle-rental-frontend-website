@@ -8,7 +8,7 @@ import { ApiError } from "@/api/client";
 import type { PaymentFailureCode } from "@/api/payments";
 import { accountKey } from "@/features/account/hooks/use-account";
 import { vehicleKeys } from "@/features/vehicles/hooks/use-vehicles";
-import type { PaymentMethod } from "@/lib/constants";
+import type { OnlinePaymentMethod, PaymentMethod } from "@/lib/constants";
 import { confirmationPath } from "../steps";
 import { useBookingFlow } from "./use-booking-flow";
 import { useBookingQuote } from "./use-booking-quote";
@@ -21,6 +21,8 @@ export function usePaymentStep() {
   const { vehicle, quote } = useBookingQuote();
 
   const [method, setMethod] = useState<PaymentMethod>("card");
+  /** "Pay at pick-up" only: how the down payment is paid now. */
+  const [downPaymentMethod, setDownPaymentMethod] = useState<OnlinePaymentMethod>("card");
   const [mockOutcome, setMockOutcome] = useState<"success" | "decline">("success");
 
   const mutation = useMutation({
@@ -49,6 +51,11 @@ export function usePaymentStep() {
       setMethod(next);
       mutation.reset();
     },
+    downPaymentMethod,
+    selectDownPaymentMethod: (next: OnlinePaymentMethod) => {
+      setDownPaymentMethod(next);
+      mutation.reset();
+    },
     mockOutcome,
     setMockOutcome,
     /** Stays true after success, while the page moves on to the confirmation. */
@@ -58,8 +65,8 @@ export function usePaymentStep() {
     /** Why the booking could not be made (nothing was charged), or null. */
     error,
     pay: () => {
-      const { rental, customer } = state;
-      if (!rental || !vehicle || !customer || !quote) return;
+      const { rental, customer, documents } = state;
+      if (!rental || !vehicle || !customer || !documents || !quote) return;
       mutation.mutate({
         vehicleId: vehicle.id,
         pickupLocation: rental.pickupLocation,
@@ -70,7 +77,8 @@ export function usePaymentStep() {
         returnTime: rental.returnTime,
         withDriver: quote.withDriver,
         customer,
-        payment: { method, mockOutcome },
+        documents,
+        payment: { method, downPaymentMethod, mockOutcome },
         expectedTotal: quote.total,
       });
     },

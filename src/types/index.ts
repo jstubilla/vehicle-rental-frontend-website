@@ -3,8 +3,11 @@ import type {
   ActivityType,
   BookingStatus,
   ContactType,
+  DocumentKind,
+  DocumentStatus,
   LeadSource,
   LeadStage,
+  OnlinePaymentMethod,
   PaymentMethod,
   PaymentStatus,
   TaskStatus,
@@ -87,6 +90,14 @@ export interface Customer {
   createdAt: string;
 }
 
+/** A photo the customer sent (e.g. their valid ID), as a compressed JPEG data URL. */
+export interface UploadedDocument {
+  fileName: string;
+  dataUrl: string;
+}
+
+export type BookingDocuments = Record<DocumentKind, UploadedDocument>;
+
 /**
  * A booking keeps its own copy of the price it was made at (dailyRate, driverRate and the
  * totals). If the owner changes a vehicle's rate later, existing bookings
@@ -116,6 +127,12 @@ export interface Booking {
   driverTotal: number;
   total: number;
   status: BookingStatus;
+  /**
+   * The customer's valid ID, proof of billing and driver's license. Staff check them before
+   * confirming the booking. Bookings made before documents were asked for have none.
+   */
+  documents?: BookingDocuments | null;
+  documentsStatus?: DocumentStatus | null;
   paymentId: string | null;
   notes: string;
   createdAt: string;
@@ -134,6 +151,11 @@ export interface Payment {
   status: PaymentStatus;
   /** Reference from the payment provider (mock value for now). */
   providerRef: string | null;
+  /**
+   * "Pay at pick-up" only: the down payment charged online when booking. `amount` stays the
+   * full total, and `status` stays "pending" until staff record the balance at pick-up.
+   */
+  downPayment?: { method: OnlinePaymentMethod; amount: number } | null;
   createdAt: string;
 }
 

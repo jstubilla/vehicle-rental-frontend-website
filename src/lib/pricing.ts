@@ -12,6 +12,18 @@ import type { VehicleCategory } from "./constants";
  */
 export const DRIVER_DAILY_RATE = 1000;
 
+/**
+ * "Pay at pick-up": this share of the total is paid online as a down payment when booking,
+ * and the rest is paid when the customer collects the vehicle.
+ */
+export const DOWN_PAYMENT_RATE = 0.1;
+
+/** Splits a total into the down payment (rounded up to the peso) and the balance due at pick-up. */
+export function splitDownPayment(total: number): { downPayment: number; balance: number } {
+  const downPayment = Math.ceil(total * DOWN_PAYMENT_RATE);
+  return { downPayment, balance: total - downPayment };
+}
+
 /** Motorcycles are always "Vehicle only"; cars and vans can come with a driver. */
 const NO_DRIVER_CATEGORIES: readonly VehicleCategory[] = ["125cc", "150cc"];
 

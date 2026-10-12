@@ -13,6 +13,7 @@ export type ApiErrorCode =
   | "has_bookings"
   | "duplicate_email"
   | "invalid_transition"
+  | "documents_unverified"
   | "invalid_price"
   | "last_admin"
   | "self_deactivate"

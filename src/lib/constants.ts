@@ -35,7 +35,17 @@ export const BOOKING_STATUSES = ["pending", "confirmed", "active", "completed", 
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 
 export const PAYMENT_METHODS = ["card", "gcash", "maya", "paypal", "wise", "pay_at_pickup"] as const;
+/** The methods that charge online. "Pay at pick-up" uses one of these for its down payment. */
+export const ONLINE_PAYMENT_METHODS = ["card", "gcash", "maya", "paypal", "wise"] as const;
+export type OnlinePaymentMethod = (typeof ONLINE_PAYMENT_METHODS)[number];
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+/** The photos a customer sends with a booking, checked by staff before it is confirmed. */
+export const DOCUMENT_KINDS = ["validId", "proofOfBilling", "driversLicense"] as const;
+export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
+
+export const DOCUMENT_STATUSES = ["pending", "verified", "rejected"] as const;
+export type DocumentStatus = (typeof DOCUMENT_STATUSES)[number];
 
 export const PAYMENT_STATUSES = ["pending", "processing", "paid", "failed"] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];

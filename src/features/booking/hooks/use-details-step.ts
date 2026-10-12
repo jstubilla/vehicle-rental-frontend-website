@@ -5,27 +5,30 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useAccount } from "@/features/account/hooks/use-account";
-import { detailsFormSchema, type DetailsFormValues } from "../schemas";
+import type { BookingDocuments } from "@/types";
+import { detailsStepSchema, type DetailsStepValues } from "../schemas";
 import { nextStepPath } from "../steps";
 import { useBookingFlow } from "./use-booking-flow";
 
 /**
- * Step 3: who is driving. Saves the answers into the booking and moves to payment.
+ * Step 3: who is driving, and photos of their documents. Saves the answers into the booking and moves on.
  * `alreadyFilled` is true when the visitor comes back to this step: no need to ask again.
  */
-export function useDetailsStep(initial: DetailsFormValues, alreadyFilled: boolean) {
+export function useDetailsStep(initial: DetailsStepValues, alreadyFilled: boolean) {
   const router = useRouter();
   const { update } = useBookingFlow();
   const { data: account, isSuccess: accountChecked } = useAccount();
   const [answered, setAnswered] = useState(false);
 
-  const form = useForm<DetailsFormValues>({
-    resolver: zodResolver(detailsFormSchema),
+  const form = useForm<DetailsStepValues>({
+    resolver: zodResolver(detailsStepSchema),
     defaultValues: initial,
   });
 
   const onSubmit = form.handleSubmit((values) => {
-    update({ customer: values });
+    // The schema has checked that all three photos are there.
+    const { documents, ...customer } = values;
+    update({ customer, documents: documents as BookingDocuments });
     router.push(nextStepPath("details"));
   });
 

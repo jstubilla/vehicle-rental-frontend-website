@@ -55,6 +55,10 @@ export async function changeBookingStatus(id: string, status: BookingStatus): Pr
   if (!canTransition(existing.status, status)) {
     throw new ApiError("That status change is not allowed", 409, "invalid_transition");
   }
+  // A booking with documents is confirmed only once staff have verified them.
+  if (status === "confirmed" && existing.documents && existing.documentsStatus !== "verified") {
+    throw new ApiError("The customer's documents are not verified yet", 409, "documents_unverified");
+  }
 
   const updated: Booking = { ...existing, status, updatedAt: new Date().toISOString() };
   writeTable("bookings", bookings.map((b) => (b.id === id ? updated : b)));
@@ -69,6 +73,33 @@ export async function changeBookingStatus(id: string, status: BookingStatus): Pr
       ),
       session.userId,
     ),
+    ...readTable("activities"),
+  ]);
+  return updated;
+}
+
+/**
+ * Records the staff decision on the customer's documents. Verifying them also confirms a
+ * pending booking; rejecting them leaves it pending so staff can ask for new photos or cancel.
+ */
+export async function reviewBookingDocuments(id: string, decision: "verified" | "rejected"): Promise<Booking> {
+  const session = assertAdmin();
+  await simulateNetwork();
+
+  const bookings = readTable("bookings");
+  const existing = bookings.find((b) => b.id === id);
+  if (!existing || !existing.documents) throw new ApiError("Booking not found", 404, "not_found");
+
+  const confirm = decision === "verified" && existing.status === "pending";
+  const updated: Booking = {
+    ...existing,
+    documentsStatus: decision,
+    status: confirm ? "confirmed" : existing.status,
+    updatedAt: new Date().toISOString(),
+  };
+  writeTable("bookings", bookings.map((b) => (b.id === id ? updated : b)));
+  writeTable("activities", [
+    customerNote(existing.customerId, "note", content.admin.bookings.documentsNote(existing.reference, decision), session.userId),
     ...readTable("activities"),
   ]);
   return updated;
@@ -92,7 +123,7 @@ export async function markPaymentReceived(bookingId: string): Promise<Payment> {
       "note",
       content.admin.bookings.paymentNote(
         booking.reference,
-        formatCurrency(payment.amount),
+        formatCurrency(payment.amount - (payment.downPayment?.amount ?? 0)),
         content.enums.paymentMethod[payment.method],
       ),
       session.userId,

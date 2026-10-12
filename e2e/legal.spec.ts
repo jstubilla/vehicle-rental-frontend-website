@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { content } from "../src/content";
-import { dateFromToday, expectNoA11yViolations, pageAlerts, visit } from "./helpers";
+import { dateFromToday, expectNoA11yViolations, pageAlerts, SAMPLE_DOCUMENTS, visit } from "./helpers";
 
 const legal = content.legal;
 const b = content.booking;
@@ -10,7 +10,7 @@ const h1 = (page: Page, name: string) => page.getByRole("heading", { level: 1, n
 /** A half-finished booking saved in the browser the way the real flow saves it. `withDetails` = the driver step is done. */
 async function startWithBooking(page: Page, withDetails: boolean) {
   await page.addInitScript(
-    ({ pickup, ret, withDetails }) => {
+    ({ pickup, ret, withDetails, documents }) => {
       sessionStorage.setItem(
         "car-rental-booking-flow",
         JSON.stringify({
@@ -26,10 +26,11 @@ async function startWithBooking(page: Page, withDetails: boolean) {
           customer: withDetails
             ? { name: "Lorenzo Buenaventura", email: "lorenzo.b@example.com", phone: "0917 555 0142", licenseNumber: "N21-25-778899", notes: "" }
             : null,
+          documents: withDetails ? documents : null,
         }),
       );
     },
-    { pickup: dateFromToday(60), ret: dateFromToday(63), withDetails },
+    { pickup: dateFromToday(60), ret: dateFromToday(63), withDetails, documents: SAMPLE_DOCUMENTS },
   );
 }
 

@@ -230,7 +230,7 @@ export function StyleguideSections() {
       </Block>
 
       <Block title="Table (sortable)">
-        <Table label="Sample vehicles" variant="striped">
+        <Table label="Sample Vehicles" variant="striped">
           <TableCaption>Click “Rate” to sort.</TableCaption>
           <TableHeader>
             <TableRow>
@@ -312,7 +312,7 @@ export function StyleguideSections() {
         <div className="grid gap-4 md:grid-cols-2">
           <Alert variant="info" title="Heads up">Prices include VAT.</Alert>
           <Alert variant="success" title="Booking confirmed">Reference RC-2026-0001.</Alert>
-          <Alert variant="warning" title="Almost full">Only 2 vehicles left.</Alert>
+          <Alert variant="warning" title="Almost full">Only 2 Vehicles left.</Alert>
           <Alert variant="danger" title="Payment failed">Please try another method.</Alert>
         </div>
         <div className="grid gap-4 md:grid-cols-2">

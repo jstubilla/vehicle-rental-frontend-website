@@ -24,3 +24,19 @@ export const detailsFormSchema = z.object({
 });
 
 export type DetailsFormValues = z.infer<typeof detailsFormSchema>;
+
+const uploadedDocument = z
+  .object({ fileName: z.string(), dataUrl: z.string() })
+  .nullable()
+  .refine((value) => value !== null, content.booking.documents.required);
+
+/** Step 3 as a whole: the details above plus the three document photos. */
+export const detailsStepSchema = detailsFormSchema.extend({
+  documents: z.object({
+    validId: uploadedDocument,
+    proofOfBilling: uploadedDocument,
+    driversLicense: uploadedDocument,
+  }),
+});
+
+export type DetailsStepValues = z.input<typeof detailsStepSchema>;

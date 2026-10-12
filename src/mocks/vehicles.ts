@@ -48,7 +48,7 @@ type Seed = Omit<Vehicle, "images">;
  */
 const vehicles: Seed[] = [
   { id: "veh-01", slug: "suv", name: "SUV", category: "suv", examples: "Toyota Fortuner, Mitsubishi Montero, Ford Everest, Nissan Terra or similar", seats: 7, pricePerDay: 4000, status: "available", featured: true },
-  { id: "veh-02", slug: "mpv", name: "Multi-purpose vehicle (MPV)", category: "mpv", examples: "Toyota Avanza, Mitsubishi Xpander, Hyundai Stargazer, Toyota Innova or similar", seats: 8, pricePerDay: 2600, status: "available", featured: true },
+  { id: "veh-02", slug: "mpv", name: "Multi-purpose Vehicle (MPV)", category: "mpv", examples: "Toyota Avanza, Mitsubishi Xpander, Hyundai Stargazer, Toyota Innova or similar", seats: 8, pricePerDay: 2600, status: "available", featured: true },
   { id: "veh-03", slug: "sedan", name: "Sedan", category: "sedan", examples: "Toyota Vios, Mitsubishi Mirage, Suzuki Dzire, Toyota Ativ or similar", seats: 5, pricePerDay: 1800, status: "available", featured: true },
   { id: "veh-04", slug: "hatchback", name: "Hatchback", category: "hatchback", examples: "Toyota Wigo or similar", seats: 5, pricePerDay: 1600, status: "available", featured: false },
   { id: "veh-05", slug: "van", name: "Van", category: "van", examples: "Toyota Commuter, Toyota HiAce, Toyota Grandia, Nissan NV350 or similar", seats: 15, pricePerDay: 4500, status: "available", featured: true },

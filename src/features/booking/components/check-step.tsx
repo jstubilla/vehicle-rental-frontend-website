@@ -8,6 +8,7 @@ import { useStepGuard } from "../hooks/use-step-guard";
 import { BOOKING_STEPS, nextStepPath, previousStepPath, stepIndex } from "../steps";
 import { summaryFromFlow } from "../summary";
 import { BookingSummary } from "./booking-summary";
+import { DocumentGallery } from "./document-gallery";
 import { StepActions, StepHeading, StepSkeleton } from "./step-parts";
 
 const t = content.booking.check;
@@ -24,6 +25,15 @@ export function CheckStep() {
       <StepHeading title={t.title} description={t.description} />
 
       <BookingSummary data={summaryFromFlow({ state, vehicle, quote })} />
+
+      {state.documents && (
+        <section aria-labelledby="documents-heading" className="flex flex-col gap-3">
+          <h2 id="documents-heading" className="text-lg">
+            {content.booking.documents.title}
+          </h2>
+          <DocumentGallery documents={state.documents} />
+        </section>
+      )}
 
       <nav aria-label={t.title}>
         <ul className="flex flex-wrap gap-x-4 gap-y-1">

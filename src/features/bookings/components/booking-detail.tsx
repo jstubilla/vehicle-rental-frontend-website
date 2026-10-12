@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
+  Badge,
   Button,
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui";
 import { content } from "@/content";
 import { BookingSummary } from "@/features/booking/components/booking-summary";
+import { DocumentGallery } from "@/features/booking/components/document-gallery";
 import { summaryFromBooking } from "@/features/booking/summary";
 import { BOOKING_TRANSITIONS } from "@/lib/booking-status";
 import type { BookingStatus } from "@/lib/constants";
@@ -27,9 +29,11 @@ import { BookingStatusBadge, PaymentStatusBadge } from "./booking-status-badge";
 
 const t = content.admin.bookings.detail;
 
+const DOCUMENT_BADGE = { pending: "warning", verified: "success", rejected: "danger" } as const;
+
 export function BookingDetail({ id }: { id: string }) {
   const query = useBooking(id);
-  const { changeStatus, markPaid } = useBookingMutations();
+  const { changeStatus, markPaid, reviewDocuments } = useBookingMutations();
   const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   if (query.isError) return <ErrorState headingAs="h1" onRetry={() => query.refetch()} />;
@@ -58,7 +62,12 @@ export function BookingDetail({ id }: { id: string }) {
 
   const details = query.data;
   const { booking, customer, payment } = details;
-  const nextStatuses = BOOKING_TRANSITIONS[booking.status];
+  const documentsStatus = booking.documentsStatus ?? "pending";
+  // A booking with documents is confirmed from the Documents card, once they are approved.
+  const awaitingDocuments = Boolean(booking.documents) && documentsStatus !== "verified";
+  const nextStatuses = BOOKING_TRANSITIONS[booking.status].filter(
+    (status) => !(awaitingDocuments && status === "confirmed"),
+  );
 
   function move(status: BookingStatus) {
     if (status === "cancelled") setConfirmingCancel(true);
@@ -84,6 +93,45 @@ export function BookingDetail({ id }: { id: string }) {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="flex min-w-0 flex-col gap-6 lg:col-span-2">
+          {booking.documents && (
+            <Card as="section" aria-labelledby="documents-heading">
+              <CardHeader>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <CardTitle as="h2" id="documents-heading" className="text-xl">
+                    {t.documents.title}
+                  </CardTitle>
+                  <Badge variant={DOCUMENT_BADGE[documentsStatus]}>{t.documents.status[documentsStatus]}</Badge>
+                </div>
+                {documentsStatus !== "verified" && <p className="text-sm text-muted">{t.documents.description}</p>}
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <DocumentGallery documents={booking.documents} />
+                {documentsStatus === "rejected" && <p className="text-sm text-muted">{t.documents.rejectedHint}</p>}
+                {documentsStatus !== "verified" && booking.status !== "cancelled" && (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      loading={reviewDocuments.isPending && reviewDocuments.variables?.decision === "verified"}
+                      disabled={reviewDocuments.isPending}
+                      onClick={() => reviewDocuments.mutate({ id: booking.id, decision: "verified" })}
+                    >
+                      {booking.status === "pending" ? t.documents.approve : t.documents.approveOnly}
+                    </Button>
+                    {documentsStatus === "pending" && (
+                      <Button
+                        variant="outline"
+                        loading={reviewDocuments.isPending && reviewDocuments.variables?.decision === "rejected"}
+                        disabled={reviewDocuments.isPending}
+                        onClick={() => reviewDocuments.mutate({ id: booking.id, decision: "rejected" })}
+                      >
+                        {t.documents.reject}
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           <BookingSummary data={summaryFromBooking(details)} />
           <p className="text-sm text-muted">{t.priceNote}</p>
 
@@ -108,6 +156,9 @@ export function BookingDetail({ id }: { id: string }) {
               <p>
                 <BookingStatusBadge status={booking.status} />
               </p>
+              {awaitingDocuments && booking.status === "pending" && (
+                <p className="text-sm text-muted">{t.documents.checkFirst}</p>
+              )}
               {nextStatuses.length === 0 ? (
                 <p className="text-sm text-muted">{t.finalStatus}</p>
               ) : (
@@ -145,6 +196,20 @@ export function BookingDetail({ id }: { id: string }) {
                     <dt className="text-sm text-muted">{t.amount}</dt>
                     <dd className="font-medium">{formatCurrency(payment.amount)}</dd>
                   </div>
+                  {payment.downPayment && (
+                    <>
+                      <div>
+                        <dt className="text-sm text-muted">
+                          {t.downPayment(content.enums.paymentMethod[payment.downPayment.method])}
+                        </dt>
+                        <dd className="font-medium">{formatCurrency(payment.downPayment.amount)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-sm text-muted">{t.balance}</dt>
+                        <dd className="font-medium">{formatCurrency(payment.amount - payment.downPayment.amount)}</dd>
+                      </div>
+                    </>
+                  )}
                   <div>
                     <dt className="text-sm text-muted">{t.status}</dt>
                     <dd>

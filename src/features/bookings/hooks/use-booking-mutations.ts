@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { changeBookingStatus, markPaymentReceived } from "@/api/booking-admin";
+import { changeBookingStatus, markPaymentReceived, reviewBookingDocuments } from "@/api/booking-admin";
 import { ApiError } from "@/api/client";
 import { useToast } from "@/components/ui";
 import { content } from "@/content";
@@ -32,9 +32,26 @@ export function useBookingMutations() {
       onError: (error) => {
         refresh();
         toast({
-          title: error instanceof ApiError && error.code === "invalid_transition" ? t.detail.invalidMove : content.admin.common.saveError,
+          title:
+            error instanceof ApiError && error.code === "invalid_transition"
+              ? t.detail.invalidMove
+              : error instanceof ApiError && error.code === "documents_unverified"
+                ? t.detail.documents.checkFirst
+                : content.admin.common.saveError,
           variant: "danger",
         });
+      },
+    }),
+    reviewDocuments: useMutation({
+      mutationFn: ({ id, decision }: { id: string; decision: "verified" | "rejected" }) =>
+        reviewBookingDocuments(id, decision),
+      onSuccess: (_, { decision }) => {
+        refresh();
+        toast({ title: t.detail.documents.saved[decision], variant: decision === "verified" ? "success" : "default" });
+      },
+      onError: () => {
+        refresh();
+        toast({ title: content.admin.common.saveError, variant: "danger" });
       },
     }),
     markPaid: useMutation({

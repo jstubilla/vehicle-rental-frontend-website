@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { Badge, Button, Card, EmptyState, ErrorState, Skeleton } from "@/components/ui";
 import { content } from "@/content";
+import { formatCurrency } from "@/lib/currency";
 import { useBookingDetails } from "../hooks/use-booking-details";
 import { useBookingFlow } from "../hooks/use-booking-flow";
 import { summaryFromBooking } from "../summary";
@@ -46,8 +47,14 @@ export function Confirmation({ reference }: { reference: string }) {
     );
   }
 
-  const { booking } = query.data;
+  const { booking, payment } = query.data;
   const confirmed = booking.status !== "pending";
+  const balance = payment?.downPayment ? formatCurrency(booking.total - payment.downPayment.amount) : null;
+  const subtitle = !confirmed
+    ? t.subtitlePending(balance)
+    : balance
+      ? t.subtitleDownPayment(balance)
+      : t.subtitleConfirmed;
 
   return (
     <div className="flex max-w-narrow flex-col gap-8 transition-[opacity,transform] duration-(--duration-modal) ease-out-strong starting:translate-y-1.5 starting:opacity-0">
@@ -55,7 +62,7 @@ export function Confirmation({ reference }: { reference: string }) {
         <h1 className="text-4xl font-extrabold tracking-display md:text-5xl">
           {confirmed ? t.titleConfirmed : t.titlePending}
         </h1>
-        <p className="text-lg text-muted">{confirmed ? t.subtitleConfirmed : t.subtitlePending}</p>
+        <p className="text-lg text-muted">{subtitle}</p>
       </div>
 
       {/* The reference is what people keep from this page, so it is the raised object on it. */}

@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Alert, Button, Card, CardContent, Checkbox, FieldGroup, NewTabLink, RadioGroup } from "@/components/ui";
+import { Alert, Button, Card, CardContent, Checkbox, FieldGroup, NewTabLink, Price, RadioGroup } from "@/components/ui";
 import { content } from "@/content";
 import { formatCurrency } from "@/lib/currency";
-import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/constants";
+import { ONLINE_PAYMENT_METHODS, PAYMENT_METHODS, type OnlinePaymentMethod, type PaymentMethod } from "@/lib/constants";
+import { splitDownPayment } from "@/lib/pricing";
 import { SHOW_MOCK_CONTROLS } from "@/lib/site";
 import { useBookingQuote } from "../hooks/use-booking-quote";
 import { usePaymentStep } from "../hooks/use-payment-step";
@@ -25,14 +26,64 @@ const ERROR_ACTION_PATH = {
 } as const;
 
 /** Explains what will happen for the chosen method. No card fields: card data never touches this site. */
-function MethodNotice({ method }: { method: PaymentMethod }) {
-  const text =
-    method === "card"
-      ? t.cardNotice
-      : method === "pay_at_pickup"
-        ? t.pickupNotice
-        : t.redirectNotice(content.enums.paymentMethod[method]);
+function MethodNotice({ method }: { method: OnlinePaymentMethod }) {
+  const text = method === "card" ? t.cardNotice : t.redirectNotice(content.enums.paymentMethod[method]);
   return <p className="rounded-md bg-surface-muted p-4 text-sm">{text}</p>;
+}
+
+/** "Pay at pick-up": what is paid now and at pick-up, and how the down payment is paid. */
+function DownPaymentPanel({
+  total,
+  method,
+  onMethodChange,
+  disabled,
+}: {
+  total: number;
+  method: OnlinePaymentMethod;
+  onMethodChange: (method: OnlinePaymentMethod) => void;
+  disabled: boolean;
+}) {
+  const { downPayment, balance } = splitDownPayment(total);
+  return (
+    <section aria-labelledby="down-payment-heading" className="flex flex-col gap-5 rounded-md border border-border p-4 md:p-6">
+      <div className="flex flex-col gap-1">
+        <h2 id="down-payment-heading" className="text-lg">
+          {t.downPayment.title}
+        </h2>
+        <p className="text-sm text-muted">{t.downPayment.description}</p>
+      </div>
+
+      <dl className="grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-1 rounded-md bg-surface-muted p-4">
+          <dt className="text-sm text-muted">{t.downPayment.dueNow}</dt>
+          <dd>
+            <Price amount={downPayment} size="lg" exact />
+          </dd>
+        </div>
+        <div className="flex flex-col gap-1 rounded-md border border-border p-4">
+          <dt className="text-sm text-muted">{t.downPayment.dueAtPickup}</dt>
+          <dd>
+            <Price amount={balance} size="lg" tone="plain" exact />
+          </dd>
+        </div>
+      </dl>
+
+      <FieldGroup label={t.downPayment.methodLabel}>
+        <RadioGroup
+          name="down-payment-method"
+          value={method}
+          onValueChange={(value) => onMethodChange(value as OnlinePaymentMethod)}
+          options={ONLINE_PAYMENT_METHODS.map((value) => ({
+            value,
+            label: t.methods[value].label,
+            disabled,
+          }))}
+        />
+      </FieldGroup>
+
+      <MethodNotice method={method} />
+    </section>
+  );
 }
 
 /** Step 5, the last one: pay and confirm the booking in one action. */
@@ -46,7 +97,9 @@ export function PaymentStep() {
   if (!ready || !quote) return <StepSkeleton />;
 
   const busy = payment.isBusy;
+  const payAtPickup = payment.method === "pay_at_pickup";
   const amount = formatCurrency(quote.total);
+  const downPayment = formatCurrency(splitDownPayment(quote.total).downPayment);
 
   function onPay() {
     if (!accepted) {
@@ -85,9 +138,18 @@ export function PaymentStep() {
           />
         </FieldGroup>
 
-        <MethodNotice method={payment.method} />
+        {payAtPickup ? (
+          <DownPaymentPanel
+            total={quote.total}
+            method={payment.downPaymentMethod}
+            onMethodChange={payment.selectDownPaymentMethod}
+            disabled={busy}
+          />
+        ) : (
+          <MethodNotice method={payment.method as OnlinePaymentMethod} />
+        )}
 
-        {SHOW_MOCK_CONTROLS && payment.method !== "pay_at_pickup" && (
+        {SHOW_MOCK_CONTROLS && (
           <Card variant="muted">
             <CardContent className="pt-4 md:pt-6">
               <FieldGroup label={t.demo.title} hint={t.demo.description}>
@@ -154,14 +216,14 @@ export function PaymentStep() {
 
         <StepActions backHref={previousStepPath("payment")}>
           <Button size="lg" variant="accent" loading={busy} onClick={onPay}>
-            {payment.method === "pay_at_pickup" ? t.confirmPickup : payment.failure ? t.tryAgain : t.pay(amount)}
+            {payment.failure ? t.tryAgain : payAtPickup ? t.payDownPayment(downPayment) : t.pay(amount)}
           </Button>
         </StepActions>
       </div>
 
       <aside className="order-first min-w-0 lg:order-none lg:col-span-1">
         <BookingSummary
-          data={summaryFromFlow({ state, vehicle, quote })}
+          data={summaryFromFlow({ state, vehicle, quote, payAtPickup })}
           collapsible
           className="lg:sticky lg:top-24"
         />

@@ -1,6 +1,6 @@
 import type { BookingDetails } from "@/api/bookings";
 import { content } from "@/content";
-import type { Quote } from "@/lib/pricing";
+import { splitDownPayment, type Quote } from "@/lib/pricing";
 import type { Vehicle } from "@/types";
 import type { FlowState } from "./flow-store";
 
@@ -24,6 +24,11 @@ export interface SummaryData {
   driverRate: number | null;
   driverTotal: number | null;
   total: number | null;
+  /**
+   * "Pay at pick-up": the down payment and the balance left for pick-up. `paidWith` is set once
+   * the down payment has been paid (on a saved booking).
+   */
+  downPayment: { amount: number; balance: number; paidWith: string | null } | null;
   /** The person who booked (their contact details), not the hired driver. */
   renter: { name: string; email: string; phone: string } | null;
   payment: string | null;
@@ -42,12 +47,16 @@ export function summaryFromFlow({
   state,
   vehicle,
   quote,
+  payAtPickup = false,
 }: {
   state: FlowState;
   vehicle: Vehicle | null;
   quote: Quote | null;
+  /** True on the payment step while "Pay at pick-up" is chosen. */
+  payAtPickup?: boolean;
 }): SummaryData {
   const rental = state.rental;
+  const split = quote && payAtPickup ? splitDownPayment(quote.total) : null;
   return {
     vehicle: vehicle ? { name: vehicle.name, meta: vehicleMeta(vehicle) } : null,
     pickup: rental ? { location: rental.pickupLocation, date: rental.pickupDate, time: rental.pickupTime } : null,
@@ -61,6 +70,7 @@ export function summaryFromFlow({
     driverRate: quote?.withDriver ? quote.driverRate : null,
     driverTotal: quote?.withDriver ? quote.driverTotal : null,
     total: quote?.total ?? null,
+    downPayment: split ? { amount: split.downPayment, balance: split.balance, paidWith: null } : null,
     renter: state.customer,
     payment: null,
   };
@@ -79,6 +89,13 @@ export function summaryFromBooking({ booking, vehicle, customer, payment }: Book
     driverRate: booking.withDriver ? booking.driverRate : null,
     driverTotal: booking.withDriver ? booking.driverTotal : null,
     total: booking.total,
+    downPayment: payment?.downPayment
+      ? {
+          amount: payment.downPayment.amount,
+          balance: booking.total - payment.downPayment.amount,
+          paidWith: content.enums.paymentMethod[payment.downPayment.method],
+        }
+      : null,
     renter: { name: customer.name, email: customer.email, phone: customer.phone },
     payment: payment ? content.enums.paymentMethod[payment.method] : null,
   };

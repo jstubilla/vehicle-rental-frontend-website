@@ -4,6 +4,27 @@ import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
 import { addDaysISO, todayISO } from "../src/lib/dates";
 
+/** A 1×1 PNG, standing in for a phone photo of an ID. */
+const SAMPLE_PHOTO_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+const samplePhoto = { fileName: "photo.png", dataUrl: `data:image/png;base64,${SAMPLE_PHOTO_BASE64}` };
+
+/** The three booking documents, already uploaded, for tests that start mid-flow. */
+export const SAMPLE_DOCUMENTS = { validId: samplePhoto, proofOfBilling: samplePhoto, driversLicense: samplePhoto };
+
+/** Uploads a photo for each document on the "Your details" step. */
+export async function uploadDocuments(page: Page): Promise<void> {
+  for (const kind of ["validId", "proofOfBilling", "driversLicense"] as const) {
+    const label = content.booking.documents.kinds[kind].label;
+    await page.getByLabel(label, { exact: true }).setInputFiles({
+      name: `${kind}.png`,
+      mimeType: "image/png",
+      buffer: Buffer.from(SAMPLE_PHOTO_BASE64, "base64"),
+    });
+    await expect(page.getByText(`${kind}.png`)).toBeVisible();
+  }
+}
+
 /** An ISO date N days from today in Manila time, the same clock the site uses. */
 export const dateFromToday = (days: number): string => addDaysISO(todayISO(), days);
 

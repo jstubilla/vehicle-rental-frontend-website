@@ -163,6 +163,32 @@ export function BookingSummary({
                       className={cn("justify-items-end text-right", totalChange)}
                     />
                   </div>
+                  {data.downPayment && (
+                    <div className="flex flex-col gap-2 rounded-md bg-surface-muted p-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <p>{data.downPayment.paidWith ? t.downPaymentPaid(data.downPayment.paidWith) : t.downPayment}</p>
+                        <Price
+                          key={data.downPayment.amount}
+                          amount={data.downPayment.amount}
+                          size="sm"
+                          tone="plain"
+                          exact
+                          className={cn("shrink-0 justify-items-end text-right", totalChange)}
+                        />
+                      </div>
+                      <div className="flex items-start justify-between gap-4">
+                        <p>{t.balance}</p>
+                        <Price
+                          key={data.downPayment.balance}
+                          amount={data.downPayment.balance}
+                          size="sm"
+                          tone="plain"
+                          exact
+                          className={cn("shrink-0 justify-items-end text-right", totalChange)}
+                        />
+                      </div>
+                    </div>
+                  )}
                   <p className="text-sm text-muted">{t.pricesNote}</p>
                 </div>
               )}

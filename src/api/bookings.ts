@@ -1,7 +1,8 @@
-import { buildQuote, offersDriver } from "@/lib/pricing";
+import type { OnlinePaymentMethod, PaymentMethod } from "@/lib/constants";
+import { buildQuote, offersDriver, splitDownPayment } from "@/lib/pricing";
 import { countRentalDays } from "@/lib/rental";
 import { newId, readTable, writeTable } from "@/mocks/store";
-import type { Activity, Booking, Customer, Payment, Vehicle } from "@/types";
+import type { Activity, Booking, BookingDocuments, Customer, Payment, Vehicle } from "@/types";
 import { saveSignedInDetails } from "./account";
 import { ApiError, simulateNetwork } from "./client";
 import { processPayment, type PaymentFailureCode, type PaymentRequest } from "./payments";
@@ -18,8 +19,17 @@ export interface CreateBookingInput {
   /** "With a driver". Ignored for a vehicle that does not offer one (motorcycles). */
   withDriver: boolean;
   customer: { name: string; email: string; phone: string; licenseNumber: string; notes: string };
-  /** How the visitor chose to pay. The charge happens inside createBooking, see /src/api/payments.ts. */
-  payment: Pick<PaymentRequest, "method" | "mockOutcome">;
+  /** Photos of the customer's valid ID, proof of billing and driver's license, for staff to check. */
+  documents: BookingDocuments;
+  /**
+   * How the visitor chose to pay. The charge happens inside createBooking, see /src/api/payments.ts.
+   * "Pay at pick-up" charges the down payment now with `downPaymentMethod`.
+   */
+  payment: {
+    method: PaymentMethod;
+    downPaymentMethod?: OnlinePaymentMethod;
+    mockOutcome?: PaymentRequest["mockOutcome"];
+  };
   /** The total the visitor was shown. If the price is different now, nothing is charged. */
   expectedTotal: number;
 }
@@ -68,7 +78,15 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     throw new ApiError("The price has changed", 409, "price_changed");
   }
 
-  const payment = await processPayment({ ...input.payment, amount: quote.total });
+  // Pay at pick-up: only the down payment is charged now; the balance is paid at pick-up.
+  const payAtPickup = input.payment.method === "pay_at_pickup";
+  const downPaymentMethod = input.payment.downPaymentMethod ?? "card";
+  const { downPayment } = splitDownPayment(quote.total);
+  const payment = await processPayment({
+    method: payAtPickup ? downPaymentMethod : (input.payment.method as OnlinePaymentMethod),
+    amount: payAtPickup ? downPayment : quote.total,
+    mockOutcome: input.payment.mockOutcome,
+  });
   if (payment.status === "failed") {
     return { status: "payment_failed", failureCode: payment.failureCode ?? "declined" };
   }
@@ -103,10 +121,11 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   const paymentRecord: Payment = {
     id: paymentId,
     bookingId,
-    method: payment.method,
+    method: input.payment.method,
     amount: quote.total,
-    status: payment.status === "paid" ? "paid" : "pending",
+    status: payAtPickup ? "pending" : "paid",
     providerRef: payment.providerRef,
+    downPayment: payAtPickup ? { method: downPaymentMethod, amount: downPayment } : null,
     createdAt: now,
   };
 
@@ -128,8 +147,12 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     driverRate: quote.driverRate,
     driverTotal: quote.driverTotal,
     total: quote.total,
-    // Paid online = confirmed. Pay at pick-up waits for staff to confirm.
-    status: payment.status === "paid" ? "confirmed" : "pending",
+    // Paid (in full or by down payment), but staff check the customer's documents before confirming.
+    status: "pending",
+    // FILE STORAGE GOES HERE: a real backend uploads these to PRIVATE storage that only staff can
+    // read (signed, expiring links) and stores only the file keys on the booking.
+    documents: input.documents,
+    documentsStatus: "pending",
     paymentId,
     notes: input.customer.notes,
     createdAt: now,
@@ -172,7 +195,8 @@ export interface BookingDetails {
 export async function getBookingByReference(reference: string): Promise<BookingDetails | null> {
   await simulateNetwork();
   const booking = readTable("bookings").find((b) => b.reference.toLowerCase() === reference.toLowerCase());
-  return booking ? toBookingDetails(booking) : null;
+  // The customer's ID photos are for staff only; the public confirmation page never receives them.
+  return booking ? toBookingDetails({ ...booking, documents: null }) : null;
 }
 
 /** Joins a booking with its vehicle, customer and payment. Shared with the admin screens. */

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { content } from "../src/content";
 import { formatCurrency } from "../src/lib/currency";
 import { DRIVER_DAILY_RATE } from "../src/lib/pricing";
-import { dateFromToday, pageAlerts, visit } from "./helpers";
+import { dateFromToday, loginAs, pageAlerts, uploadDocuments, visit } from "./helpers";
 
 const b = content.booking;
 
@@ -20,6 +20,7 @@ async function fillDetails(page: Page) {
   await page.getByLabel(b.details.email).fill("lorenzo.b@example.com");
   await page.getByLabel(b.details.phone).fill("0917 555 0142");
   await page.getByLabel(b.details.license).fill("N21-25-778899");
+  await uploadDocuments(page);
   await page.getByRole("button", { name: b.common.continue }).click();
 }
 
@@ -91,7 +92,8 @@ test("a visitor completes all six steps, including a declined payment", async ({
   await test.step("Step 3: empty details show errors, then valid details continue", async () => {
     await expect(page).toHaveURL(/\/book\/details/);
     await page.getByRole("button", { name: b.common.continue }).click();
-    await expect(pageAlerts(page)).toHaveCount(4);
+    // Four fields plus the three document photos.
+    await expect(pageAlerts(page)).toHaveCount(7);
     await fillDetails(page);
   });
 
@@ -134,7 +136,7 @@ test("a visitor completes all six steps, including a declined payment", async ({
 
   await test.step("Step 6: the confirmation shows a booking reference", async () => {
     await expect(page).toHaveURL(/\/book\/confirmation\/RC-[A-Z2-9]{6}$/);
-    await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
     await expect(page.getByText(/^RC-[A-Z2-9]{6}$/)).toBeVisible();
     await expect(page.getByRole("region", { name: b.summary.title })).toContainText(formatCurrency(5400));
     const progress = page.getByRole("navigation", { name: content.ui.stepper.label });
@@ -144,7 +146,7 @@ test("a visitor completes all six steps, including a declined payment", async ({
     );
     // The booking is kept, so a reload still shows it.
     await page.reload();
-    await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
   });
 
   await test.step("Booking is open: the same car can be booked again for the same dates", async () => {
@@ -171,18 +173,48 @@ test("a visitor can use a Google Maps link instead of typing an address", async 
   await expect(page.getByLabel(b.dates.returnLocation)).toHaveValue("456 Sample St, Quezon City");
 });
 
-test("paying at pick-up leaves the booking pending", async ({ page }) => {
+test("paying at pick-up takes a 10% down payment now and leaves the balance for pick-up", async ({ page }) => {
+  // Hatchback at 1,600/day for 2 days = 3,200: 320 now, 2,880 at pick-up.
   await reachPayment(page, "hatchback", 30, 2);
 
   await page.getByRole("radio", { name: new RegExp(b.payment.methods.pay_at_pickup.label) }).check();
-  await expect(page.getByText(b.payment.pickupNotice)).toBeVisible();
-  // Nothing is charged, so the demo "decline" control is not offered.
-  await expect(page.getByLabel(b.payment.demo.decline)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: b.payment.downPayment.title })).toBeVisible();
+  await page
+    .getByRole("group", { name: b.payment.downPayment.methodLabel })
+    .getByRole("radio", { name: b.payment.methods.gcash.label })
+    .check();
   await page.getByLabel(b.payment.terms).check();
-  await page.getByRole("button", { name: b.payment.confirmPickup }).click();
+  await page.getByRole("button", { name: b.payment.payDownPayment(formatCurrency(320)) }).click();
 
   await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
-  await expect(page.getByText(content.enums.bookingStatus.pending, { exact: true })).toBeVisible();
+  await expect(page.getByText(b.confirmation.subtitlePending(formatCurrency(2880)))).toBeVisible();
+});
+
+test("staff check the customer's documents before the booking is confirmed", async ({ page }) => {
+  await reachPayment(page, "hatchback", 30, 2);
+  await page.getByLabel(b.payment.terms).check();
+  await page.getByRole("button", { name: b.payment.pay(formatCurrency(3200)) }).click();
+  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
+  const reference = page.url().split("/").pop()!;
+
+  const d = content.admin.bookings.detail;
+  await loginAs(page);
+  await visit(page, `/admin/bookings?q=${reference}`);
+  await page.getByRole("link", { name: reference }).click();
+
+  const documents = page.getByRole("region", { name: d.documents.title });
+  await expect(documents.getByText(d.documents.status.pending)).toBeVisible();
+  // Confirming is only offered through the documents.
+  const status = page.getByRole("region", { name: d.status, exact: true });
+  await expect(status.getByRole("button", { name: d.actions.confirmed })).toHaveCount(0);
+
+  await documents.getByRole("button", { name: b.documents.view(b.documents.kinds.validId.label) }).click();
+  await expect(page.getByRole("dialog").getByRole("img", { name: b.documents.kinds.validId.label })).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  await documents.getByRole("button", { name: d.documents.approve }).click();
+  await expect(documents.getByText(d.documents.status.verified)).toBeVisible();
+  await expect(status.getByText(content.enums.bookingStatus.confirmed, { exact: true })).toBeVisible();
 });
 
 test("later steps cannot be opened before the earlier ones are done", async ({ page }) => {
@@ -220,7 +252,7 @@ test("a price change before paying charges nothing and asks the visitor to check
   await page.getByRole("link", { name: b.check.toPayment }).click();
   await page.getByLabel(b.payment.terms).check();
   await page.getByRole("button", { name: b.payment.pay(formatCurrency(3400)) }).click();
-  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
   expect(await savedCounts(page)).toEqual({ bookings: 16, payments: 16 });
 });
 
@@ -238,7 +270,7 @@ test("a visitor books a car With a driver, charged for every rental day", async 
   await page.getByLabel(b.payment.terms).check();
   await page.getByRole("button", { name: b.payment.pay(formatCurrency(5400 + driverTotal)) }).click();
 
-  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titleConfirmed })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
   const confirmed = page.getByRole("region", { name: b.summary.title });
   await expect(confirmed).toContainText(b.driverOption.withDriver);
   await expect(confirmed).toContainText(formatCurrency(5400 + driverTotal));

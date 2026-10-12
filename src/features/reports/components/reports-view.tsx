@@ -27,7 +27,7 @@ import {
 } from "@/components/ui";
 import { content } from "@/content";
 import { LEAD_STAGES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/currency";
+import { formatCurrency, formatPhp, formatPhpCompact, formatUsd } from "@/lib/currency";
 import { formatMonth } from "@/lib/dates";
 import { RANGE_PRESETS, type ReportData } from "@/lib/reports";
 import { useReport } from "../hooks/use-report";
@@ -77,11 +77,20 @@ function Reports({ report }: { report: ReportData }) {
     <>
       <section aria-label={t.summary.label}>
         <h2 className="sr-only">{t.summary.label}</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard label={t.summary.leads} value={report.totalLeads} hint={t.summary.leadsHint} />
           <StatCard label={t.summary.customers} value={report.totalCustomers} hint={t.summary.customersHint} />
           <StatCard label={t.summary.bookings} value={report.totalBookings} hint={t.summary.bookingsHint} />
-          <StatCard label={t.summary.revenue} value={formatCurrency(report.totalRevenue)} hint={t.summary.revenueHint} />
+          <StatCard
+            label={t.summary.revenue}
+            value={
+              <>
+                {formatPhp(report.totalRevenue, { exact: true })}
+                <span className="block text-base font-normal text-muted">{formatUsd(report.totalRevenue)}</span>
+              </>
+            }
+            hint={t.summary.revenueHint}
+          />
         </div>
       </section>
 
@@ -165,6 +174,7 @@ function Reports({ report }: { report: ReportData }) {
             categories={months}
             series={[{ name: t.revenue.revenue, values: report.bookingsByMonth.map((e) => e.revenue) }]}
             formatValue={formatCurrency}
+            formatLabel={formatPhpCompact}
           />
         }
         table={
