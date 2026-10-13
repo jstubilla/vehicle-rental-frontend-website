@@ -1,0 +1,20 @@
+-- Data the live site needs from day one (not demo data): the business-wide rates and the 8 vehicle types.
+-- Copied from frontend/src/lib/pricing.ts, frontend/src/lib/booking-status.ts and frontend/src/mocks/vehicles.ts.
+-- Staff change rates and prices afterwards; re-running this migration is not needed.
+
+insert into public.settings (driver_daily_rate, down_payment_rate, payment_deadline_hours)
+values (1000, 0.10, 24)
+on conflict (id) do nothing;
+
+-- Photos are served by the website from frontend/public/images/vehicles.
+insert into public.vehicles (slug, name, category, examples, seats, price_per_day, status, featured, images, sort_order)
+values
+  ('suv', 'SUV', 'suv', 'Toyota Fortuner, Mitsubishi Montero, Ford Everest, Nissan Terra or similar', 7, 4000, 'available', true, '[{"src":"/images/vehicles/suv-front.jpg","alt":"SUV, front corner view","label":"SUV photo","ratio":"photo","credit":{"author":"Ethan Llamas","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:Toyota_Fortuner_2.8_Q_2022.jpg"}}]'::jsonb, 1),
+  ('mpv', 'Multi-purpose Vehicle (MPV)', 'mpv', 'Toyota Avanza, Mitsubishi Xpander, Hyundai Stargazer, Toyota Innova or similar', 8, 2600, 'available', true, '[{"src":"/images/vehicles/mpv-front.jpg","alt":"Multi-purpose Vehicle (MPV), front corner view","label":"Multi-purpose Vehicle (MPV) photo","ratio":"photo","credit":{"author":"Ethan Llamas","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:Toyota_Innova_GUN143_FL_2.8_XE_Black.jpg"}}]'::jsonb, 2),
+  ('sedan', 'Sedan', 'sedan', 'Toyota Vios, Mitsubishi Mirage, Suzuki Dzire, Toyota Ativ or similar', 5, 1800, 'available', true, '[{"src":"/images/vehicles/sedan-front.jpg","alt":"Sedan, front corner view","label":"Sedan photo","ratio":"photo","credit":{"author":"Zotyefan","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:Toyota_Vios_IMG001.jpg"}}]'::jsonb, 3),
+  ('hatchback', 'Hatchback', 'hatchback', 'Toyota Wigo or similar', 5, 1600, 'available', false, '[{"src":"/images/vehicles/hatchback-front.jpg","alt":"Hatchback, front corner view","label":"Hatchback photo","ratio":"photo","credit":{"author":"Ethan Llamas","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:Toyota_Wigo_1.0_TRD_S_2022.jpg"}}]'::jsonb, 4),
+  ('van', 'Van', 'van', 'Toyota Commuter, Toyota HiAce, Toyota Grandia, Nissan NV350 or similar', 15, 4500, 'available', true, '[{"src":"/images/vehicles/van-front.jpg","alt":"Van, front corner view","label":"Van photo","ratio":"photo","credit":{"author":"Wide Awake!","license":"CC BY 4.0","href":"https://commons.wikimedia.org/wiki/File:2024_Toyota_Hiace_GL_Grandia_in_P._Burgos_Street_(2025-04-18).jpg"}}]'::jsonb, 5),
+  ('pickup', 'Pick-up truck', 'pickup', 'Toyota Hilux or similar', 5, 3500, 'available', false, '[{"src":"/images/vehicles/pickup-front.jpg","alt":"Pick-up truck, front corner view","label":"Pick-up truck photo","ratio":"photo","credit":{"author":"Ethan Llamas","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:Toyota_Hilux_GUN135_FL2_2.4_G_4x2_Prerunner_Attitude_Black_Mica_01.jpg"}}]'::jsonb, 6),
+  ('125cc', 'Motorcycle (125cc and below)', '125cc', 'Honda Click 125i or similar', null, 550, 'available', false, '[{"src":"/images/vehicles/125cc-front.jpg","alt":"Motorcycle (125cc and below), front corner view","label":"Motorcycle (125cc and below) photo","ratio":"photo","credit":{"author":"オーバードライブ83","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:2018_Honda_Vario_125_CBS_(20211017).jpg"}}]'::jsonb, 7),
+  ('150cc', 'Motorcycle (150cc–160cc)', '150cc', 'Yamaha Aerox 155 or similar', null, 700, 'available', false, '[{"src":"/images/vehicles/150cc-front.jpg","alt":"Motorcycle (150cc–160cc), front corner view","label":"Motorcycle (150cc–160cc) photo","ratio":"photo","credit":{"author":"Chanokchon","license":"CC BY-SA 4.0","href":"https://commons.wikimedia.org/wiki/File:2025_Yamaha_Aerox_155_ABS.jpg"}}]'::jsonb, 8)
+on conflict (slug) do nothing;
