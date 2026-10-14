@@ -37,7 +37,7 @@ export function isPaymentOverdue(booking: { approvedAt?: string | null }, now = 
 
 /** A booking request whose photos staff still have to approve or reject. */
 export function isWaitingForDocumentCheck(booking: { status: BookingStatus; documentsStatus?: string | null; documents?: unknown }): boolean {
-  return booking.status === "pending" && Boolean(booking.documents) && booking.documentsStatus === "pending";
+  return booking.status === "pending" && booking.documentsStatus === "pending";
 }
 
 /**

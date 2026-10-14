@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./test";
 import { content } from "../src/content";
 import { VEHICLE_CATEGORIES } from "../src/lib/constants";
-import { seedVehicles } from "../src/mocks/vehicles";
+import { seedVehicles } from "./fixtures/vehicles";
 import { expectNoA11yViolations, visit } from "./helpers";
 
 test("the catalog lists types of vehicle, each with an example that says 'or similar'", async ({ page }) => {

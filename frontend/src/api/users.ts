@@ -1,30 +1,27 @@
-import { newId, readTable, writeTable } from "@/mocks/store";
 import type { User } from "@/types";
-import { assertAdmin } from "./auth";
-import { ApiError, simulateNetwork } from "./client";
+import { requireStaff } from "./auth";
+import { ApiError, toApiError, unwrap, type ApiErrorCode } from "./client";
+import { toUser, type StaffRow } from "./rows";
+import { db } from "./supabase";
 
 /**
- * Staff list, used for "assigned to" pickers and to show who wrote an activity.
- * Any signed-in staff member may read it.
+ * Staff accounts. Reading and switching accounts on or off happen directly in the database, which
+ * also refuses to deactivate yourself or the last active account. Adding someone (an email
+ * invitation) and changing a sign-in email need the service-role key, so they go through the server
+ * (src/app/api/staff/route.ts).
  */
-export async function listUsers(): Promise<User[]> {
-  await simulateNetwork();
-  return readTable("users");
-}
 
-/** Refuses a change that would leave nobody able to sign in (everyone locked out). */
-export function assertSomeoneActive(users: User[]): void {
-  if (!users.some((user) => user.active)) {
-    throw new ApiError("At least one account must stay active", 409, "last_admin");
-  }
+/** Staff list, used for "assigned to" pickers and to show who wrote an activity. */
+export async function listUsers(): Promise<User[]> {
+  await requireStaff();
+  return (unwrap(await db().from("staff").select("*")) as StaffRow[]).map(toUser);
 }
 
 /* ---------- Staff accounts (Users screen) ---------- */
 
 export async function listStaff(): Promise<User[]> {
-  assertAdmin();
-  await simulateNetwork();
-  return readTable("users").sort((a, b) => a.name.localeCompare(b.name));
+  await requireStaff();
+  return (unwrap(await db().from("staff").select("*").order("name")) as StaffRow[]).map(toUser);
 }
 
 export interface UserInput {
@@ -33,62 +30,36 @@ export interface UserInput {
   active: boolean;
 }
 
-function assertEmailFree(users: User[], email: string, exceptId?: string) {
-  if (users.some((u) => u.id !== exceptId && u.email.toLowerCase() === email)) {
-    throw new ApiError("Another user already has this email", 409, "duplicate_email");
+async function callStaffRoute(method: "POST" | "PATCH", body: object): Promise<User> {
+  const response = await fetch("/api/staff", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const result = (await response.json().catch(() => null)) as
+    | { user: StaffRow }
+    | { error: { message: string; code: ApiErrorCode } }
+    | null;
+  if (!result || "error" in result) {
+    throw new ApiError(result?.error.message ?? "Could not save the user", response.status, result?.error.code ?? "unknown");
   }
+  return toUser(result.user);
 }
 
+/** Adds a staff member and emails them an invitation to choose their password. */
 export async function createUser(input: UserInput): Promise<User> {
-  assertAdmin();
-  await simulateNetwork();
-
-  const users = readTable("users");
-  const email = input.email.trim().toLowerCase();
-  assertEmailFree(users, email);
-
-  const user: User = {
-    id: newId("usr"),
-    name: input.name.trim(),
-    email,
-    active: input.active,
-    createdAt: new Date().toISOString(),
-  };
-  writeTable("users", [user, ...users]);
-  return user;
+  return callStaffRoute("POST", input);
 }
 
 export async function updateUser(id: string, input: UserInput): Promise<User> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const users = readTable("users");
-  const existing = users.find((u) => u.id === id);
-  if (!existing) throw new ApiError("User not found", 404, "not_found");
-  const email = input.email.trim().toLowerCase();
-  assertEmailFree(users, email, id);
-  if (session.userId === id && !input.active) throw new ApiError("You cannot deactivate yourself", 409, "self_deactivate");
-
-  const updated: User = { ...existing, name: input.name.trim(), email, active: input.active };
-  const next = users.map((u) => (u.id === id ? updated : u));
-  assertSomeoneActive(next);
-  writeTable("users", next);
-  return updated;
+  return callStaffRoute("PATCH", { id, ...input });
 }
 
 /** Turns an account off or back on. Deactivated people cannot sign in; their records stay. */
 export async function setUserActive(id: string, active: boolean): Promise<User> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const users = readTable("users");
-  const existing = users.find((u) => u.id === id);
-  if (!existing) throw new ApiError("User not found", 404, "not_found");
-  if (session.userId === id && !active) throw new ApiError("You cannot deactivate yourself", 409, "self_deactivate");
-
-  const updated: User = { ...existing, active };
-  const next = users.map((u) => (u.id === id ? updated : u));
-  assertSomeoneActive(next);
-  writeTable("users", next);
-  return updated;
+  await requireStaff();
+  const { data, error } = await db().from("staff").update({ active }).eq("id", id).select("*").maybeSingle();
+  if (error) throw toApiError(error);
+  if (!data) throw new ApiError("User not found", 404, "not_found");
+  return toUser(data as StaffRow);
 }

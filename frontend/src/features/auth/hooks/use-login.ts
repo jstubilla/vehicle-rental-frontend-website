@@ -49,10 +49,5 @@ export function useLogin() {
     onSubmit: form.handleSubmit((values) => mutation.mutate(values)),
     isSubmitting: mutation.isPending || mutation.isSuccess,
     errorCode: errorCode as keyof typeof content.admin.login.errors | null,
-    /** Fills the form with a demo account (demo only). */
-    fill: (email: string, password: string) => {
-      form.setValue("email", email);
-      form.setValue("password", password);
-    },
   };
 }

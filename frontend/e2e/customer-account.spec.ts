@@ -1,7 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
-import { seedBookings } from "../src/mocks/bookings";
-import { seedCustomers } from "../src/mocks/customers";
+import { seedAccounts } from "./fixtures/accounts";
+import { seedBookings } from "./fixtures/bookings";
+import { seedCustomers } from "./fixtures/customers";
+import { latestLoginCode } from "./mail";
 import { addApprovedBooking, dateFromToday, expectNoA11yViolations, pageAlerts, uploadDocuments, visit } from "./helpers";
 
 const t = content.account.login;
@@ -14,11 +16,19 @@ const passwordBox = (page: Page) => page.locator("input[type=password]");
 const greeting = (page: Page, firstName: string) => page.getByText(nav.hello(firstName));
 const loginLink = (page: Page) => page.getByRole("banner").getByRole("link", { name: nav.login });
 
+/** The seeded website customer (backend/supabase/seed.sql). */
+const demo = seedAccounts[0];
+
+async function fillDemoLogin(page: Page) {
+  await emailBox(page).fill(demo.email);
+  await passwordBox(page).fill(demo.password);
+  await page.getByRole("button", { name: t.submit }).click();
+}
+
 /** Logs in as the demo customer through the real form. */
 async function loginAsDemoCustomer(page: Page, from = "/login") {
   await visit(page, from);
-  await page.getByRole("button", { name: t.demo.use }).click();
-  await page.getByRole("button", { name: t.submit }).click();
+  await fillDemoLogin(page);
   await expect(greeting(page, "Maria")).toBeVisible();
 }
 
@@ -50,7 +60,7 @@ test.describe("signing up", () => {
   test("an email that already has an account is refused", async ({ page }) => {
     await visit(page, "/signup");
     await page.getByLabel(s.name).fill("Someone Else");
-    await page.getByLabel(s.email).fill(t.demo.email);
+    await page.getByLabel(s.email).fill(demo.email);
     await page.getByLabel(s.password).fill("longenough1");
     await page.getByRole("button", { name: s.submit }).click();
     await expect(page.getByText(s.errors.duplicate_email)).toBeVisible();
@@ -84,7 +94,7 @@ test.describe("logging in", () => {
 
   test("a wrong password is refused", async ({ page }) => {
     await visit(page, "/login");
-    await emailBox(page).fill(t.demo.email);
+    await emailBox(page).fill(demo.email);
     await passwordBox(page).fill("not-the-password");
     await page.getByRole("button", { name: t.submit }).click();
     await expect(page.getByText(t.errors.invalid_credentials)).toBeVisible();
@@ -105,9 +115,10 @@ test.describe("logging in", () => {
     await page.getByRole("button", { name: t.sendCode }).click();
     await expect(page.getByText(t.errors.no_account)).toBeVisible();
 
-    await emailBox(page).fill(t.demo.email);
+    const sentAfter = new Date();
+    await emailBox(page).fill(demo.email);
     await page.getByRole("button", { name: t.sendCode }).click();
-    await expect(page.getByText(t.codeSent(t.demo.email))).toBeVisible();
+    await expect(page.getByText(t.codeSent(demo.email))).toBeVisible();
     // Focus lands in the code box.
     await expect(page.getByLabel(t.code)).toBeFocused();
 
@@ -115,19 +126,28 @@ test.describe("logging in", () => {
     await page.getByRole("button", { name: t.verify }).click();
     await expect(pageAlerts(page).filter({ hasText: content.validation.code })).toBeVisible();
 
-    await page.getByLabel(t.code).fill("123456");
+    // A wrong code is refused; the one from the email works.
+    const code = await latestLoginCode(demo.email, sentAfter);
+    await page.getByLabel(t.code).fill(code === "000000" ? "111111" : "000000");
+    await page.getByRole("button", { name: t.verify }).click();
+    await expect(page.getByText(t.errors.invalid_code)).toBeVisible();
+    await page.getByLabel(t.code).fill(code);
     await page.getByRole("button", { name: t.verify }).click();
     await expect(greeting(page, "Maria")).toBeVisible();
   });
 
-  for (const [label, name] of [
-    [t.google, "Google"],
-    [t.apple, "Apple"],
+  for (const [label, provider] of [
+    [t.google, "google"],
+    [t.apple, "apple"],
   ] as const) {
-    test(`"${label}" signs in`, async ({ page }) => {
-      await visit(page, "/login");
+    // The provider's own page can't be tested here: check the visitor is sent to it through Supabase,
+    // with the way back to this site's /auth/callback.
+    test(`"${label}" sends the visitor to ${provider}`, async ({ page }) => {
+      await visit(page, "/login?next=/my-bookings");
+      const leaving = page.waitForRequest((request) => request.url().includes(`/auth/v1/authorize?provider=${provider}`));
       await page.getByRole("button", { name: label }).click();
-      await expect(greeting(page, name)).toBeVisible();
+      const url = new URL((await leaving).url());
+      expect(url.searchParams.get("redirect_to")).toBe("http://localhost:3100/auth/callback?next=%2Fmy-bookings");
     });
   }
 
@@ -145,8 +165,7 @@ test.describe("saved details in the booking", () => {
     await expect(page.getByRole("heading", { name: d.savedDetails.title })).toHaveCount(0);
     await page.getByRole("main").getByRole("link", { name: d.loginPrompt.link }).click();
     await expect(page).toHaveURL(/\/login\?next=%2Fbook%2Fdetails|\/login\?next=\/book\/details/);
-    await page.getByRole("button", { name: t.demo.use }).click();
-    await page.getByRole("button", { name: t.submit }).click();
+    await fillDemoLogin(page);
     await expect(page).toHaveURL(/\/book\/details/);
     await expect(page.getByRole("heading", { name: d.savedDetails.title })).toBeVisible();
   });
@@ -162,7 +181,7 @@ test.describe("saved details in the booking", () => {
     await expect(page.getByRole("heading", { name: d.savedDetails.title })).toHaveCount(0);
     await expect(page.getByLabel(d.name)).toBeFocused();
     await expect(page.getByLabel(d.name)).toHaveValue("Maria Santos");
-    await expect(page.getByLabel(d.email)).toHaveValue(t.demo.email);
+    await expect(page.getByLabel(d.email)).toHaveValue(demo.email);
     await expect(page.getByLabel(d.phone)).toHaveValue("0917 555 0100");
     await expect(page.getByLabel(d.license)).toHaveValue("N01-23-456789");
 
@@ -222,7 +241,7 @@ test.describe("my bookings", () => {
   });
 
   test("a signed-in customer sees their bookings and can pay one that is approved", async ({ page }) => {
-    const maria = seedCustomers.find((customer) => customer.email === t.demo.email)!;
+    const maria = seedCustomers.find((customer) => customer.email === demo.email)!;
     const { reference } = await addApprovedBooking(page, { customerId: maria.id });
     await loginAsDemoCustomer(page);
 
@@ -243,7 +262,7 @@ test.describe("my bookings", () => {
     await needsAction.getByRole("link", { name: mb.payNow }).click();
 
     // Her email is already filled in on the pay page.
-    await expect(page.getByLabel(content.booking.access.email)).toHaveValue(t.demo.email);
+    await expect(page.getByLabel(content.booking.access.email)).toHaveValue(demo.email);
     await page.getByRole("button", { name: content.booking.access.continue }).click();
     await expect(page.getByRole("heading", { level: 1, name: content.booking.payment.title })).toBeVisible();
   });
@@ -276,7 +295,7 @@ for (const theme of ["light", "dark"] as const) {
       await expectNoA11yViolations(page);
 
       await page.getByRole("tab", { name: t.tabCode }).click();
-      await emailBox(page).fill(t.demo.email);
+      await emailBox(page).fill(demo.email);
       await page.getByRole("button", { name: t.sendCode }).click();
       await expect(page.getByLabel(t.code)).toBeVisible();
       await expectNoA11yViolations(page);

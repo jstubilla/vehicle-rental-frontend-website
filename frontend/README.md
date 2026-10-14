@@ -1,10 +1,10 @@
-# Car Rental Co. — front-end skeleton
+# Car Rental Co. — website
 
 A car rental website for **one company**, with a booking flow for visitors and a built-in admin area
-(a small CRM) for staff. This is the **front end only**:
+(a small CRM) for staff.
 
-- **No backend.** All data is fake ("mock") and lives in your browser. Everything is built so the mock
-  can be swapped for a real API later without touching the screens (see [section 5](#5-swapping-the-mocks-for-a-real-api)).
+- **Data lives in Supabase** (the database, sign-in and photo storage), set up in [`../backend`](../backend).
+  The screens reach it only through `src/api` (see [section 5](#5-how-the-data-flows)).
 - **Grayscale wireframe.** The look is a placeholder until the designer's design arrives. The look and
   the function are kept separate, so the design can be applied without breaking anything. See
   [`docs/DESIGN-HANDOFF.md`](docs/DESIGN-HANDOFF.md).
@@ -16,11 +16,14 @@ TanStack Query. Currency is Philippine pesos (PHP) and times are Manila time.
 
 ## 1. Run it
 
-You need [Node.js](https://nodejs.org) 20 or newer. Run every command below from this `frontend/` folder.
+You need [Node.js](https://nodejs.org) 20 or newer, and a Supabase database with the migrations from
+[`../backend`](../backend) applied: your hosted staging project, or a local one (`npx supabase start` in
+`backend/`, which needs Docker and loads the demo data). Run every command below from this `frontend/` folder.
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env.local   # then fill in the Supabase settings (section 8)
 npm run dev
 ```
 
@@ -28,9 +31,6 @@ Open <http://localhost:3000>.
 
 > **Windows PowerShell says "running scripts is disabled"?** Use `npm.cmd` instead of `npm`
 > (for example `npm.cmd run dev`), or run the commands in Command Prompt.
-
-Optional: copy `.env.example` to `.env.local` to change the settings in
-[section 8](#8-settings-environment-variables).
 
 | Command | What it does |
 | --- | --- |
@@ -52,17 +52,21 @@ Optional: copy `.env.example` to `.env.local` to change the settings in
 | `/contact` | Contact form (each message becomes a lead in the admin) |
 | `/review` | Leave a review (private; staff choose which ones show on the home page) |
 | `/privacy`, `/terms` | Placeholder Privacy Policy and Rental Terms (linked from the footer, the payment step and the forms). **Replace them before going live.** |
-| `/login`, `/signup` | Customer accounts (mock). A signed-in customer is asked whether to fill in their saved details when booking |
+| `/login`, `/signup` | Customer accounts. A signed-in customer is asked whether to fill in their saved details when booking |
 | `/admin` | Admin area (sign in first) |
 | `/styleguide` | Every reusable component in one page (for developers) |
 
 ### Signing in to the admin
 
-The login page lists the demo admin account. Every staff account is an **admin** and can do everything:
-there are no roles or permissions. All staff accounts use the password **`demo1234`**.
+Every staff account is an **admin** and can do everything: there are no roles or permissions. A staff
+member is a Supabase sign-in account with an active row in the `staff` table; create the first one as
+described in [`../backend/README.md`](../backend/README.md), then add colleagues on the Users screen (they get
+an invitation email and choose their password at `/admin/set-password`).
 
-The demo accounts and the payment "demo controls" only show while `NEXT_PUBLIC_SHOW_MOCK_CONTROLS` is not
-`false`.
+With the **local** database, the demo data includes staff accounts (for example `admin@carrental.example`)
+and a customer (`maria.santos@example.com`), all with the password **`demo1234`**.
+
+The payment "demo controls" only show while `NEXT_PUBLIC_SHOW_MOCK_CONTROLS` is not `false`.
 
 ---
 
@@ -81,7 +85,7 @@ pages and components is in [`docs/DESIGN-HANDOFF.md`](docs/DESIGN-HANDOFF.md).
 
 | Layer | Where | What it may contain |
 | --- | --- | --- |
-| **Logic** | `src/features/*/hooks`, `src/api`, `src/lib`, `src/mocks` | Data, forms, rules. **No styling at all.** |
+| **Logic** | `src/features/*/hooks`, `src/api`, `src/lib` | Data, forms, rules. **No styling at all.** |
 | **UI kit** | `src/components/ui` | The only place where things get their look. Every value comes from `src/styles/tokens.css`. |
 | **Pages** | `src/app`, `src/features/*/components` | Layout only: what goes where. |
 
@@ -92,10 +96,11 @@ Other folders worth knowing:
 | `src/content/index.ts` | **All wording.** Nothing else contains text that visitors read. |
 | `src/assets/config.ts` | The logo and every image |
 | `src/components/ui/loading-screen.tsx` | The placeholder loading screen, shown on every refresh of the public site (minimum time: `SPLASH_MIN_MS` in `src/lib/site.ts`). Put the company loading animation in its `LoadingAnimation` function (see `docs/DESIGN-HANDOFF.md`) |
-| `src/mocks` | The fake data (8 vehicle types, 20 customers, 15 bookings, 15 leads, and more) |
-| `src/api` | The only door to the data. Every function is `async`, like a real API. |
+| `src/api` | The only door to the data (Supabase). Every function is `async`. |
+| `src/app/api` | The two things only the server may do: record a payment, and invite or edit staff accounts |
 | `src/proxy.ts` | Guards `/admin` (Next.js 16 calls this file a "proxy"; older versions call it "middleware") |
-| `e2e` | The automated browser tests |
+| `e2e` | The automated browser tests, and in `e2e/fixtures` the demo data they expect |
+| `scripts/generate-seed.mjs` | Turns `e2e/fixtures` into the local demo database (`../backend/supabase/seed.sql`) |
 | `docs` | The design handoff guide |
 
 ---
@@ -132,76 +137,54 @@ in `public/images/` and set its `src`.
 
 ## 4. Changing the demo data
 
-The fake database is in `src/mocks`. The first time someone opens the site, a copy of it is saved in
-their browser (`localStorage`). From then on, every change they make, such as a booking, a new lead or
-a price change, is saved there and survives a page reload. Each browser has its **own** copy, and there is
-no sharing between people.
+The **local** database (`npx supabase start` in `backend/`) is filled with demo data: 8 vehicle types,
+20 customers, 15 bookings, 15 leads and more, plus demo sign-in accounts. It comes from
+`../backend/supabase/seed.sql`, which is generated from the test fixtures in `e2e/fixtures`:
 
-- **To start over in your browser:** open the browser's developer tools, go to *Application*, then
-  *Local Storage*, and delete the `car-rental-mock-db-v…` entry. Or open the site in a private window.
-- **After you edit anything in `src/mocks`**, open `src/mocks/store.ts` and add 1 to `SEED_VERSION`.
-  Without this, browsers that already saved the old data keep showing it and your change looks like it
-  did nothing.
-- Pages that must be complete for search engines (the catalog, vehicle pages) are built on the server
-  from the *original* data, then refreshed in the browser with the saved data.
+1. Edit the files in `e2e/fixtures`.
+2. Run `node scripts/generate-seed.mjs` (here, in `frontend/`).
+3. Run `npx supabase db reset` in `backend/` to rebuild the local database with it.
+
+Dates in the demo data are relative to the day it is loaded, so it always looks current. The demo data is
+never loaded into a hosted project.
 
 ---
 
-## 5. Swapping the mocks for a real API
+## 5. How the data flows
 
-Screens never read the mock data directly. They call functions in `src/api` (for example
-`listVehicles()`), and those functions read `src/mocks`. To go live, **rewrite the inside of the `src/api`
-functions to call your server and keep the same names, inputs and results.** No screen should need to
-change.
+Screens never talk to the database directly. They call functions in `src/api` (for example
+`listVehicles()`), which use Supabase (`src/api/supabase.ts`) and convert the rows into the types in
+`src/types/index.ts` (`src/api/rows.ts`).
 
-1. **Set up the base.** `src/api/client.ts` is where the server address, sign-in headers and error handling
-   belong. Add a small `request()` helper there.
-2. **Go file by file.** For each function in `src/api/*.ts`, replace the `readTable(...)` lines with a
-   request, for example:
-
-   ```ts
-   // Before (mock)
-   export async function listVehicles() {
-     await simulateNetwork();
-     return readTable("vehicles").filter((v) => v.status !== "inactive");
-   }
-
-   // After (real API)
-   export async function listVehicles() {
-     return request<Vehicle[]>("/vehicles");
-   }
-   ```
-
-3. **Keep the shapes.** The data types in `src/types/index.ts` describe what the screens expect. Your API
-   should return that shape (dates as ISO text, money as PHP numbers), or you convert it inside `src/api`.
-4. **Report problems with `ApiError`.** Screens react to the *code* in an `ApiError` (for example
-   `vehicle_unavailable`, `price_changed`, `duplicate_email`, `last_admin`). The full list is in
-   `src/api/client.ts`. Have the server return matching codes and throw `new ApiError(message, status, code)`.
-5. **Move the business rules to the server.** The rules in `src/lib` and `src/api` (availability by
-   date, price snapshot, the booking status flow, "last active account" protection, sign-in checks) run in the
-   browser today so the demo works. A real server **must repeat them**, because anything in a browser can
-   be bypassed. `src/lib` can stay for showing the *same* answer to the visitor early (for example the
-   price quote).
-6. **Delete the mock files** once nothing imports them: `src/mocks`, `simulateNetwork`, and `readTable`.
-7. **Server-side use.** Public pages call `src/api` on the Next.js server as well as in the browser. Give your
-   `request()` helper a full server address (from an environment variable) so it works in both places.
-8. Run `npm run test:e2e` against the real API, using a test database that resets. The tests expect the
-   demo data, so seed it the same way.
+- **Who may do what is decided by the database**, not the screens: its row-level security lets visitors
+  read the catalog only, signed-in customers see their own bookings, and active staff do everything. The
+  business rules (prices, the booking status flow, the "last active account" protection) are enforced there
+  too; see [`../backend/README.md`](../backend/README.md).
+- **Visitors' actions** (booking requests, the contact form, reviews, paying, cancelling) call database
+  functions that check everything themselves. The price is always worked out by the database from the
+  current rates.
+- **Booking photos** are uploaded from the browser to a private Storage bucket that only staff can read.
+  Staff see them through links that expire after 10 minutes.
+- **Two things run on the Next.js server** with the secret service-role key, in `src/app/api`: recording a
+  payment (`payments`) and inviting or editing staff accounts (`staff`). Nothing else needs that key.
+- **Errors**: a broken rule comes back as an `ApiError` whose `code` the screens understand (for example
+  `price_changed`, `duplicate_email`, `last_admin`); the list is in `src/api/client.ts`.
+- **Public pages** (home, catalog, vehicle pages) also load data on the server with the public key, and
+  refresh in the browser. The home page and the vehicle pages are pre-built when the site is deployed, so
+  the HTML search engines read shows the prices of that moment; visitors' browsers always load the
+  current ones. **The build needs the Supabase settings**, because it reads the vehicles.
 
 ### Sign-in
 
-Today's login is a **fake**: one shared password, and a plain cookie that the site creates for itself
-(`src/api/auth.ts`, `src/lib/session.ts`, `src/app/api/mock-session/route.ts`). It is fine for a demo and
-**must not be used for real security.**
+Staff and website customers both sign in with **Supabase Auth**; the session is kept in cookies.
 
-For the real thing:
+- `src/api/auth.ts`: staff login. Only an active row in `staff` lets someone into `/admin`; `src/proxy.ts`
+  checks this before every admin page, and the database checks it again on every request.
+- `src/api/account.ts`: customer sign-up, password login, a 6-digit email code, and Google / Apple.
+- `src/app/auth/callback`: where Google, Apple and Supabase's emails send people back to.
 
-- Replace `login`, `getSession` and `logout` in `src/api/auth.ts` so they call your server.
-- Have the server set a real, signed, `httpOnly` cookie, and make `src/proxy.ts` check it properly.
-- Delete `DEMO_PASSWORD` and `src/app/api/mock-session/route.ts`.
-- **The server must check that someone is signed in on every request**, not just the screens (`assertAdmin` in
-  `src/api/auth.ts` is where the mock does it). Every signed-in staff member is an admin. If you later need
-  different levels of access, add them then.
+One browser has one session: signing in as a customer on the public site signs a staff member out of the
+admin area, and the other way round.
 
 ---
 
@@ -210,9 +193,12 @@ For the real thing:
 All payment logic is in **one file: `src/api/payments.ts`**, in the function `processPayment`. Right now it
 waits a moment and then returns "paid", or "declined" if the demo control asks for it. Replace its body
 with your gateway (PayMongo, Xendit, Maya, GCash or similar), and keep the same input and result shape, so
-the payment step and the booking do not change. `processPayment` is called from `createBooking` in
-`src/api/bookings.ts`, which first checks that the vehicle is free and the price is unchanged, and only then
-charges and saves the booking. A real server should keep that order (check, charge, save) in one step.
+the payment step and the booking do not change. `processPayment` runs on the server, in
+`src/app/api/payments/route.ts`, which first checks that the booking is approved and not overdue, then
+charges, then records the payment with the database function `record_booking_payment`.
+
+**Until a real gateway is connected, anyone who has a booking's reference and email can "pay" for it with
+the mock and confirm it for free.** Do not take real bookings before this is replaced.
 
 **Important:** the site must never see card numbers. Use the gateway's hosted page (the customer is sent
 there and comes back) or the gateway's own secure embedded fields. Do not add card inputs to this
@@ -228,9 +214,10 @@ control disappears, and remove the `mockOutcome` input.
 
 `npm run test:e2e` opens the real site in a real browser and clicks through it: all six booking steps
 (including a declined payment), the contact form, admin login and the admin sign-in, every admin
-screen, keyboard-only use, and an **accessibility scan (axe)** of every main page. Details, and how to
-run just one file, are in [`e2e/README.md`](e2e/README.md). The first time, run
-`npm run test:e2e:install` to download the test browser.
+screen, keyboard-only use, and an **accessibility scan (axe)** of every main page. They run against the
+**local** Supabase database and put the demo data back before every test, so never point them at a real
+project. Details, and how to run just one file, are in [`e2e/README.md`](e2e/README.md). The first time,
+run `npm run test:e2e:install` to download the test browser.
 
 ---
 
@@ -241,7 +228,15 @@ Copy `.env.example` to `.env.local`.
 | Variable | Default | What it does |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | `http://localhost:3000` | The real address of the site. Used in search engine links, the sitemap and sharing previews. **Set this before going live.** |
-| `NEXT_PUBLIC_SHOW_MOCK_CONTROLS` | `true` | Shows the demo login accounts and the "force a declined payment" choice. Set to `false` for a clean demo or for production. |
+| `NEXT_PUBLIC_SUPABASE_URL` | (none, required) | The Supabase project's URL (Project Settings → API). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | (none, required) | The project's public **anon** (publishable) key. Safe in the browser: the database's security rules decide what it can do. |
+| `SUPABASE_SERVICE_ROLE_KEY` | (none, required on the server) | The **secret** service-role key, used only by `src/app/api` (payments, staff invitations). Never prefix it with `NEXT_PUBLIC_`, never commit it. |
+| `NEXT_PUBLIC_SHOW_MOCK_CONTROLS` | `true` | Shows the "force a declined payment" choice on the pay page. Set to `false` for production. |
+
+On Vercel, add the same variables under Project Settings → Environment Variables (the service-role key
+for the server only). In the Supabase project, set **Authentication → URL Configuration**: the Site URL to
+the website's address, and add `https://<your site>/auth/callback` (and `http://localhost:3000/**` for
+development) to the Redirect URLs.
 
 ---
 
@@ -273,7 +268,7 @@ Decisions made where the brief did not say. Each is easy to change; please check
   transmission, fuel type, year, description or feature list. The vehicle detail
   page shows the photos, those specs, and the price — no other text.
 - Adding, editing or removing vehicles is **not** built (only the price). This was a deliberate scope
-  decision. The 8 vehicle types come from `src/mocks/vehicles.ts`.
+  decision. The 8 vehicle types are added by the database migration `…_catalog_data.sql` in `../backend`.
 - **There is no preset list of pick-up/return locations.** The visitor always types or pastes where they
   mean — an address, or a Google Maps link — in a plain text field (`src/features/booking/components/dates-step.tsx`).
   Nothing checks that the text is a real place or a valid link; a real backend with an address-lookup
@@ -302,12 +297,7 @@ Decisions made where the brief did not say. Each is easy to change; please check
   Qualified, Won and Lost. Converting a lead creates a customer.
 - **There are no roles.** Every staff account is an admin. The system will not let the last active account be
   deactivated, and nobody can deactivate themselves.
-- Staff sessions last 8 hours.
-
-**Storage**
-
-- Mock data is saved in each visitor's own browser, so it is not shared and can be cleared at any time.
-  The mock login cookie is not secure (see [section 5](#5-swapping-the-mocks-for-a-real-api)).
+- How long staff stay signed in is a Supabase Auth setting (Authentication → Sessions).
 
 ---
 
@@ -322,20 +312,19 @@ Decisions made where the brief did not say. Each is easy to change; please check
   email, address). It needs the client's real details.
 - Real terms and conditions and a privacy notice (placeholder pages exist and are already linked from the footer, the payment step and the forms).
 
-**For going live (needs a backend):**
+**For going live:**
 
 - Replace the placeholder Privacy Policy and Rental Terms with versions approved by the client.
-- Replace `src/api` with real requests (section 5), real login and permissions on the server, and a real
-  payment gateway (section 6).
-- Emails (booking confirmations, contact-form receipts), and any notifications for staff.
+- A real payment gateway (section 6). Until then, payments are not real.
+- Emails (booking confirmations, contact-form receipts), and any notifications for staff. The places are
+  marked `EMAIL TRIGGER GOES HERE`; Supabase Auth already sends its own sign-in emails.
 - Setting up hosting and the real `NEXT_PUBLIC_SITE_URL`.
 - **Pick-up/return locations are free text today** (an address or a Google Maps link), with nothing checking
   that they are real. A backend could validate them and, if useful, price a delivery/collection fee based
   on distance from a branch.
 
 **Not built, on purpose or by scope:** adding and editing vehicles (only prices), invoices and receipts,
-customer accounts and login for visitors, multiple languages (the wording is already in one file, so
-this is possible), file uploads such as driver's license photos, and maps.
+multiple languages (the wording is already in one file, so this is possible), and maps.
 
 **Checked and not checked.** The accessibility scan and the keyboard tests pass. Automated scanning
 finds many, but not all, accessibility problems. Before launch, also try the site with a screen reader

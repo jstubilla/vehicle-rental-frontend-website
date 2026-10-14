@@ -1,6 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
 import { loginAs, pageAlerts, visit } from "./helpers";
+import { runSql } from "./db";
 
 const t = content.contact.form;
 
@@ -45,8 +46,9 @@ test("wrong values are rejected with the right message", async ({ page }) => {
 
 test("a failed send keeps what was typed and can be retried", async ({ page }) => {
   await visit(page, "/contact");
-  // "[fail]" is the demo trigger for the error state (see src/api/contact.ts).
-  await fillValidForm(page, "I would like a van for a company trip. [fail]");
+  // The first send fails as if the server were down.
+  await page.route("**/rest/v1/rpc/submit_inquiry", (route) => route.fulfill({ status: 503, body: "{}" }), { times: 1 });
+  await fillValidForm(page, "I would like a van for a company trip.");
   await page.getByRole("button", { name: t.submit }).click();
 
   await expect(pageAlerts(page).filter({ hasText: t.errorTitle })).toBeVisible();
@@ -61,7 +63,8 @@ test("'Ask about this vehicle' preselects that vehicle", async ({ page }) => {
   await visit(page, "/vehicles/sedan");
   await page.getByRole("link", { name: content.vehicleDetail.askAbout }).click();
   await expect(page).toHaveURL(/\/contact\?vehicle=sedan/);
-  await expect(page.getByLabel(t.vehicle)).toHaveValue("veh-03");
+  const [sedan] = await runSql<{ id: string }>("select id from public.vehicles where slug = 'sedan'");
+  await expect(page.getByLabel(t.vehicle)).toHaveValue(sedan.id);
   await expect(page.getByLabel(t.vehicle).locator("option:checked")).toHaveText("Sedan");
 });
 
@@ -75,7 +78,7 @@ test("a sent message becomes a New lead that staff can see", async ({ page }) =>
   await page.getByRole("button", { name: t.sendAnother }).click();
   await expect(page.getByLabel(t.name)).toHaveValue("");
 
-  // Same browser, so the fake database is shared: a Sales user finds the new lead.
+  // A staff member finds the new lead.
   await loginAs(page);
   await visit(page, "/admin/leads");
   await page.getByRole("searchbox", { name: content.admin.leads.searchLabel }).fill("Rosalinda");

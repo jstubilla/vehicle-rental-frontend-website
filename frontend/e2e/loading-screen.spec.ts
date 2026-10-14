@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
 import { SPLASH_MIN_MS } from "../src/lib/site";
 import { expectNoA11yViolations, visit } from "./helpers";

@@ -9,14 +9,15 @@ backend/
 ├── supabase/
 │   ├── config.toml     # Supabase settings (used by the CLI and the local stack)
 │   ├── migrations/     # SQL migrations, applied in filename order
+│   ├── templates/      # Auth emails: the 6-digit login code and the staff invitation
+│   ├── seed.sql        # Demo data for the LOCAL database only (generated, see below)
 │   └── functions/      # Edge functions (server code, e.g. payment webhooks) — none yet
 └── tests/              # Runs the migrations on plain Postgres and checks the business rules
 ```
 
 ## The database
 
-The front end still runs on its browser mock (`frontend/src/mocks`). These migrations are the real
-database it will switch to; nothing in `frontend/` uses them yet.
+The website (`frontend/src/api`) reads and writes these tables and calls these functions.
 
 | Migration | What it does |
 | --- | --- |
@@ -26,6 +27,7 @@ database it will switch to; nothing in `frontend/` uses them yet.
 | `…_public_functions.sql` | Functions the website calls with `supabase.rpc(...)` (below) |
 | `…_storage.sql` | The private `booking-documents` bucket for ID photos: visitors can only upload, staff can read |
 | `…_catalog_data.sql` | The 8 vehicle types and the rates (driver ₱1,000/day, 10% down payment, 24 hours to pay) |
+| `…_account_access.sql` | A deactivated staff member can read their own row (so the login can say so), and a customer can read their own customer record (for My bookings) |
 
 **Conventions.** Columns are `snake_case` (the front end's `src/api` maps them to its camelCase types).
 Enum values match `frontend/src/lib/constants.ts` exactly. Money is whole pesos. When a rule is broken,
@@ -64,11 +66,27 @@ insert into public.staff (id, name, email)
 select id, 'Your Name', email from auth.users where email = 'you@example.com';
 ```
 
-After that, staff add colleagues the same way (inviting the auth user needs the service-role key, so it
-belongs on a server, not in the browser).
+After that, staff add colleagues on the website's Users screen: it emails them an invitation, and the
+link lets them choose a password at `/admin/set-password`.
 
 A customer sees their bookings once their email is **confirmed**: keep "Confirm email" switched on under
 Authentication → Providers → Email on the hosted project.
+
+### Settings for a hosted project
+
+The local stack takes these from `config.toml`; on a hosted project set them in the dashboard:
+
+1. **Authentication → URL Configuration**: Site URL = the website's address. Redirect URLs: add
+   `https://<your site>/auth/callback**` (and `http://localhost:3000/**` for development).
+2. **Authentication → Email Templates**:
+   - *Magic Link*: the website asks for a **6-digit code**, so the email must show it. Use the text of
+     `supabase/templates/magic-link.html` (it contains `{{ .Token }}`).
+   - *Invite user*: use `supabase/templates/invite.html`, whose link goes through the website's
+     `/auth/callback` so the new staff member is signed in and can choose their password.
+3. **Authentication → Providers**: turn on Google and/or Apple if you want those buttons to work (each
+   needs that provider's own client id and secret). Leave Email on with "Confirm email" on.
+4. Supabase's built-in email sender is only for testing (a few emails per hour). Before going live, set
+   up your own SMTP under **Authentication → Emails → SMTP Settings**.
 
 ## Working on it
 
@@ -79,7 +97,8 @@ You need the [Supabase CLI](https://supabase.com/docs/guides/cli). Run every com
 | --- | --- |
 | `npx supabase migration new <name>` | Create a new, empty migration file in `supabase/migrations/` |
 | `npx supabase start` | Run a local Supabase stack (needs Docker) |
-| `npx supabase db reset` | Rebuild the local database from the migrations and `seed.sql` |
+| `npx supabase db reset` | Rebuild the local database from the migrations and `seed.sql` (the demo data) |
+| `npx supabase status -o env` | Show the local stack's URL and keys (for `frontend/.env.local`) |
 | `npx supabase link --project-ref <ref>` | Connect this folder to your hosted Supabase project |
 | `npx supabase db push` | Apply new migrations to the linked hosted project |
 
@@ -95,11 +114,25 @@ PGHOST=127.0.0.1 PGPORT=5432 PGUSER=postgres ./tests/run.sh
 
 Add a check to `tests/business-rules.test.sql` with every new rule.
 
+The website's browser tests (`frontend/e2e`) run against the local stack too, with the demo data.
+
+## Demo data
+
+`supabase/seed.sql` fills the **local** database with demo data: 15 bookings,
+20 customers, 15 leads, tasks, reviews, 6 staff accounts (one deactivated) and one website customer, all
+signing in with the password `demo1234` (for example `admin@carrental.example`). It is generated from the
+website's test fixtures, so edit those and regenerate it:
+
+```bash
+cd ../frontend && node scripts/generate-seed.mjs
+```
+
+The seed is never applied to a hosted project (`supabase db push` only applies migrations).
+
 ## Not done yet
 
-- Switching `frontend/src/api` from the mock to these tables and functions.
-- Demo data (`supabase/seed.sql`) for local development and the end-to-end tests.
-- Emails (marked `EMAIL TRIGGER GOES HERE` in the functions) and the payment gateway.
+- Emails about bookings (marked `EMAIL TRIGGER GOES HERE` in the functions and in `frontend/src/api`).
+- A real payment gateway. Until then the website's mock payment confirms bookings without taking money.
 - Cleaning up uploaded photos that never got attached to a booking.
 
 ## Connecting to Supabase from GitHub

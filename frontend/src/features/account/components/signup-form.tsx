@@ -23,7 +23,7 @@ export function SignupForm() {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-          {errorCode && <Alert variant="danger">{t.errors[errorCode]}</Alert>}
+          {errorCode && <Alert variant={errorCode === "confirm_email" ? "info" : "danger"}>{t.errors[errorCode]}</Alert>}
           <FormField label={t.name} required error={errors.name?.message}>
             <Input {...register("name")} autoComplete="name" />
           </FormField>

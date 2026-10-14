@@ -19,11 +19,14 @@ export function useSubmitStep() {
 
   const mutation = useMutation({
     mutationFn: createBooking,
-    onSuccess: (booking) => {
+    onSuccess: (details) => {
+      // The confirmation page shows these straight away (with the renter's contact details, which the
+      // public status page leaves out).
+      queryClient.setQueryData(["booking", details.booking.reference], details);
       // A signed-in customer's phone and license were just saved to their account.
       queryClient.invalidateQueries({ queryKey: accountKey });
       queryClient.invalidateQueries({ queryKey: ownBookingsKey });
-      router.push(confirmationPath(booking.reference));
+      router.push(confirmationPath(details.booking.reference));
     },
     onError: (error) => {
       // Reload the vehicle so the price shown is the current one.
