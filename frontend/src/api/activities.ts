@@ -1,8 +1,9 @@
 import type { ActivityType } from "@/lib/constants";
-import { newId, readTable, writeTable } from "@/mocks/store";
 import type { Activity } from "@/types";
-import { assertAdmin } from "./auth";
-import { simulateNetwork } from "./client";
+import { requireStaff } from "./auth";
+import { unwrap } from "./client";
+import { activitySubject, toActivity, type ActivityRow } from "./rows";
+import { db } from "./supabase";
 
 /** An activity plus the names needed to display it. */
 export interface ActivityView extends Activity {
@@ -11,40 +12,40 @@ export interface ActivityView extends Activity {
   entityName: string | null;
 }
 
-function withNames(activities: Activity[]): ActivityView[] {
-  const users = readTable("users");
-  const leads = readTable("leads");
-  const customers = readTable("customers");
-  return activities.map((activity) => ({
-    ...activity,
-    authorName: users.find((u) => u.id === activity.authorId)?.name ?? null,
-    entityName:
-      (activity.entityType === "lead" ? leads : customers).find((row) => row.id === activity.entityId)?.name ?? null,
-  }));
-}
+const WITH_NAMES = "*, author:staff(name), lead:leads(name), customer:customers(name)";
 
-const newestFirst = (a: Activity, b: Activity) => b.createdAt.localeCompare(a.createdAt);
+type ActivityWithNames = ActivityRow & {
+  author: { name: string } | null;
+  lead: { name: string } | null;
+  customer: { name: string } | null;
+};
 
-/** The activity log of one lead or customer. */
+const toView = ({ author, lead, customer, ...row }: ActivityWithNames): ActivityView => ({
+  ...toActivity(row),
+  authorName: author?.name ?? null,
+  entityName: (row.lead_id ? lead?.name : customer?.name) ?? null,
+});
+
+/** The activity log of one lead or customer, newest first. */
 export async function listActivities(entityType: Activity["entityType"], entityId: string): Promise<ActivityView[]> {
-  assertAdmin();
-  await simulateNetwork();
-  return withNames(
-    readTable("activities")
-      .filter((a) => a.entityType === entityType && a.entityId === entityId)
-      .sort(newestFirst),
-  );
+  await requireStaff();
+  const rows = unwrap(
+    await db()
+      .from("activities")
+      .select(WITH_NAMES)
+      .eq(entityType === "lead" ? "lead_id" : "customer_id", entityId)
+      .order("created_at", { ascending: false }),
+  ) as ActivityWithNames[];
+  return rows.map(toView);
 }
 
 /** The latest activity across the CRM. */
 export async function listRecentActivities(limit = 8): Promise<ActivityView[]> {
-  assertAdmin();
-  await simulateNetwork();
-  return withNames(
-    readTable("activities")
-      .sort(newestFirst)
-      .slice(0, limit),
-  );
+  await requireStaff();
+  const rows = unwrap(
+    await db().from("activities").select(WITH_NAMES).order("created_at", { ascending: false }).limit(limit),
+  ) as ActivityWithNames[];
+  return rows.map(toView);
 }
 
 export interface ActivityInput {
@@ -55,18 +56,13 @@ export interface ActivityInput {
 }
 
 export async function createActivity(input: ActivityInput): Promise<Activity> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const activity: Activity = {
-    id: newId("act"),
-    type: input.type,
-    body: input.body.trim(),
-    entityType: input.entityType,
-    entityId: input.entityId,
-    authorId: session.userId,
-    createdAt: new Date().toISOString(),
-  };
-  writeTable("activities", [activity, ...readTable("activities")]);
-  return activity;
+  const { userId } = await requireStaff();
+  const row = unwrap(
+    await db()
+      .from("activities")
+      .insert({ type: input.type, body: input.body.trim(), author_id: userId, ...activitySubject(input.entityType, input.entityId) })
+      .select("*")
+      .single(),
+  ) as ActivityRow;
+  return toActivity(row);
 }

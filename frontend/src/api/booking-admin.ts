@@ -1,148 +1,171 @@
 import { content } from "@/content";
 import { canTransition } from "@/lib/booking-status";
-import { searchBookings, type BookingListParams, type BookingRow } from "@/lib/booking-search";
-import type { BookingStatus } from "@/lib/constants";
+import { searchBookings, type BookingListParams, type BookingRow as BookingListRow } from "@/lib/booking-search";
+import type { ActivityType, BookingStatus, DocumentKind } from "@/lib/constants";
 import { formatCurrency } from "@/lib/currency";
-import { newId, readTable, writeTable } from "@/mocks/store";
-import type { Activity, Booking, Paginated, Payment } from "@/types";
-import { assertAdmin } from "./auth";
-import { toBookingDetails, type BookingDetails } from "./bookings";
-import { ApiError, simulateNetwork } from "./client";
+import type { Booking, BookingDocuments, Paginated, Payment } from "@/types";
+import { requireStaff } from "./auth";
+import type { BookingDetails } from "./bookings";
+import { ApiError, check, toApiError, unwrap } from "./client";
+import {
+  one,
+  toBooking,
+  toCustomer,
+  toPayment,
+  toVehicle,
+  type BookingRow,
+  type CustomerRow,
+  type PaymentRow,
+  type VehicleRow,
+} from "./rows";
+import { db, DOCUMENTS_BUCKET } from "./supabase";
 
-/** Staff-side booking management. (Visitors create bookings in api/bookings.ts.) */
+/**
+ * Staff-side booking management. (Visitors create bookings in api/bookings.ts.) The database enforces
+ * the status flow and the locked price; these functions add the activity notes.
+ */
 
-export async function listBookings(params: BookingListParams): Promise<Paginated<BookingRow>> {
-  assertAdmin();
-  await simulateNetwork();
+/** How long a link to a customer's document photo works. */
+const SIGNED_URL_SECONDS = 10 * 60;
 
-  const customers = readTable("customers");
-  const vehicles = readTable("vehicles");
-  const payments = readTable("payments");
-  const rows: BookingRow[] = readTable("bookings").map((booking) => ({
-    ...booking,
-    customerName: customers.find((c) => c.id === booking.customerId)?.name ?? "",
-    vehicleName: vehicles.find((v) => v.id === booking.vehicleId)?.name ?? "",
-    paymentStatus: payments.find((p) => p.id === booking.paymentId)?.status ?? null,
-  }));
-  return searchBookings(rows, params);
+export async function listBookings(params: BookingListParams): Promise<Paginated<BookingListRow>> {
+  await requireStaff();
+  const rows = unwrap(
+    await db().from("bookings").select("*, customer:customers(name), vehicle:vehicles(name), payment:payments(id, status)"),
+  ) as (BookingRow & {
+    customer: { name: string } | null;
+    vehicle: { name: string } | null;
+    payment: { id: string; status: Payment["status"] } | { id: string; status: Payment["status"] }[] | null;
+  })[];
+  return searchBookings(
+    rows.map(({ customer, vehicle, payment, ...row }) => {
+      const paid = one(payment);
+      return {
+        ...toBooking(row, paid?.id ?? null),
+        customerName: customer?.name ?? "",
+        vehicleName: vehicle?.name ?? "",
+        paymentStatus: paid?.status ?? null,
+      };
+    }),
+    params,
+  );
+}
+
+/** The customer's document photos, as short-lived private links only staff can create. */
+async function loadDocuments(bookingId: string): Promise<BookingDocuments | null> {
+  const rows = unwrap(
+    await db().from("booking_documents").select("kind, storage_path, file_name").eq("booking_id", bookingId),
+  ) as { kind: DocumentKind; storage_path: string; file_name: string }[];
+  if (rows.length === 0) return null;
+  const signed = unwrap(
+    await db()
+      .storage.from(DOCUMENTS_BUCKET)
+      .createSignedUrls(
+        rows.map((row) => row.storage_path),
+        SIGNED_URL_SECONDS,
+      ),
+  );
+  const urls = new Map(signed.map((item) => [item.path, item.signedUrl]));
+  return Object.fromEntries(
+    rows.map((row) => [row.kind, { fileName: row.file_name, dataUrl: urls.get(row.storage_path) ?? "" }]),
+  ) as BookingDocuments;
 }
 
 export async function getBookingById(id: string): Promise<BookingDetails | null> {
-  assertAdmin();
-  await simulateNetwork();
-  const booking = readTable("bookings").find((b) => b.id === id);
-  return booking ? toBookingDetails(booking) : null;
+  await requireStaff();
+  const { data, error } = await db()
+    .from("bookings")
+    .select("*, vehicle:vehicles(*), customer:customers(*, contact_details(*)), payment:payments(*)")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw toApiError(error);
+  if (!data) return null;
+  const { vehicle, customer, payment, ...row } = data as BookingRow & {
+    vehicle: VehicleRow;
+    customer: CustomerRow;
+    payment: PaymentRow | PaymentRow[] | null;
+  };
+  const paymentRow = one(payment);
+  return {
+    booking: { ...toBooking(row, paymentRow?.id ?? null), documents: await loadDocuments(id) },
+    vehicle: toVehicle(vehicle),
+    customer: toCustomer(customer),
+    payment: paymentRow ? toPayment(paymentRow) : null,
+  };
 }
 
-const customerNote = (customerId: string, type: Activity["type"], body: string, authorId: string): Activity => ({
-  id: newId("act"),
-  type,
-  body,
-  entityType: "customer",
-  entityId: customerId,
-  authorId,
-  createdAt: new Date().toISOString(),
-});
+async function addCustomerNote(customerId: string, type: ActivityType, body: string, authorId: string) {
+  check(await db().from("activities").insert({ type, body, customer_id: customerId, author_id: authorId }));
+}
+
+async function loadBooking(id: string): Promise<BookingRow> {
+  return unwrap(await db().from("bookings").select("*").eq("id", id).maybeSingle()) as BookingRow;
+}
 
 /** Moves a booking to its next status, if the rules allow it, and logs it on the customer. */
 export async function changeBookingStatus(id: string, status: BookingStatus): Promise<Booking> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const bookings = readTable("bookings");
-  const existing = bookings.find((b) => b.id === id);
-  if (!existing) throw new ApiError("Booking not found", 404, "not_found");
+  const { userId } = await requireStaff();
+  const existing = await loadBooking(id);
   if (!canTransition(existing.status, status)) {
     throw new ApiError("That status change is not allowed", 409, "invalid_transition");
   }
-  // A booking with documents is confirmed only by the customer paying, after staff approve them.
-  if (status === "confirmed" && existing.documents) {
-    throw new ApiError("This booking is confirmed when the customer pays", 409, "invalid_transition");
-  }
-
-  const updated: Booking = { ...existing, status, updatedAt: new Date().toISOString() };
-  writeTable("bookings", bookings.map((b) => (b.id === id ? updated : b)));
-  writeTable("activities", [
-    customerNote(
-      existing.customerId,
-      "status_change",
-      content.admin.bookings.statusChangeNote(
-        existing.reference,
-        content.enums.bookingStatus[existing.status],
-        content.enums.bookingStatus[status],
-      ),
-      session.userId,
+  // The database also refuses to confirm a booking with documents by hand: the customer's payment does that.
+  const updated = unwrap(await db().from("bookings").update({ status }).eq("id", id).select("*").single()) as BookingRow;
+  await addCustomerNote(
+    existing.customer_id,
+    "status_change",
+    content.admin.bookings.statusChangeNote(
+      existing.reference,
+      content.enums.bookingStatus[existing.status],
+      content.enums.bookingStatus[status],
     ),
-    ...readTable("activities"),
-  ]);
-  return updated;
+    userId,
+  );
+  return toBooking(updated, null);
 }
 
 /**
  * Records the staff decision on the customer's documents. Approving them moves the booking to
- * "approved", and the customer is sent a link to pay. Rejecting them (with a reason the customer
- * sees) leaves it pending until the customer sends new photos.
+ * "approved" (the database does this), and the customer is sent a link to pay. Rejecting them (with a
+ * reason the customer sees) leaves it pending until the customer sends new photos.
  */
-export async function reviewBookingDocuments(
-  id: string,
-  decision: "verified" | "rejected",
-  reason = "",
-): Promise<Booking> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const bookings = readTable("bookings");
-  const existing = bookings.find((b) => b.id === id);
-  if (!existing || !existing.documents) throw new ApiError("Booking not found", 404, "not_found");
-  if (existing.status !== "pending" || existing.documentsStatus !== "pending") {
+export async function reviewBookingDocuments(id: string, decision: "verified" | "rejected", reason = ""): Promise<Booking> {
+  const { userId } = await requireStaff();
+  const existing = await loadBooking(id);
+  if (existing.status !== "pending" || existing.documents_status !== "pending") {
     throw new ApiError("These documents have already been checked", 409, "invalid_transition");
   }
-
-  const now = new Date().toISOString();
-  const updated: Booking = {
-    ...existing,
-    documentsStatus: decision,
-    status: decision === "verified" ? "approved" : "pending",
-    approvedAt: decision === "verified" ? now : null,
-    rejectionReason: decision === "rejected" ? reason.trim() : null,
-    updatedAt: now,
-  };
-  writeTable("bookings", bookings.map((b) => (b.id === id ? updated : b)));
-  writeTable("activities", [
-    customerNote(existing.customerId, "note", content.admin.bookings.documentsNote(existing.reference, decision), session.userId),
-    ...readTable("activities"),
-  ]);
+  const updated = unwrap(
+    await db()
+      .from("bookings")
+      .update({ documents_status: decision, rejection_reason: decision === "rejected" ? reason.trim() : null })
+      .eq("id", id)
+      .select("*")
+      .single(),
+  ) as BookingRow;
+  await addCustomerNote(existing.customer_id, "note", content.admin.bookings.documentsNote(existing.reference, decision), userId);
   // EMAIL TRIGGER GOES HERE: approved = send documentsApprovedEmail (the link to pay); rejected =
   // send documentsRejectedEmail (the reason and the link to send new photos). Templates: /src/emails.
-  // A scheduled job on the backend should also send paymentReminderEmail a few hours before the
-  // payment deadline, and cancel bookings still unpaid after it.
-  return updated;
+  return toBooking(updated, null);
 }
 
-/** Records that the customer has paid (used for pay-at-pick-up bookings). */
+/** Records that the customer has paid the balance (used for pay-at-pick-up bookings). */
 export async function markPaymentReceived(bookingId: string): Promise<Payment> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const booking = readTable("bookings").find((b) => b.id === bookingId);
-  const payments = readTable("payments");
-  const payment = payments.find((p) => p.id === booking?.paymentId);
-  if (!booking || !payment) throw new ApiError("Payment not found", 404, "not_found");
-
-  const updated: Payment = { ...payment, status: "paid" };
-  writeTable("payments", payments.map((p) => (p.id === payment.id ? updated : p)));
-  writeTable("activities", [
-    customerNote(
-      booking.customerId,
-      "note",
-      content.admin.bookings.paymentNote(
-        booking.reference,
-        formatCurrency(payment.amount - (payment.downPayment?.amount ?? 0)),
-        content.enums.paymentMethod[payment.method],
-      ),
-      session.userId,
+  const { userId } = await requireStaff();
+  const booking = await loadBooking(bookingId);
+  const updated = unwrap(
+    await db().from("payments").update({ status: "paid" }).eq("booking_id", bookingId).select("*").maybeSingle(),
+  ) as PaymentRow;
+  const payment = toPayment(updated);
+  await addCustomerNote(
+    booking.customer_id,
+    "note",
+    content.admin.bookings.paymentNote(
+      booking.reference,
+      formatCurrency(payment.amount - (payment.downPayment?.amount ?? 0)),
+      content.enums.paymentMethod[payment.method],
     ),
-    ...readTable("activities"),
-  ]);
-  return updated;
+    userId,
+  );
+  return payment;
 }

@@ -41,8 +41,17 @@ const rows: Row[] = [
   { customer: 14, vehicleId: "veh-03", start: 3, nights: 2, status: "pending", method: "pay_at_pickup", pickupLocation: "BGC, Taguig" },
 ];
 
+// The same alphabet the database uses for references (no 0/O/1/I).
+const REFERENCE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 function reference(n: number): string {
-  return `RC-${(n * 7919 + 100003).toString(36).toUpperCase().padStart(6, "0").slice(-6)}`;
+  let value = n * 7919 + 100003;
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code = REFERENCE_ALPHABET[value % 32] + code;
+    value = Math.floor(value / 32);
+  }
+  return `RC-${code}`;
 }
 
 const built = rows.map((row, index) => {

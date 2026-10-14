@@ -1,64 +1,57 @@
-import { SESSION_TTL_SECONDS, type Session } from "@/lib/session";
-import { readTable } from "@/mocks/store";
-import { ApiError, simulateNetwork } from "./client";
+import { ApiError } from "./client";
+import { db } from "./supabase";
 
 /**
- * MOCK AUTH. The demo has one shared password for every account, so no password
- * is ever stored. A real backend checks each user's own (hashed) password.
+ * STAFF sign-in, with Supabase Auth. A staff member is an auth user with an active row in the staff
+ * table (customers sign in through /src/api/account.ts). The database checks who is signed in on every
+ * request (row-level security), so these functions only decide what the screens show.
  */
-export const DEMO_PASSWORD = "demo1234";
 
-const SESSION_URL = "/api/mock-session";
-
-/** The signed-in user, remembered so API functions can check that someone is signed in. */
-let currentSession: Session | null = null;
-
-export async function login(email: string, password: string): Promise<Session> {
-  await simulateNetwork();
-
-  const user = readTable("users").find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-  if (!user || password !== DEMO_PASSWORD) {
-    throw new ApiError("Wrong email or password", 401, "invalid_credentials");
-  }
-  if (!user.active) throw new ApiError("This account is deactivated", 403, "account_inactive");
-
-  const session: Session = {
-    userId: user.id,
-    name: user.name,
-    email: user.email,
-    expiresAt: Date.now() + SESSION_TTL_SECONDS * 1000,
-  };
-
-  const response = await fetch(SESSION_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session }),
-  });
-  if (!response.ok) throw new ApiError("Could not start the session", 500);
-
-  currentSession = session;
-  return session;
+/** The signed-in staff member. */
+export interface Session {
+  userId: string;
+  name: string;
+  email: string;
 }
 
-/** Who is signed in right now? null if nobody (or the session expired). */
+async function staffSession(userId: string, email: string): Promise<Session | null> {
+  const { data } = await db().from("staff").select("name, email, active").eq("id", userId).maybeSingle();
+  if (!data?.active) return null;
+  return { userId, name: data.name, email: data.email ?? email };
+}
+
+export async function login(email: string, password: string): Promise<Session> {
+  const supabase = db();
+  const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+  if (error || !data.user) throw new ApiError("Wrong email or password", 401, "invalid_credentials");
+
+  const { data: staff } = await supabase.from("staff").select("name, email, active").eq("id", data.user.id).maybeSingle();
+  if (!staff || !staff.active) {
+    // A website customer's account, or a deactivated staff member: don't stay signed in.
+    await supabase.auth.signOut();
+    if (!staff) throw new ApiError("Wrong email or password", 401, "invalid_credentials");
+    throw new ApiError("This account is deactivated", 403, "account_inactive");
+  }
+  return { userId: data.user.id, name: staff.name, email: staff.email };
+}
+
+/** Who is signed in right now, if it is an active staff member; otherwise null. */
 export async function getSession(): Promise<Session | null> {
-  const response = await fetch(SESSION_URL, { cache: "no-store" });
-  const { session } = (await response.json()) as { session: Session | null };
-  currentSession = session;
-  return session;
+  const { data } = await db().auth.getUser();
+  if (!data.user) return null;
+  return staffSession(data.user.id, data.user.email ?? "");
 }
 
 export async function logout(): Promise<void> {
-  await fetch(SESSION_URL, { method: "DELETE" });
-  currentSession = null;
+  await db().auth.signOut();
 }
 
 /**
- * Used inside admin API functions: refuses the call if nobody is signed in. Every
- * signed-in staff member is an admin and may do everything. The route guard in
- * proxy.ts is the first line; a real backend repeats this check on every request.
+ * The signed-in user's id, for the staff screens (e.g. as the author of a note). The database refuses
+ * anything they are not allowed to do, so this only catches a session that has expired.
  */
-export function assertAdmin(): Session {
-  if (!currentSession) throw new ApiError("Please sign in", 401, "forbidden");
-  return currentSession;
+export async function requireStaff(): Promise<{ userId: string }> {
+  const { data } = await db().auth.getSession();
+  if (!data.session) throw new ApiError("Please sign in again", 401, "forbidden");
+  return { userId: data.session.user.id };
 }

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
 import { dateFromToday, expectNoA11yViolations, pageAlerts, SAMPLE_DOCUMENTS, visit } from "./helpers";
 

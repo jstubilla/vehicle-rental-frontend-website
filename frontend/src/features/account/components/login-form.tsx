@@ -19,7 +19,6 @@ import {
   TabsTrigger,
 } from "@/components/ui";
 import { content } from "@/content";
-import { SHOW_MOCK_CONTROLS } from "@/lib/site";
 import { useCodeLogin, usePasswordLogin, useProviderLogin } from "../hooks/use-login";
 
 const t = content.account.login;
@@ -110,8 +109,7 @@ export function LoginForm() {
                   <FormField
                     label={t.code}
                     required
-                    hint={SHOW_MOCK_CONTROLS ? t.codeDemoNote : undefined}
-                    error={code.codeForm.formState.errors.code?.message}
+                                        error={code.codeForm.formState.errors.code?.message}
                   >
                     <Input
                       {...code.codeForm.register("code")}
@@ -137,31 +135,6 @@ export function LoginForm() {
         </CardContent>
       </Card>
 
-      {SHOW_MOCK_CONTROLS && (
-        <Card variant="muted" as="section" aria-labelledby="demo-customer-heading">
-          <CardContent className="flex flex-col gap-3 pt-4 md:pt-6">
-            <h2 id="demo-customer-heading" className="text-lg">
-              {t.demo.title}
-            </h2>
-            <p className="text-sm text-muted">{t.demo.description}</p>
-            <p className="text-sm">
-              <span className="block font-medium">{t.demo.email}</span>
-              <code className="font-mono text-muted">{t.demo.password}</code>
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="self-start"
-              onClick={() => {
-                setTab("password");
-                password.fill(t.demo.email, t.demo.password);
-              }}
-            >
-              {t.demo.use}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

@@ -1,51 +1,58 @@
 import { content } from "@/content";
 import { todayISO } from "@/lib/dates";
-import { searchTasks, type TaskListParams, type TaskRow } from "@/lib/task-search";
-import { newId, readTable, writeTable } from "@/mocks/store";
+import { searchTasks, type TaskListParams, type TaskRow as TaskListRow } from "@/lib/task-search";
 import type { Paginated, Task } from "@/types";
-import { assertAdmin } from "./auth";
-import { ApiError, simulateNetwork } from "./client";
+import { requireStaff } from "./auth";
+import { ApiError, check, toApiError, unwrap } from "./client";
+import { activitySubject, toTask, type TaskRow } from "./rows";
+import { db } from "./supabase";
 
-function toRows(tasks: Task[]): TaskRow[] {
-  const users = readTable("users");
-  const leads = readTable("leads");
-  const customers = readTable("customers");
+const WITH_NAMES = "*, assignee:staff(name), lead:leads(name), customer:customers(name)";
+
+type TaskWithNames = TaskRow & {
+  assignee: { name: string } | null;
+  lead: { name: string } | null;
+  customer: { name: string } | null;
+};
+
+function toRows(rows: TaskWithNames[]): TaskListRow[] {
   const today = todayISO();
-
-  return tasks.map((task) => ({
-    ...task,
-    assigneeName: users.find((u) => u.id === task.assigneeId)?.name ?? null,
-    linkedName:
-      task.linkedType === "lead"
-        ? (leads.find((l) => l.id === task.linkedId)?.name ?? null)
-        : task.linkedType === "customer"
-          ? (customers.find((c) => c.id === task.linkedId)?.name ?? null)
-          : null,
-    overdue: task.status === "open" && task.dueDate < today,
-  }));
+  return rows.map(({ assignee, lead, customer, ...row }) => {
+    const task = toTask(row);
+    return {
+      ...task,
+      assigneeName: assignee?.name ?? null,
+      linkedName: (task.linkedType === "lead" ? lead?.name : task.linkedType === "customer" ? customer?.name : null) ?? null,
+      overdue: task.status === "open" && task.dueDate < today,
+    };
+  });
 }
 
-export async function listTasks(params: TaskListParams): Promise<Paginated<TaskRow>> {
-  const session = assertAdmin();
-  await simulateNetwork();
-  return searchTasks(toRows(readTable("tasks")), params, session.userId);
+export async function listTasks(params: TaskListParams): Promise<Paginated<TaskListRow>> {
+  const { userId } = await requireStaff();
+  const rows = unwrap(await db().from("tasks").select(WITH_NAMES)) as TaskWithNames[];
+  return searchTasks(toRows(rows), params, userId);
 }
 
 /** The tasks linked to one lead or customer, open ones first (for their detail pages). */
-export async function listTasksFor(linkedType: "lead" | "customer", linkedId: string): Promise<TaskRow[]> {
-  assertAdmin();
-  await simulateNetwork();
-  return toRows(readTable("tasks").filter((t) => t.linkedType === linkedType && t.linkedId === linkedId)).sort(
+export async function listTasksFor(linkedType: "lead" | "customer", linkedId: string): Promise<TaskListRow[]> {
+  await requireStaff();
+  const rows = unwrap(
+    await db().from("tasks").select(WITH_NAMES).eq(linkedType === "lead" ? "lead_id" : "customer_id", linkedId),
+  ) as TaskWithNames[];
+  return toRows(rows).sort(
     (a, b) => Number(a.status === "done") - Number(b.status === "done") || a.dueDate.localeCompare(b.dueDate),
   );
 }
 
 /** Names for the "linked to" picker in the task form. */
 export async function listLinkOptions(type: "lead" | "customer"): Promise<{ id: string; name: string }[]> {
-  assertAdmin();
-  await simulateNetwork();
-  const rows = type === "lead" ? readTable("leads") : readTable("customers");
-  return rows.map((row) => ({ id: row.id, name: row.name })).sort((a, b) => a.name.localeCompare(b.name));
+  await requireStaff();
+  const rows = unwrap(await db().from(type === "lead" ? "leads" : "customers").select("id, name").order("name")) as {
+    id: string;
+    name: string;
+  }[];
+  return rows;
 }
 
 export interface TaskInput {
@@ -57,68 +64,57 @@ export interface TaskInput {
   linkedId: string | null;
 }
 
-export async function createTask(input: TaskInput): Promise<Task> {
-  assertAdmin();
-  await simulateNetwork();
+const toColumns = (input: TaskInput) => ({
+  title: input.title.trim(),
+  notes: input.notes.trim(),
+  due_date: input.dueDate,
+  assignee_id: input.assigneeId,
+  lead_id: input.linkedType === "lead" ? input.linkedId : null,
+  customer_id: input.linkedType === "customer" ? input.linkedId : null,
+});
 
-  const task: Task = {
-    id: newId("task"),
-    ...input,
-    title: input.title.trim(),
-    notes: input.notes.trim(),
-    status: "open",
-    createdAt: new Date().toISOString(),
-    completedAt: null,
-  };
-  writeTable("tasks", [task, ...readTable("tasks")]);
-  return task;
+export async function createTask(input: TaskInput): Promise<Task> {
+  await requireStaff();
+  return toTask(unwrap(await db().from("tasks").insert(toColumns(input)).select("*").single()) as TaskRow);
 }
 
 export async function updateTask(id: string, input: TaskInput): Promise<Task> {
-  assertAdmin();
-  await simulateNetwork();
-
-  const tasks = readTable("tasks");
-  const existing = tasks.find((t) => t.id === id);
-  if (!existing) throw new ApiError("Task not found", 404, "not_found");
-
-  const updated: Task = { ...existing, ...input, title: input.title.trim(), notes: input.notes.trim() };
-  writeTable("tasks", tasks.map((t) => (t.id === id ? updated : t)));
-  return updated;
+  await requireStaff();
+  const { data, error } = await db().from("tasks").update(toColumns(input)).eq("id", id).select("*").maybeSingle();
+  if (error) throw toApiError(error);
+  if (!data) throw new ApiError("Task not found", 404, "not_found");
+  return toTask(data as TaskRow);
 }
 
 /** Marks a task done (or open again). Finishing a task is noted on the lead or customer it belongs to. */
 export async function setTaskDone(id: string, done: boolean): Promise<Task> {
-  const session = assertAdmin();
-  await simulateNetwork();
+  const { userId } = await requireStaff();
+  const { data, error } = await db()
+    .from("tasks")
+    .update({ status: done ? "done" : "open" })
+    .eq("id", id)
+    .select("*")
+    .maybeSingle();
+  if (error) throw toApiError(error);
+  if (!data) throw new ApiError("Task not found", 404, "not_found");
+  const task = toTask(data as TaskRow);
 
-  const tasks = readTable("tasks");
-  const existing = tasks.find((t) => t.id === id);
-  if (!existing) throw new ApiError("Task not found", 404, "not_found");
-
-  const now = new Date().toISOString();
-  const updated: Task = { ...existing, status: done ? "done" : "open", completedAt: done ? now : null };
-  writeTable("tasks", tasks.map((t) => (t.id === id ? updated : t)));
-
-  if (done && existing.linkedType && existing.linkedId) {
-    writeTable("activities", [
-      {
-        id: newId("act"),
-        type: "note",
-        body: content.admin.tasks.completedNote(existing.title),
-        entityType: existing.linkedType,
-        entityId: existing.linkedId,
-        authorId: session.userId,
-        createdAt: now,
-      },
-      ...readTable("activities"),
-    ]);
+  if (done && task.linkedType && task.linkedId) {
+    check(
+      await db()
+        .from("activities")
+        .insert({
+          type: "note",
+          body: content.admin.tasks.completedNote(task.title),
+          author_id: userId,
+          ...activitySubject(task.linkedType, task.linkedId),
+        }),
+    );
   }
-  return updated;
+  return task;
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  assertAdmin();
-  await simulateNetwork();
-  writeTable("tasks", readTable("tasks").filter((t) => t.id !== id));
+  await requireStaff();
+  check(await db().from("tasks").delete().eq("id", id));
 }

@@ -1,10 +1,9 @@
 import type { ContactType } from "@/lib/constants";
-import { newId, readTable, writeTable } from "@/mocks/store";
-import type { ContactDetail } from "@/types";
-import { assertAdmin } from "./auth";
-import { ApiError, simulateNetwork } from "./client";
+import { requireStaff } from "./auth";
+import { check } from "./client";
+import { db } from "./supabase";
 
-/** Extra phone numbers and emails on a customer or a lead. */
+/** Extra phone numbers and emails on a customer or a lead (the contact_details table). */
 export type ContactOwner = "customer" | "lead";
 
 export interface ContactDetailInput {
@@ -13,34 +12,25 @@ export interface ContactDetailInput {
   value: string;
 }
 
-type WithContacts = { id: string; additionalContacts: ContactDetail[] };
-
-function changeRow<T extends WithContacts>(rows: T[], id: string, change: (list: ContactDetail[]) => ContactDetail[]): T[] {
-  if (!rows.some((row) => row.id === id)) throw new ApiError("Record not found", 404, "not_found");
-  return rows.map((row) => (row.id === id ? { ...row, additionalContacts: change(row.additionalContacts) } : row));
-}
-
-async function change(owner: ContactOwner, id: string, edit: (list: ContactDetail[]) => ContactDetail[]) {
-  assertAdmin();
-  await simulateNetwork();
-  if (owner === "customer") writeTable("customers", changeRow(readTable("customers"), id, edit));
-  else writeTable("leads", changeRow(readTable("leads"), id, edit));
-}
-
 const clean = (input: ContactDetailInput) => ({
   type: input.type,
   label: input.label.trim(),
   value: input.value.trim(),
 });
 
-export function addContactDetail(owner: ContactOwner, id: string, input: ContactDetailInput) {
-  return change(owner, id, (list) => [...list, { id: newId("cd"), ...clean(input) }]);
+const ownerColumn = (owner: ContactOwner) => (owner === "customer" ? "customer_id" : "lead_id");
+
+export async function addContactDetail(owner: ContactOwner, id: string, input: ContactDetailInput): Promise<void> {
+  await requireStaff();
+  check(await db().from("contact_details").insert({ ...clean(input), [ownerColumn(owner)]: id }));
 }
 
-export function updateContactDetail(owner: ContactOwner, id: string, detailId: string, input: ContactDetailInput) {
-  return change(owner, id, (list) => list.map((d) => (d.id === detailId ? { ...d, ...clean(input) } : d)));
+export async function updateContactDetail(owner: ContactOwner, id: string, detailId: string, input: ContactDetailInput): Promise<void> {
+  await requireStaff();
+  check(await db().from("contact_details").update(clean(input)).eq("id", detailId).eq(ownerColumn(owner), id));
 }
 
-export function removeContactDetail(owner: ContactOwner, id: string, detailId: string) {
-  return change(owner, id, (list) => list.filter((d) => d.id !== detailId));
+export async function removeContactDetail(owner: ContactOwner, id: string, detailId: string): Promise<void> {
+  await requireStaff();
+  check(await db().from("contact_details").delete().eq("id", detailId).eq(ownerColumn(owner), id));
 }

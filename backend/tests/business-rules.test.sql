@@ -110,6 +110,12 @@ select t.expect_error(format($$update bookings set total = 1 where reference = %
 select t.expect_error($$update staff set active = false where id = '00000000-0000-0000-0000-00000000000a'$$, 'self_deactivate');
 update staff set active = false where id = '00000000-0000-0000-0000-00000000000b';
 reset role;
+-- a deactivated staff member sees only their own row, and nothing else
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+set role authenticated;
+select t.ok((select count(*) from staff) = 1 and not (select active from staff), 'deactivated staff read only their own row');
+select t.ok((select count(*) from customers) = 0, 'deactivated staff see no customers');
+reset role;
 select set_config('request.jwt.claim.sub', '', false);
 select t.expect_error($$update staff set active = false$$, 'last_admin');
 update staff set active = true;
@@ -166,7 +172,8 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000c
 set role authenticated;
 select t.ok(not is_staff(), 'customer is not staff');
 select t.ok((select count(*) from bookings) = 3 and (select count(*) from payments) = 1, 'customer sees own bookings and payment');
-select t.ok((select count(*) from booking_documents) = 0 and (select count(*) from customers) = 0, 'customer sees no documents or CRM rows');
+select t.ok((select count(*) from booking_documents) = 0 and (select count(*) from leads) = 0, 'customer sees no documents or leads');
+select t.ok((select count(*) from customers) = 1 and (select email from customers) = 'ana@example.com', 'customer sees only their own customer record');
 update profiles set phone = '123';
 reset role;
 select t.ok((select phone from profiles where id = '00000000-0000-0000-0000-00000000000c') = '123', 'customer updates own profile');

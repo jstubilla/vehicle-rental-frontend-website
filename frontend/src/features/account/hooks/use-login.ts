@@ -21,7 +21,7 @@ import { accountKey } from "./use-account";
 
 export type LoginErrorCode = keyof typeof content.account.login.errors;
 
-const KNOWN_CODES: string[] = ["invalid_credentials", "invalid_code", "no_account"];
+const KNOWN_CODES: string[] = ["invalid_credentials", "invalid_code", "no_account", "confirm_email"];
 
 /** Which message to show for a failed request. */
 export function loginErrorCode(error: unknown): LoginErrorCode | null {
@@ -62,11 +62,6 @@ export function usePasswordLogin() {
     onSubmit: form.handleSubmit((values) => mutation.mutate(values)),
     isSubmitting: mutation.isPending || mutation.isSuccess,
     errorCode: loginErrorCode(mutation.error),
-    /** Fills the form with the demo customer (demo only). */
-    fill: (email: string, password: string) => {
-      form.setValue("email", email);
-      form.setValue("password", password);
-    },
   };
 }
 
@@ -110,7 +105,7 @@ export function useCodeLogin() {
   };
 }
 
-/** "Continue with Google / Apple". Demo only: signs in as a fixed demo profile. */
+/** "Continue with Google / Apple": leaves for the provider's page and comes back signed in. */
 export function useProviderLogin() {
   const afterLogin = useAfterLogin();
   const mutation = useMutation({ mutationFn: (provider: LoginProvider) => loginWithProvider(provider), onSuccess: afterLogin });

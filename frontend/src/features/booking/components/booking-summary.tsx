@@ -128,7 +128,7 @@ export function BookingSummary({
                     {data.renter.name}
                     <br />
                     <span className="text-sm font-normal text-muted">
-                      {data.renter.email} · {data.renter.phone}
+                      {[data.renter.email, data.renter.phone].filter(Boolean).join(" · ")}
                     </span>
                   </Row>
                 )}

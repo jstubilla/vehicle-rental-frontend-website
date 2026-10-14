@@ -9,7 +9,10 @@ import type { content } from "@/content";
 import { signupSchema, type SignupValues } from "../schemas";
 import { useAfterLogin } from "./use-login";
 
-/** Logic for the create-account form. A new account is signed in straight away. */
+/**
+ * Logic for the create-account form. A new account is signed in straight away, unless Supabase asks the
+ * visitor to confirm their email first (then the form says so).
+ */
 export function useSignup() {
   const afterLogin = useAfterLogin();
   const form = useForm<SignupValues>({
@@ -21,8 +24,8 @@ export function useSignup() {
   const error = mutation.error;
   const errorCode: keyof typeof content.account.signup.errors | null = !error
     ? null
-    : error instanceof ApiError && error.code === "duplicate_email"
-      ? "duplicate_email"
+    : error instanceof ApiError && (error.code === "duplicate_email" || error.code === "confirm_email")
+      ? error.code
       : "unknown";
 
   return {

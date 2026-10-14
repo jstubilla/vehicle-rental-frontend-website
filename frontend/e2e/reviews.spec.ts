@@ -1,7 +1,7 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
-import { seedBookings } from "../src/mocks/bookings";
-import { seedReviews } from "../src/mocks/reviews";
+import { seedBookings } from "./fixtures/bookings";
+import { seedReviews } from "./fixtures/reviews";
 import { expectNoA11yViolations, loginAs, pageAlerts, visit } from "./helpers";
 
 const t = content.reviews.form;
@@ -63,7 +63,8 @@ test.describe("the review form", () => {
 
   test("a server failure shows the error message and keeps what was typed", async ({ page }) => {
     await visit(page, "/review");
-    await fillValidForm(page, "Please fail this one [fail]");
+    await page.route("**/rest/v1/rpc/submit_review", (route) => route.fulfill({ status: 503, body: "{}" }));
+    await fillValidForm(page, "Please fail this one");
     await page.getByRole("button", { name: t.submit }).click();
     await expect(page.getByText(t.errorTitle)).toBeVisible();
     await expect(page.getByLabel(t.name)).toHaveValue("Rosalinda Fuentes");

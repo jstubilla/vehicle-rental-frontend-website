@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./test";
 import { content } from "../src/content";
 import { loginAs, pageAlerts, visit } from "./helpers";
 

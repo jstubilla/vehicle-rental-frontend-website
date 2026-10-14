@@ -1,6 +1,7 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "./test";
 import { content } from "../src/content";
-import { seedBookings } from "../src/mocks/bookings";
+import { seedBookings } from "./fixtures/bookings";
+import { fixtureId } from "./db";
 import {
   addApprovedBooking,
   dateFromToday,
@@ -192,9 +193,9 @@ test.describe("admin area (signed in)", () => {
   const ADMIN_PAGES: PageCase[] = [
     { name: "Dashboard", path: "/admin", ready: (p) => p.getByRole("heading", { name: content.admin.dashboard.recentActivity }) },
     { name: "Customer list", path: "/admin/customers", ready: (p) => p.getByRole("row").nth(1) },
-    { name: "Customer profile", path: "/admin/customers/cus-05", ready: (p) => h1(p, "Mark Villanueva") },
+    { name: "Customer profile", path: `/admin/customers/${fixtureId("cus-05")}`, ready: (p) => h1(p, "Mark Villanueva") },
     { name: "Lead list", path: "/admin/leads", ready: (p) => p.getByRole("row").nth(1) },
-    { name: "Lead detail", path: "/admin/leads/lead-05", ready: (p) => h1(p, "Trisha Valdez") },
+    { name: "Lead detail", path: `/admin/leads/${fixtureId("lead-05")}`, ready: (p) => h1(p, "Trisha Valdez") },
   ];
 
   for (const { name, path, ready } of ADMIN_PAGES) {
@@ -241,7 +242,7 @@ test.describe("management pages (signed in)", () => {
     { name: "Pipeline", path: "/admin/pipeline", ready: (p) => p.getByRole("region", { name: content.enums.leadStage.new, exact: true }).getByRole("listitem").first() },
     { name: "Task list", path: "/admin/tasks", ready: (p) => p.getByRole("row").nth(1) },
     { name: "Booking list", path: "/admin/bookings", ready: (p) => p.getByRole("row").nth(1) },
-    { name: "Booking detail", path: `/admin/bookings/${pendingBooking.id}`, ready: (p) => h1(p, pendingBooking.reference) },
+    { name: "Booking detail", path: `/admin/bookings/${fixtureId(pendingBooking.id)}`, ready: (p) => h1(p, pendingBooking.reference) },
     { name: "Reports", path: "/admin/reports", ready: (p) => p.getByRole("figure").first() },
     { name: "Vehicle prices", path: "/admin/pricing", ready: (p) => p.getByRole("row").nth(1) },
     { name: "Users", path: "/admin/users", ready: (p) => p.getByRole("row").nth(1) },
@@ -393,7 +394,7 @@ test.describe("dark mode", () => {
       await expectNoA11yViolations(page);
 
       const pending = seedBookings.find((booking) => booking.status === "pending")!;
-      await visit(page, `/admin/bookings/${pending.id}`);
+      await visit(page, `/admin/bookings/${fixtureId(pending.id)}`);
       await expect(h1(page, pending.reference)).toBeVisible();
       await expectNoA11yViolations(page);
     });

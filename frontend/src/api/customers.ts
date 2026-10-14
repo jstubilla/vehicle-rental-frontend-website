@@ -1,18 +1,19 @@
-import { searchCustomers, type CustomerListParams, type CustomerRow } from "@/lib/customer-search";
-import { newId, readTable, writeTable } from "@/mocks/store";
+import { searchCustomers, type CustomerListParams, type CustomerRow as CustomerListRow } from "@/lib/customer-search";
 import type { Booking, Customer, Paginated } from "@/types";
-import { assertAdmin } from "./auth";
-import { ApiError, simulateNetwork } from "./client";
+import { requireStaff } from "./auth";
+import { ApiError, check, toApiError, unwrap } from "./client";
+import { one, toBooking, toCustomer, type BookingRow, type CustomerRow } from "./rows";
+import { db } from "./supabase";
 
-export async function listCustomers(params: CustomerListParams): Promise<Paginated<CustomerRow>> {
-  assertAdmin();
-  await simulateNetwork();
-  const bookings = readTable("bookings");
-  const rows: CustomerRow[] = readTable("customers").map((customer) => ({
-    ...customer,
-    bookingCount: bookings.filter((b) => b.customerId === customer.id).length,
-  }));
-  return searchCustomers(rows, params);
+export async function listCustomers(params: CustomerListParams): Promise<Paginated<CustomerListRow>> {
+  await requireStaff();
+  const rows = unwrap(await db().from("customers").select("*, contact_details(*), bookings(count)")) as (CustomerRow & {
+    bookings: { count: number }[] | { count: number } | null;
+  })[];
+  return searchCustomers(
+    rows.map(({ bookings, ...row }) => ({ ...toCustomer(row), bookingCount: one(bookings)?.count ?? 0 })),
+    params,
+  );
 }
 
 export interface CustomerProfile {
@@ -21,20 +22,26 @@ export interface CustomerProfile {
 }
 
 export async function getCustomerProfile(id: string): Promise<CustomerProfile | null> {
-  assertAdmin();
-  await simulateNetwork();
-  const customer = readTable("customers").find((c) => c.id === id);
-  if (!customer) return null;
-
-  const vehicles = readTable("vehicles");
-  const bookings = readTable("bookings")
-    .filter((b) => b.customerId === id)
-    .sort((a, b) => b.pickupDate.localeCompare(a.pickupDate))
-    .map((booking) => ({
-      booking,
-      vehicleName: vehicles.find((v) => v.id === booking.vehicleId)?.name ?? "",
-    }));
-  return { customer, bookings };
+  await requireStaff();
+  const { data, error } = await db()
+    .from("customers")
+    .select("*, contact_details(*), bookings(*, vehicle:vehicles(name), payment:payments(id))")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw toApiError(error);
+  if (!data) return null;
+  const { bookings, ...customer } = data as CustomerRow & {
+    bookings: (BookingRow & { vehicle: { name: string } | null; payment: { id: string } | { id: string }[] | null })[];
+  };
+  return {
+    customer: toCustomer(customer),
+    bookings: bookings
+      .map(({ vehicle, payment, ...booking }) => ({
+        booking: toBooking(booking, one(payment)?.id ?? null),
+        vehicleName: vehicle?.name ?? "",
+      }))
+      .sort((a, b) => b.booking.pickupDate.localeCompare(a.booking.pickupDate)),
+  };
 }
 
 export interface CustomerInput {
@@ -45,79 +52,43 @@ export interface CustomerInput {
   notes: string;
 }
 
-function assertEmailFree(customers: Customer[], email: string, exceptId?: string) {
-  const taken = customers.some((c) => c.id !== exceptId && c.email.toLowerCase() === email.toLowerCase());
-  if (taken) throw new ApiError("A customer with this email already exists", 409, "duplicate_email");
+const toColumns = (input: CustomerInput) => ({
+  name: input.name.trim(),
+  email: input.email.trim().toLowerCase(),
+  phone: input.phone.trim(),
+  license_number: input.licenseNumber.trim() || null,
+  notes: input.notes.trim(),
+});
+
+/** A unique-email error from the database means another customer has this email. */
+function duplicateEmail(error: ApiError): ApiError {
+  return error.code === "duplicate_email" ? new ApiError("A customer with this email already exists", 409, "duplicate_email") : error;
 }
 
 export async function createCustomer(input: CustomerInput): Promise<Customer> {
-  const session = assertAdmin();
-  await simulateNetwork();
-
-  const customers = readTable("customers");
-  const email = input.email.trim().toLowerCase();
-  assertEmailFree(customers, email);
-
-  const now = new Date().toISOString();
-  const customer: Customer = {
-    id: newId("cus"),
-    name: input.name.trim(),
-    email,
-    phone: input.phone.trim(),
-    licenseNumber: input.licenseNumber.trim() || null,
-    notes: input.notes.trim(),
-    additionalContacts: [],
-    createdAt: now,
-  };
-  writeTable("customers", [customer, ...customers]);
-  writeTable("activities", [
-    {
-      id: newId("act"),
-      type: "note",
-      body: "Customer added by staff.",
-      entityType: "customer",
-      entityId: customer.id,
-      authorId: session.userId,
-      createdAt: now,
-    },
-    ...readTable("activities"),
-  ]);
+  const { userId } = await requireStaff();
+  const result = await db().from("customers").insert(toColumns(input)).select("*").single();
+  if (result.error) throw duplicateEmail(toApiError(result.error));
+  const customer = toCustomer(result.data as CustomerRow);
+  check(
+    await db().from("activities").insert({ type: "note", body: "Customer added by staff.", customer_id: customer.id, author_id: userId }),
+  );
   return customer;
 }
 
 export async function updateCustomer(id: string, input: CustomerInput): Promise<Customer> {
-  assertAdmin();
-  await simulateNetwork();
-
-  const customers = readTable("customers");
-  const existing = customers.find((c) => c.id === id);
-  if (!existing) throw new ApiError("Customer not found", 404, "not_found");
-
-  const email = input.email.trim().toLowerCase();
-  assertEmailFree(customers, email, id);
-
-  const updated: Customer = {
-    ...existing,
-    name: input.name.trim(),
-    email,
-    phone: input.phone.trim(),
-    licenseNumber: input.licenseNumber.trim() || null,
-    notes: input.notes.trim(),
-  };
-  writeTable("customers", customers.map((c) => (c.id === id ? updated : c)));
-  return updated;
+  await requireStaff();
+  const result = await db().from("customers").update(toColumns(input)).eq("id", id).select("*, contact_details(*)").maybeSingle();
+  if (result.error) throw duplicateEmail(toApiError(result.error));
+  if (!result.data) throw new ApiError("Customer not found", 404, "not_found");
+  return toCustomer(result.data as CustomerRow);
 }
 
-/** Deletes a customer and their activity log. Customers with bookings are kept. */
+/**
+ * Deletes a customer and their activity log. Customers with bookings are kept (the database refuses
+ * with "has_bookings"). Leads converted into this customer simply lose the link.
+ */
 export async function deleteCustomer(id: string): Promise<void> {
-  assertAdmin();
-  await simulateNetwork();
-
-  if (readTable("bookings").some((b) => b.customerId === id)) {
-    throw new ApiError("This customer has bookings", 409, "has_bookings");
-  }
-  writeTable("customers", readTable("customers").filter((c) => c.id !== id));
-  writeTable("activities", readTable("activities").filter((a) => !(a.entityType === "customer" && a.entityId === id)));
-  // Leads that were converted into this customer simply lose the link.
-  writeTable("leads", readTable("leads").map((l) => (l.customerId === id ? { ...l, customerId: null } : l)));
+  await requireStaff();
+  check(await db().from("customers").delete().eq("id", id));
 }

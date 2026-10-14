@@ -1,5 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-import { DEMO_PASSWORD } from "../src/api/auth";
+import { expect, test, type Page } from "./test";
+import { DEMO_PASSWORD, fixtureId } from "./db";
 import { content } from "../src/content";
 import { demoAccount, loginAs, pageAlerts, visit } from "./helpers";
 
@@ -8,7 +8,7 @@ const sidebar = (page: Page) => page.getByRole("navigation", { name: t.nav.label
 
 test.describe("signed out", () => {
   test("every admin page sends visitors to the login page and remembers where they wanted to go", async ({ page }) => {
-    for (const path of ["/admin", "/admin/customers", "/admin/leads", "/admin/customers/cus-01"]) {
+    for (const path of ["/admin", "/admin/customers", "/admin/leads", `/admin/customers/${fixtureId("cus-01")}`]) {
       await page.goto(path);
       await expect(page).toHaveURL(new RegExp(`/admin/login\\?next=${encodeURIComponent(path).replace(/\//g, "%2F")}`));
       await expect(page.getByRole("heading", { level: 1, name: t.login.title })).toBeVisible();
@@ -85,7 +85,7 @@ test.describe("staff", () => {
     await loginAs(page);
     await visit(page, "/admin/customers");
     await expect(page.getByRole("button", { name: t.customers.add })).toBeVisible();
-    await visit(page, "/admin/customers/cus-01");
+    await visit(page, `/admin/customers/${fixtureId("cus-01")}`);
     await expect(page.getByRole("heading", { level: 1, name: "Juan Dela Cruz" })).toBeVisible();
     await expect(page.getByRole("button", { name: t.common.edit, exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: t.common.delete, exact: true })).toBeVisible();
@@ -93,11 +93,18 @@ test.describe("staff", () => {
 });
 
 test.describe("signed in", () => {
-  test("the session cookie is hidden from page scripts", async ({ page, context }) => {
+  test("the session is kept in a same-site cookie that the server checks", async ({ page, context }) => {
     await loginAs(page);
-    const cookie = (await context.cookies()).find((c) => c.name === "car-rental-session");
-    expect(cookie?.httpOnly).toBe(true);
-    expect(await page.evaluate(() => document.cookie)).not.toContain("car-rental-session");
+    // Supabase keeps the session in "sb-<project>-auth-token" cookies (readable by the page, which
+    // refreshes the session; the database checks the token on every request).
+    const cookies = (await context.cookies()).filter((c) => /^sb-.*-auth-token/.test(c.name));
+    expect(cookies.length).toBeGreaterThan(0);
+    for (const cookie of cookies) expect(cookie.sameSite).toBe("Lax");
+
+    // Without the cookie, the admin area is closed again.
+    await context.clearCookies();
+    await page.goto("/admin/customers");
+    await expect(page).toHaveURL(/\/admin\/login\?next=/);
   });
 
   test("the login page sends signed-in staff to their dashboard", async ({ page }) => {

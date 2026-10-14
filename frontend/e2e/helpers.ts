@@ -1,10 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
-import { DEMO_PASSWORD } from "../src/api/auth";
 import { content } from "../src/content";
 import { addDaysISO, todayISO } from "../src/lib/dates";
-import { seedBookings } from "../src/mocks/bookings";
-import { seedCustomers } from "../src/mocks/customers";
+import { DEMO_PASSWORD, fixtureId, runSql } from "./db";
+import { seedBookings } from "./fixtures/bookings";
+import { seedCustomers } from "./fixtures/customers";
+import { seedUsers } from "./fixtures/users";
 
 /** A 1×1 PNG, standing in for a phone photo of an ID. */
 const SAMPLE_PHOTO_BASE64 =
@@ -29,32 +30,26 @@ export async function uploadDocuments(page: Page): Promise<void> {
 
 /**
  * Adds a booking whose documents staff have just approved, so it is waiting for payment, and
- * returns what the customer needs to open the pay page.
+ * returns what the customer needs to open the pay page. `customerId` is a fixture id ("cus-02").
  */
 export async function addApprovedBooking(
-  page: Page,
+  _page: Page,
   { customerId }: { customerId?: string } = {},
 ): Promise<{ reference: string; email: string; total: number }> {
   const confirmed = seedBookings.find((booking) => booking.status === "confirmed")!;
-  const source = { ...confirmed, customerId: customerId ?? confirmed.customerId };
-  const email = seedCustomers.find((customer) => customer.id === source.customerId)!.email;
-  const booking = {
-    ...source,
-    id: "bkg-e2e-approved",
-    reference: "RC-PAYM3E",
-    status: "approved",
-    documentsStatus: "verified",
-    approvedAt: new Date().toISOString(),
-    paymentId: null,
-  };
-  await visit(page, "/");
-  await page.evaluate((row) => {
-    const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
-    const db = JSON.parse(localStorage.getItem(key)!);
-    db.bookings.unshift(row);
-    localStorage.setItem(key, JSON.stringify(db));
-  }, booking);
-  return { reference: booking.reference, email, total: booking.total };
+  const owner = customerId ?? confirmed.customerId;
+  const email = seedCustomers.find((customer) => customer.id === owner)!.email;
+  const reference = "RC-PAYM3E";
+  await runSql(`
+    insert into public.bookings (customer_id, vehicle_id, reference, pickup_location, return_location, pickup_date,
+      pickup_time, return_date, return_time, days, daily_rate, vehicle_total, with_driver, driver_rate, driver_total,
+      total, status, documents_status, approved_at)
+    select '${fixtureId(owner)}', vehicle_id, '${reference}', pickup_location, return_location, pickup_date,
+      pickup_time, return_date, return_time, days, daily_rate, vehicle_total, with_driver, driver_rate, driver_total,
+      total, 'approved', 'verified', now()
+    from public.bookings where id = '${fixtureId(confirmed.id)}'
+  `);
+  return { reference, email, total: confirmed.total };
 }
 
 /** Opens the emailed pay (or new-photos) link and gets past the email check. */
@@ -76,8 +71,10 @@ export async function visit(page: Page, path: string): Promise<void> {
   await expect(page.locator("[data-splash]")).toHaveCount(0, { timeout: 15_000 });
 }
 
-/** The demo staff login. Everyone who signs in is an admin, so there is only one to pick. */
-export const demoAccount = () => content.admin.login.demo.accounts[0];
+/** The demo staff login (seeded in backend/supabase/seed.sql). Everyone who signs in is an admin. */
+export const demoAccount = () => seedUsers[0];
+
+export { DEMO_PASSWORD };
 
 /** Signs in through the real login form. */
 export async function loginAs(page: Page, from = "/admin/login"): Promise<void> {

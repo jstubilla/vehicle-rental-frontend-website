@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, FormField, Input } from "@/components/ui";
-import { DEMO_PASSWORD } from "@/api/auth";
 import { content } from "@/content";
-import { SHOW_MOCK_CONTROLS } from "@/lib/site";
 import { useLogin } from "../hooks/use-login";
 
 const t = content.admin.login;
 
 export function LoginForm() {
-  const { form, onSubmit, isSubmitting, errorCode, fill } = useLogin();
+  const { form, onSubmit, isSubmitting, errorCode } = useLogin();
   const { register, formState } = form;
   const { errors } = formState;
 
@@ -40,33 +38,6 @@ export function LoginForm() {
           </form>
         </CardContent>
       </Card>
-
-      {SHOW_MOCK_CONTROLS && (
-        <Card variant="muted" as="section" aria-labelledby="demo-accounts-heading">
-          <CardContent className="flex flex-col gap-3 pt-4 md:pt-6">
-            <h2 id="demo-accounts-heading" className="text-lg">
-              {t.demo.title}
-            </h2>
-            <p className="text-sm text-muted">
-              {t.demo.description} <code className="font-mono font-semibold">{DEMO_PASSWORD}</code>
-            </p>
-            <ul className="flex flex-col gap-2">
-              {t.demo.accounts.map((account) => (
-                <li key={account.email} className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm">
-                    <span className="font-medium">{account.name}</span>
-                    <span className="block text-muted">{account.email}</span>
-                  </span>
-                  <Button variant="outline" size="sm" onClick={() => fill(account.email, DEMO_PASSWORD)}>
-                    {t.demo.use}
-                    <span className="sr-only"> ({account.name})</span>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       <Button asChild variant="link" className="self-center">
         <Link href="/">{t.backToSite}</Link>

@@ -7,7 +7,6 @@ import { Alert, Button, Checkbox, FormField, Input, Modal } from "@/components/u
 import type { User } from "@/types";
 import { content } from "@/content";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { SHOW_MOCK_CONTROLS } from "@/lib/site";
 import { useUserMutations, userErrorMessage } from "../hooks/use-staff";
 import { userFormSchema, type UserFormValues } from "../schemas";
 
@@ -72,7 +71,7 @@ function UserForm({ user, onClose }: { user?: User; onClose: () => void }) {
         <Input {...register("email")} type="email" autoComplete="off" />
       </FormField>
       <Checkbox {...register("active")} label={t.active} disabled={editingSelf} />
-      {SHOW_MOCK_CONTROLS && <p className="text-sm text-muted">{t.passwordNote}</p>}
+      {!user && <p className="text-sm text-muted">{t.passwordNote}</p>}
 
       <div className="flex flex-wrap justify-end gap-2 pt-2">
         <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>

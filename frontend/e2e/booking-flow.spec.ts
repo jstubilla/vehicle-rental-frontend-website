@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page } from "./test";
 import { content } from "../src/content";
 import { formatCurrency } from "../src/lib/currency";
 import { DRIVER_DAILY_RATE, splitDownPayment } from "../src/lib/pricing";
@@ -11,18 +11,19 @@ import {
   uploadDocuments,
   visit,
 } from "./helpers";
+import { runSql } from "./db";
 
 const b = content.booking;
 const d = content.admin.bookings.detail;
 const EMAIL = "lorenzo.b@example.com";
 
-/** How many bookings and payments the fake database holds right now. */
-const savedCounts = (page: Page) =>
-  page.evaluate(() => {
-    const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
-    const db = JSON.parse(localStorage.getItem(key)!);
-    return { bookings: db.bookings.length, payments: db.payments.length };
-  });
+/** How many bookings and payments the database holds right now. */
+async function savedCounts() {
+  const [row] = await runSql<{ bookings: number; payments: number }>(
+    "select (select count(*)::int from public.bookings) as bookings, (select count(*)::int from public.payments) as payments",
+  );
+  return row;
+}
 
 /** Step 3: driver details and document photos. */
 async function fillDetails(page: Page) {
@@ -151,7 +152,7 @@ test("a visitor sends a booking request in five steps, and nothing is charged", 
       "aria-current",
       "step",
     );
-    expect(await savedCounts(page)).toEqual({ bookings: 16, payments: 15 });
+    expect(await savedCounts()).toEqual({ bookings: 16, payments: 15 });
     // The booking is kept, so a reload still shows it.
     await page.reload();
     await expect(page.getByRole("heading", { level: 1, name: b.confirmation.titlePending })).toBeVisible();
@@ -216,7 +217,7 @@ test("staff approve the documents, then the customer pays and the booking is con
     await expect(pageAlerts(page).filter({ hasText: b.payment.failedTitle })).toContainText(
       b.payment.failureReasons.declined,
     );
-    expect((await savedCounts(page)).payments).toBe(15);
+    expect((await savedCounts()).payments).toBe(15);
 
     await page.getByLabel(b.payment.demo.success).check();
     await page.getByRole("button", { name: b.payment.tryAgain }).click();
@@ -349,19 +350,14 @@ test("a price change before sending books nothing and asks the visitor to check 
   await page.getByLabel(b.payment.terms).check();
 
   // The owner raises the hatchback's daily rate from 1,600 to 1,700 while the visitor is on this page.
-  await page.evaluate(() => {
-    const key = Object.keys(localStorage).find((name) => name.startsWith("car-rental-mock-db"))!;
-    const db = JSON.parse(localStorage.getItem(key)!);
-    db.vehicles.find((vehicle: { slug: string }) => vehicle.slug === "hatchback").pricePerDay = 1700;
-    localStorage.setItem(key, JSON.stringify(db));
-  });
+  await runSql("update public.vehicles set price_per_day = 1700 where slug = 'hatchback'");
 
   await page.getByRole("button", { name: b.submit.send }).click();
   await expect(pageAlerts(page).filter({ hasText: b.submit.errors.price_changed.title })).toContainText(
     b.submit.errors.price_changed.body,
   );
   await expect(page).toHaveURL(/\/book\/submit/);
-  expect(await savedCounts(page)).toEqual({ bookings: 15, payments: 15 });
+  expect(await savedCounts()).toEqual({ bookings: 15, payments: 15 });
 
   // The visitor checks the new total, then sends the request at it.
   await page.getByRole("link", { name: b.submit.errors.price_changed.action }).click();
@@ -370,7 +366,7 @@ test("a price change before sending books nothing and asks the visitor to check 
   await page.getByRole("link", { name: b.check.toSubmit }).click();
   await sendRequest(page);
   await expect(page.getByRole("region", { name: b.summary.title })).toContainText(formatCurrency(3400));
-  expect(await savedCounts(page)).toEqual({ bookings: 16, payments: 15 });
+  expect(await savedCounts()).toEqual({ bookings: 16, payments: 15 });
 });
 
 test("a visitor books a car With a driver, charged for every rental day", async ({ page }) => {

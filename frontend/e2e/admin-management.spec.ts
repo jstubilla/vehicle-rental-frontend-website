@@ -1,8 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
-import { DEMO_PASSWORD } from "../src/api/auth";
+import { expect, test, type Page } from "./test";
+import { fixtureId } from "./db";
+import { latestEmail } from "./mail";
 import { content } from "../src/content";
 import { formatCurrency, formatPhp, formatUsd } from "../src/lib/currency";
-import { seedBookings } from "../src/mocks/bookings";
+import { seedBookings } from "./fixtures/bookings";
 import { loginAs, pageAlerts, visit } from "./helpers";
 
 const t = content.admin;
@@ -15,7 +16,7 @@ test.describe("bookings", () => {
 
   test("staff move a booking through its whole life and record the payment", async ({ page }) => {
     await loginAs(page);
-    await visit(page, `/admin/bookings/${pending.id}`);
+    await visit(page, `/admin/bookings/${fixtureId(pending.id)}`);
     await expect(page.getByRole("heading", { level: 1, name: pending.reference })).toBeVisible();
 
     const status = region(page, t.bookings.detail.status);
@@ -40,7 +41,7 @@ test.describe("bookings", () => {
 
   test("cancelling asks first", async ({ page }) => {
     await loginAs(page);
-    await visit(page, `/admin/bookings/${pending.id}`);
+    await visit(page, `/admin/bookings/${fixtureId(pending.id)}`);
     await page.getByRole("button", { name: t.bookings.detail.actions.cancelled }).click();
 
     const dialog = page.getByRole("dialog");
@@ -105,7 +106,7 @@ test.describe("pricing", () => {
 test.describe("tasks", () => {
   test("a task added on a lead's page appears everywhere and can be finished", async ({ page }) => {
     await loginAs(page);
-    await visit(page, "/admin/leads/lead-03");
+    await visit(page, `/admin/leads/${fixtureId("lead-03")}`);
 
     const card = region(page, t.tasks.linkedCard.title);
     await expect(card).toContainText("Call back Hazel about airport pick-up rates");
@@ -128,7 +129,7 @@ test.describe("tasks", () => {
     await page.getByLabel(t.tasks.filters.status).selectOption("done");
     await expect(page.getByRole("row", { name: /Email the airport rate card/ })).toBeVisible();
 
-    await visit(page, "/admin/leads/lead-03");
+    await visit(page, `/admin/leads/${fixtureId("lead-03")}`);
     await expect(page.getByText(t.tasks.completedNote("Email the airport rate card"))).toBeVisible();
   });
 
@@ -222,14 +223,28 @@ test.describe("users", () => {
     await expect(dialog.getByLabel(/^Role/)).toHaveCount(0);
     await dialog.getByLabel(t.users.form.name).fill("Carmela Ortega");
     await dialog.getByLabel(t.users.form.email).fill("carmela.ortega@carrental.example");
+    const invitedAfter = new Date();
     await dialog.getByRole("button", { name: t.common.save }).click();
     await expect(page.getByRole("row", { name: /Carmela Ortega/ })).toBeVisible();
 
     await page.getByRole("button", { name: t.frame.logout }).click();
     await page.waitForURL(/\/admin\/login/);
+
+    // She follows the link in her invitation email and chooses a password.
+    const invitation = await latestEmail("carmela.ortega@carrental.example", invitedAfter);
+    const link = /href="([^"]+)"/.exec(invitation.html)![1].replace(/&amp;/g, "&");
+    await page.goto(link);
+    await expect(page).toHaveURL(/\/admin\/set-password$/);
+    await page.getByLabel(t.setPassword.password).fill("carmela-pass-1");
+    await page.getByRole("button", { name: t.setPassword.submit }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+
+    // And can sign in with it from now on.
+    await page.getByRole("button", { name: t.frame.logout }).click();
+    await page.waitForURL(/\/admin\/login/);
     await page.waitForLoadState("networkidle");
     await page.getByLabel(t.login.email).fill("carmela.ortega@carrental.example");
-    await page.getByLabel(t.login.password).fill(DEMO_PASSWORD);
+    await page.getByLabel(t.login.password).fill("carmela-pass-1");
     await page.getByRole("button", { name: t.login.submit }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
