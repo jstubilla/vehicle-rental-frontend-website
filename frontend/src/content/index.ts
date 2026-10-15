@@ -953,7 +953,7 @@ export const content = {
       address: "Address",
       hours: "Opening hours",
       addressValue: "Block 5 Lot 13, Riverplains Subdivision, Lanit, Jaro, Iloilo City",
-      hoursValue: "Daily, 7:00 AM to 9:00 PM",
+      hoursValue: "Open 24/7",
     },
     form: {
       title: "Send us a message",
