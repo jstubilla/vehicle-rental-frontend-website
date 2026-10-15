@@ -154,8 +154,7 @@ export function RenterPhotos() {
         ))}
       </ul>
 
-      <div className="flex items-center justify-between gap-3 px-gutter text-sm md:px-0">
-        <p className="min-w-0 text-muted">{t.caption}</p>
+      <div className="flex items-center justify-end gap-3 px-gutter text-sm md:px-0">
         <div className="-mr-2 flex shrink-0 items-center">
           <Button size="icon" variant="ghost" aria-label={t.previous} onClick={() => go(-1)}>
             <ChevronLeftIcon aria-hidden="true" className="size-5" />

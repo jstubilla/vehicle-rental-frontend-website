@@ -4,10 +4,10 @@ import type { Vehicle } from "@/types";
 /**
  * One photo per vehicle type, all in the same style: the vehicle cut out of a Wikimedia Commons photo
  * (credited below, CC BY-SA 4.0 unless noted), white or black, front corner view from the side with the
- * front to the right, on the same flat light backdrop (#edeef2) with a floor shadow. Each sits in the centre
- * of the frame, so 16:9 cards crop only empty backdrop; the narrow row cards show the whole photo on that
- * same colour.
- * Files: public/images/vehicles/<slug>-front.jpg.
+ * front to the right, on a transparent background with its own soft floor shadow. Every vehicle is fitted
+ * into the same box on the same ground line inside the centre 16:9 band of a 4:3 frame, so the cars line
+ * up across a grid and 16:9 cards crop only empty space. The page draws the backdrop (.vehicle-stage).
+ * Files: public/images/vehicles/<slug>-front.webp (cutouts; -front.png is the same, -front.jpg the originals).
  */
 const PHOTO_CREDITS: Record<string, { author: string; file: string; license?: string }> = {
   suv: { author: "Ethan Llamas", file: "Toyota_Fortuner_2.8_Q_2022.jpg" },
@@ -24,7 +24,7 @@ function photos(slug: string, name: string): ImageAsset[] {
   const credit = PHOTO_CREDITS[slug];
   return [
     {
-      src: credit ? `/images/vehicles/${slug}-front.jpg` : null,
+      src: credit ? `/images/vehicles/${slug}-front.webp` : null,
       alt: `${name}, front corner view`,
       label: `${name} photo`,
       ratio: "photo",

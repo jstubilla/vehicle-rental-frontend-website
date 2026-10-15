@@ -11,7 +11,8 @@ const d = content.booking.details;
 
 const emailBox = (page: Page) => page.getByRole("textbox", { name: /^Email/ });
 const passwordBox = (page: Page) => page.locator("input[type=password]");
-const greeting = (page: Page, firstName: string) => page.getByText(nav.hello(firstName));
+/** Signed in: the header offers "Log out" (it no longer greets the customer by name). */
+const signedIn = (page: Page) => page.getByRole("banner").getByRole("button", { name: nav.logout });
 const loginLink = (page: Page) => page.getByRole("banner").getByRole("link", { name: nav.login });
 
 /** Logs in as the demo customer through the real form. */
@@ -19,7 +20,7 @@ async function loginAsDemoCustomer(page: Page, from = "/login") {
   await visit(page, from);
   await page.getByRole("button", { name: t.demo.use }).click();
   await page.getByRole("button", { name: t.submit }).click();
-  await expect(greeting(page, "Maria")).toBeVisible();
+  await expect(signedIn(page)).toBeVisible();
 }
 
 /** Goes from the first booking step to step 3 (details) using a link that carries the trip. */
@@ -63,15 +64,15 @@ test.describe("signing up", () => {
     await page.getByLabel(s.password).fill("longenough1");
     await page.getByRole("button", { name: s.submit }).click();
     await expect(page).toHaveURL(/localhost:3100\/$/);
-    await expect(greeting(page, "Ana")).toBeVisible();
+    await expect(signedIn(page)).toBeVisible();
 
     // Still signed in after a reload.
     await page.reload();
-    await expect(greeting(page, "Ana")).toBeVisible();
+    await expect(signedIn(page)).toBeVisible();
 
     await page.getByRole("button", { name: nav.logout }).click();
     await expect(loginLink(page)).toBeVisible();
-    await expect(greeting(page, "Ana")).toHaveCount(0);
+    await expect(signedIn(page)).toHaveCount(0);
   });
 });
 
@@ -117,17 +118,14 @@ test.describe("logging in", () => {
 
     await page.getByLabel(t.code).fill("123456");
     await page.getByRole("button", { name: t.verify }).click();
-    await expect(greeting(page, "Maria")).toBeVisible();
+    await expect(signedIn(page)).toBeVisible();
   });
 
-  for (const [label, name] of [
-    [t.google, "Google"],
-    [t.apple, "Apple"],
-  ] as const) {
+  for (const label of [t.google, t.apple]) {
     test(`"${label}" signs in`, async ({ page }) => {
       await visit(page, "/login");
       await page.getByRole("button", { name: label }).click();
-      await expect(greeting(page, name)).toBeVisible();
+      await expect(signedIn(page)).toBeVisible();
     });
   }
 
@@ -188,7 +186,7 @@ test.describe("saved details in the booking", () => {
     await page.getByLabel(s.email).fill("ana.reyes@example.com");
     await page.getByLabel(s.password).fill("longenough1");
     await page.getByRole("button", { name: s.submit }).click();
-    await expect(greeting(page, "Ana")).toBeVisible();
+    await expect(signedIn(page)).toBeVisible();
 
     await goToDetails(page);
     await page.getByRole("button", { name: d.savedDetails.yes }).click();

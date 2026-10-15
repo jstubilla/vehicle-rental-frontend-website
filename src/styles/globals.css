@@ -107,6 +107,18 @@
 }
 
 /*
+ * The backdrop behind every vehicle cutout: a soft studio light from above, so white and black vehicles
+ * both read, in either theme. Overrides the placeholder grey a photo frame otherwise has.
+ */
+.vehicle-stage {
+  background: radial-gradient(120% 95% at 50% 30%, #f9fafb 0%, #eceff3 60%, #e0e4ea 100%);
+}
+
+[data-theme="dark"] .vehicle-stage {
+  background: radial-gradient(120% 95% at 50% 30%, #4a5669 0%, #323d4f 60%, #253042 100%);
+}
+
+/*
  * Scroll reveals (see <Reveal>): a block below the fold waits slightly lowered and transparent,
  * then settles once it enters the view. Children marked [data-reveal-item] follow in turn.
  */
@@ -250,6 +262,30 @@
 }
 [data-theme="dark"] .hero-backdrop img {
   filter: none;
+}
+/*
+ * Tours & Transfers: the file is cropped to the beach, palms and boats, and starts at the top of the page (no
+ * raised frame), so the beach sits behind the title rather than behind the price panels.
+ */
+.hero-backdrop-tours .hero-backdrop-frame {
+  top: 0;
+}
+.hero-backdrop-tours img {
+  object-position: 60% 50%;
+}
+[data-theme="dark"] .hero-backdrop-tours img {
+  opacity: 0.8;
+}
+/*
+ * A Tours & Transfers tile's photo: clear enough in the open middle to tell the place at a glance, faded to
+ * a trace at both ends where the name (left) and price (right) sit, so the text keeps its contrast.
+ */
+.tour-row-photo {
+  opacity: 0.55;
+  mask-image: linear-gradient(to right, rgb(0 0 0 / 0.3) 0%, rgb(0 0 0 / 0.5) 35%, #000 60%, rgb(0 0 0 / 0.12) 84%);
+}
+[data-theme="dark"] .tour-row-photo {
+  opacity: 0.6;
 }
 [data-theme="dark"] .hero-backdrop::after {
   background:

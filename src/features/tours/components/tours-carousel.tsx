@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { tourPhotos } from "@/assets/config";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLink, Price } from "@/components/ui";
 import { content } from "@/content";
@@ -90,7 +92,8 @@ export function ToursCarousel() {
     };
   }, [currentIndex]);
 
-  const active = playing && !hovered && !focused && onScreen && tabVisible && !reducedMotion;
+  const credit = tourPhotos[offers[index]?.name ?? ""]?.credit;
+  const active = playing &&!hovered && !focused && onScreen && tabVisible && !reducedMotion;
 
   useEffect(() => {
     if (!active) return;
@@ -141,10 +144,20 @@ export function ToursCarousel() {
             aria-label={t.slide(i + 1, offers.length)}
             className="w-full shrink-0 snap-start"
           >
+            {/* A tile over a faint photo of where the offer goes, as on the Tours & Transfers page. */}
             <Link
               href={`${PAGE_HREF}#${offer.listId}`}
-              className="group flex flex-col gap-1 rounded-sm text-inherit no-underline"
+              className="group relative isolate flex flex-col gap-1 overflow-hidden rounded-xl border border-border bg-surface px-4 py-3 text-inherit no-underline"
             >
+              {tourPhotos[offer.name]?.src && (
+                <Image
+                  src={tourPhotos[offer.name].src!}
+                  alt=""
+                  fill
+                  sizes="(min-width: 64rem) 24rem, 100vw"
+                  className="tour-row-photo -z-10 object-cover"
+                />
+              )}
               <span className="font-heading text-xl font-semibold tracking-tight text-foreground underline-offset-4 group-hover:underline lg:text-2xl">
                 {offer.name}
               </span>
@@ -158,9 +171,17 @@ export function ToursCarousel() {
         ))}
       </ul>
 
-      <ArrowLink href={PAGE_HREF} className="self-start text-sm whitespace-nowrap">
-        {t.viewAll}
-      </ArrowLink>
+      {/* The CC licences ask for a credit where the photo is used: the one behind the slide in view. */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <ArrowLink href={PAGE_HREF} className="text-sm whitespace-nowrap">
+          {t.viewAll}
+        </ArrowLink>
+        {credit && (
+          <a href={credit.href} target="_blank" rel="noopener noreferrer" className="text-xs text-muted">
+            {t.photoCredit(credit.author, credit.license)}
+          </a>
+        )}
+      </div>
     </section>
   );
 }

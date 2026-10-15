@@ -49,7 +49,7 @@ export function VehicleOption({
         <Media
           asset={vehicle.images[0] ?? images.vehicle}
           sizes="(min-width: 48rem) 14rem, 100vw"
-          className="aspect-video"
+          className="vehicle-stage aspect-video"
         />
       </div>
       <div className="flex flex-1 flex-col justify-between gap-3">

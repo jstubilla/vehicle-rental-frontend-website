@@ -14,7 +14,7 @@ export const content = {
   site: {
     name: "Ela's Car Rental",
     tagline: "Simple Car rentals across the Philippines",
-    description: "Rent a Car in the Philippines with simple online booking and clear daily rates in PHP.",
+    description: "Rent a Car, van or motorcycle in Iloilo. Book online at daily rates in PHP.",
     contactPhone: "0954 326 7335",
     contactEmail: "hello@example.com",
   },
@@ -37,7 +37,6 @@ export const content = {
     account: {
       login: "Log in",
       signup: "Sign up",
-      hello: (name: string) => `Hi, ${name}`,
       myBookings: "My bookings",
       logout: "Log out",
       label: "Your account",
@@ -77,7 +76,7 @@ export const content = {
     ],
     phoneLabel: "Call us",
     staffLogin: { label: "Staff login", href: "/admin/login" },
-    socialsTitle: "Follow or Message us",
+    socialsTitle: "Follow or message us",
     legal: "© 2026 Ela's Car Rental. All rights reserved.",
     credit: "Powered by VAIANI",
   },
@@ -217,6 +216,8 @@ export const content = {
       viewAll: "See all tours & transfers",
       slide: (n: number, total: number) => `${n} of ${total}`,
       counter: (n: number, total: number) => `${n} / ${total}`,
+      /** Under the teaser, for the photo behind the slide in view: "Photo: Mhlayson, CC BY-SA 4.0 (edited)". */
+      photoCredit: (author: string, license: string) => `Photo: ${author}, ${license} (edited)`,
     },
     howItWorks: {
       title: "How it works",
@@ -233,7 +234,6 @@ export const content = {
       /** The small renter photo carousel under the shorter reviews. Photo files and alt text: assets/config.ts. */
       photos: {
         label: "Photos of our renters",
-        caption: "Real renters, with one of our vans",
         previous: "Previous photo",
         next: "Next photo",
         slide: (n: number, total: number) => `${n} of ${total}`,
@@ -245,7 +245,7 @@ export const content = {
       write: "Write a review",
     },
     /** Closes the home page under the reviews; the button reuses nav.bookCta. */
-    cta: { title: "Ready to book your Car?" },
+    cta: { title: "Book your Car online" },
   },
 
   reviews: {
@@ -514,10 +514,10 @@ export const content = {
     meta: {
       title: "Tours & Transfers",
       description:
-        "Point-to-point van transfers and tour packages around Iloilo, plus weekly and monthly rates and a driver. Prices in PHP.",
+        "Point-to-point van transfers and day tour packages around Iloilo and Western Visayas. Fixed prices in PHP.",
     },
     title: "Tours & Transfers",
-    subtitle: "Van transfers, day tours, and ways to save on a longer rental.",
+    subtitle: "Van transfers and day tours around Iloilo, at fixed prices.",
     /**
      * Fixed prices in PHP. THE single source for these: the Tours & Transfers page lists them and the
      * home page's row of cards reads them from here, so a price is only ever typed once.
@@ -559,6 +559,11 @@ export const content = {
         price: { amount: DRIVER_DAILY_RATE, unit: "per day" },
       },
     ],
+    /** The credits for the page's licensed photos, at the foot of the page. */
+    photoCredits: {
+      title: "Photo credits",
+      note: "All photos are from Wikimedia Commons and were edited for this site.",
+    },
     cta: { title: "Ask about any of these", button: "Contact us" },
   },
 
@@ -566,10 +571,10 @@ export const content = {
     meta: {
       title: "Our Vehicles",
       description:
-        "Compare SUVs, MPVs, sedans, hatchbacks, vans, pick-up trucks and motorcycles with clear daily rates in PHP.",
+        "Compare SUVs, MPVs, sedans, hatchbacks, vans, pick-up trucks and motorcycles, with daily rates in PHP.",
     },
     title: "Our Vehicles",
-    description: "Filter by type, price and seats. Share the page to share your search.",
+    description: "Filter by type, price and seats.",
     filtersTitle: "Filters",
     showFilters: "Show filters",
     hideFilters: "Hide filters",
@@ -637,13 +642,13 @@ export const content = {
     viewPhoto: (n: number) => `View photo ${n}`,
     metaFallbackTitle: "Vehicle",
     metaDescription: (name: string, rate: string) =>
-      `Rent the ${name} for ${rate} per day. Book online with clear pricing.`,
+      `Rent the ${name} for ${rate} per day. Book online.`,
   },
 
   booking: {
     meta: {
       title: "Book your Car",
-      description: "Book your rental Car online in a few simple steps.",
+      description: "Choose your dates and Vehicle, then send your booking request online.",
     },
     steps: {
       dates: "Dates and location",
@@ -675,7 +680,7 @@ export const content = {
     },
     vehicle: {
       title: "Choose your Vehicle",
-      description: "Booking is open: choose any Vehicle. Prices shown are per day for your dates.",
+      description: "Prices are per day for your dates.",
       select: "Select",
       selected: "Selected",
       notAvailable: "Not available right now",
@@ -948,12 +953,12 @@ export const content = {
     title: "Contact us",
     subtitle: "Questions about a rental? Send us a message.",
     details: {
-      title: "Get in touch",
+      title: "Contact details",
       phone: "Phone",
       email: "Email",
       address: "Address",
       hours: "Opening hours",
-      addressValue: "Unit 000, Placeholder Building, Makati City, Metro Manila",
+      addressValue: "Block 5 Lot 13, Riverplains Subdivision, Lanit, Jaro, Iloilo City",
       hoursValue: "Daily, 7:00 AM to 9:00 PM",
     },
     form: {

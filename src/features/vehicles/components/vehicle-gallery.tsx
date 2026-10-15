@@ -19,7 +19,7 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
         asset={current}
         priority
         sizes="(min-width: 64rem) 58vw, 100vw"
-        className="aspect-video transition-opacity duration-(--duration-fast) ease-out starting:opacity-0"
+        className="vehicle-stage aspect-video transition-opacity duration-(--duration-fast) ease-out starting:opacity-0"
       />
       {current.credit && (
         <p className="text-xs text-muted">
@@ -42,7 +42,7 @@ export function VehicleGallery({ images }: { images: ImageAsset[] }) {
                   index === selected ? "border-primary" : "hover:border-border-strong",
                 )}
               >
-                <Media asset={{ ...image, label: `${index + 1}` }} sizes="20vw" className="aspect-video rounded-md border-0" />
+                <Media asset={{ ...image, label: `${index + 1}` }} sizes="20vw" className="vehicle-stage aspect-video rounded-md border-0" />
               </button>
             </li>
           ))}

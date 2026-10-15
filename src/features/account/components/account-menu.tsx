@@ -17,8 +17,6 @@ export function AccountMenu() {
 
   return account ? (
     <div className="flex items-center gap-2">
-      {/* Hidden at laptop width, where the header is tightest; shown on wide screens and in the phone menu. */}
-      <span className="max-w-36 truncate text-sm font-medium lg:max-xl:hidden">{t.hello(account.name.split(" ")[0])}</span>
       <Button asChild variant="ghost" size="sm">
         <Link href="/my-bookings">{t.myBookings}</Link>
       </Button>

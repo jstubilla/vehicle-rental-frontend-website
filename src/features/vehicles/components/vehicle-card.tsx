@@ -42,8 +42,8 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
       )}
     >
       {/*
-        Row cards stretch taller than their photo, so they show the whole photo on the photos' own backdrop
-        colour (#edeef2) rather than cropping the vehicle.
+        The cutouts are transparent and sit on the shared vehicle stage. Row cards stretch taller than their
+        photo, so they show the whole photo on that stage rather than cropping the vehicle.
       */}
       <Media
         zoom
@@ -57,8 +57,8 @@ export function VehicleCard({ vehicle, rental = null, days = null, layout = "til
               : "(min-width: 64rem) 33vw, (min-width: 40rem) 50vw, 100vw"
         }
         className={cn(
-          "rounded-none border-0",
-          isRow ? "aspect-square w-28 shrink-0 border-r bg-[#edeef2]! sm:w-40 sm:aspect-photo" : "aspect-video border-b",
+          "vehicle-stage rounded-none border-0",
+          isRow ? "aspect-square w-28 shrink-0 border-r sm:w-40 sm:aspect-photo" : "aspect-video border-b",
         )}
       />
 
