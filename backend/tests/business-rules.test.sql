@@ -48,9 +48,9 @@ insert into storage.objects (bucket_id, name) values
 
 set role anon;
 select t.ok((select count(*) from vehicles) = 8, 'visitor sees 8 vehicle types');
-select t.ok((select count(*) from customers) = 0, 'visitor sees no customers');
+select t.expect_error($$select count(*) from customers$$, 'permission denied');
 select t.ok((select count(*) from storage.objects) = 0, 'visitor cannot list uploads');
-select t.expect_error($$insert into leads (name) values ('x')$$, 'row-level security');
+select t.expect_error($$insert into leads (name) values ('x')$$, 'permission denied');
 select t.ok((select count(*) from vehicles where price_per_day = 1) = 0, 'visitor cannot change prices');
 insert into storage.objects (bucket_id, name) values ('booking-documents', 'uploads/44444444-4444-4444-4444-444444444444/validId.jpg');
 select t.expect_error($$insert into storage.objects (bucket_id, name) values ('booking-documents', 'elsewhere/x.jpg')$$, 'row-level security');
