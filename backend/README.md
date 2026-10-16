@@ -28,6 +28,10 @@ The website (`frontend/src/api`) reads and writes these tables and calls these f
 | `…_storage.sql` | The private `booking-documents` bucket for ID photos: visitors can only upload, staff can read |
 | `…_catalog_data.sql` | The 8 vehicle types and the rates (driver ₱1,000/day, 10% down payment, 24 hours to pay) |
 | `…_account_access.sql` | A deactivated staff member can read their own row (so the login can say so), and a customer can read their own customer record (for My bookings) |
+| `…_table_privileges.sql` | Gives `anon`, `authenticated` and `service_role` access to the tables and functions explicitly (newer Supabase projects no longer do this automatically; without it every request fails with "permission denied for table …") |
+
+**New tables and functions need grants.** Add `grant …` statements for them in the same migration, as
+in `…_table_privileges.sql`; row-level security then decides which rows each role sees.
 
 **Conventions.** Columns are `snake_case` (the front end's `src/api` maps them to its camelCase types).
 Enum values match `frontend/src/lib/constants.ts` exactly. Money is whole pesos. When a rule is broken,
@@ -59,12 +63,20 @@ rejecting them needs a `rejection_reason`.
 Everyone signs in with Supabase Auth. A **staff member** is an auth user with an active row in `staff`;
 anyone else is a website customer with a row in `profiles`.
 
-**First admin.** Create the user under Authentication → Users in the dashboard, then run in the SQL editor:
+**First admin.** The sign-in account comes first: a `staff` row only adds the staff details to an
+existing account (its `id` is the account's id).
 
-```sql
-insert into public.staff (id, name, email)
-select id, 'Your Name', email from auth.users where email = 'you@example.com';
-```
+1. In the dashboard, open **Authentication → Users → Add user → Create new user**, enter the email and a
+   password, and tick **Auto Confirm User**.
+2. Then run in the SQL editor, with the same email:
+
+   ```sql
+   insert into public.staff (id, name, email)
+   select id, 'Your Name', email from auth.users where email = 'you@example.com';
+   ```
+
+   It should say one row was inserted. "No rows returned" means no account has that email yet (step 1).
+3. Sign in at `/admin/login`.
 
 After that, staff add colleagues on the website's Users screen: it emails them an invitation, and the
 link lets them choose a password at `/admin/set-password`.
