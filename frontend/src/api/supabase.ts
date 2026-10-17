@@ -15,8 +15,13 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
+/** False until the hosting environment has the two variables above (e.g. a front-end-only deploy). */
+export function isSupabaseConfigured(): boolean {
+  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+}
+
 export function assertSupabaseConfigured(): void {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!isSupabaseConfigured()) {
     throw new Error(
       "Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see frontend/README.md).",
     );
